@@ -1,0 +1,17 @@
+static const char* g_VertexShader_Test = {
+    "#version 120\n"
+    "\n"
+    "uniform mat4 Projection;\r\n"
+    "uniform mat4 View;\r\n"
+    "uniform mat4 Model;\n"
+    "\n"
+    "varying vec2 TexCoord;\n"
+    "varying vec3 Normal;\n"
+    "\r\n"
+    "void main()\r\n"
+    "{\n"
+    "\tTexCoord = gl_MultiTexCoord0.xy;\n"
+    "\tNormal = gl_Normal;\r\n"
+    "    gl_Position = Projection * View * Model * gl_Vertex;\r\n"
+    "}"
+};

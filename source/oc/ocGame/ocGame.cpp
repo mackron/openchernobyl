@@ -1,0 +1,262 @@
+// Copyright (C) 2016 David Reid. See included LICENSE file.
+
+#include "ocGame.hpp"
+
+ocGame g_Game;
+
+OC_PRIVATE ocResult ocGame_RecreateWindowRT(ocVSyncMode vsyncMode)
+{
+    ocGraphicsWorldDeleteRT(&g_Game.world.graphicsWorld, g_Game.pWindowRT);
+    g_Game.pWindowRT = NULL;
+
+    ocGraphicsDeleteSwapchain(&g_Game.engine.graphics, g_Game.pSwapchain);
+    g_Game.pSwapchain = NULL;
+
+
+    ocResult result = ocGraphicsCreateSwapchain(&g_Game.engine.graphics, &g_Game.window, vsyncMode, &g_Game.pSwapchain);
+    if (result != OC_RESULT_SUCCESS) {
+        ocErrorf(&g_Game.engine, "Window was resized, but there was an error (%d) recreating the swapchain.", result);
+        return result;
+    }
+
+    result = ocGraphicsWorldCreateRTFromSwapchain(&g_Game.world.graphicsWorld, g_Game.pSwapchain, &g_Game.pWindowRT);
+    if (result != OC_RESULT_SUCCESS) {
+        ocErrorf(&g_Game.engine, "Window was resized, but there was an error (%d) recreating the render target.", result);
+        return result;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+int ocInitAndRun(int argc, char** argv)
+{
+    // Clear the global data to 0 before doing anything.
+    ocZeroObject(&g_Game);
+
+    // Engine.
+    ocResult result = ocEngineInit(&g_Game.engine, argc, argv);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
+    // Window.
+    if (!ocWindowInit(&g_Game.window, 640, 480)) {
+        goto done;
+    }
+
+    // Swapchain.
+    result = ocGraphicsCreateSwapchain(&g_Game.engine.graphics, &g_Game.window, ocVSyncMode_Enabled, &g_Game.pSwapchain);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    ocWindowShow(&g_Game.window);
+
+
+    // World.
+    result = ocWorldInit(&g_Game.world, &g_Game.engine);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+
+    // Render target for the main window.
+    result = ocGraphicsWorldCreateRTFromSwapchain(&g_Game.world.graphicsWorld, g_Game.pSwapchain, &g_Game.pWindowRT);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+
+    // TESTING (Image)
+    {
+        uint32_t sizeX = 2;
+        uint32_t sizeY = 2;
+        uint8_t data[] = {
+            0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,
+
+            0xFF, 0x00, 0x00, 0xFF
+            //0x80, 0x80, 0x80, 0xFF
+        };
+
+        ocGraphicsMipmapDesc mipmaps[2];
+        mipmaps[0].sizeX = sizeX;
+        mipmaps[0].sizeY = sizeY;
+        mipmaps[0].dataSize = mipmaps[0].sizeX*mipmaps[0].sizeY*4;
+        mipmaps[1].sizeX = 1;
+        mipmaps[1].sizeY = 1;
+        mipmaps[1].dataSize = mipmaps[1].sizeX*mipmaps[1].sizeY*4;
+
+        ocGraphicsImageDesc desc;
+        desc.format = ocGraphicsImageFormat_R8G8B8A8;
+        desc.usage = OC_GRAPHICS_IMAGE_USAGE_SHADER_INPUT;
+        desc.mipLevels = ocCountOf(mipmaps);
+        desc.pMipmaps = mipmaps;
+        desc.imageDataSize = sizeof(data);
+        desc.pImageData = data;
+        result = ocGraphicsCreateImage(&g_Game.engine.graphics, &desc, &g_Game.pImage);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        g_Game.world.graphicsWorld.pCurrentImage = g_Game.pImage;
+    }
+
+
+
+    // TESTING (Mesh)
+    {
+        float pVertices[] = {
+             0,     0.5f, 0,   0.5f, 1,   0, 0, 1,
+            -0.5f, -0.5f, 0,   0, 0,   0, 0, 1,
+             0.5f, -0.5f, 0,   1, 0,   0, 0, 1
+        };
+
+        uint32_t pIndices[] = {
+            0, 1, 2
+        };
+
+        ocGraphicsMeshDesc desc;
+        desc.format = ocGraphicsVertexFormat_P3T2N3;
+        desc.pVertices = pVertices;
+        desc.vertexCount = 3;
+        desc.pIndices = pIndices;
+        desc.indexCount = sizeof(pIndices) / sizeof(pIndices[0]);
+        result = ocGraphicsCreateMesh(&g_Game.engine.graphics, &desc, &g_Game.pMesh);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        result = ocGraphicsWorldCreateMeshObject(&g_Game.world.graphicsWorld, g_Game.pMesh, &g_Game.pMeshObject);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.2f, 0, 0));
+    }
+
+
+
+    // Timer for the main simulation.
+    ocTimerInit(&g_Game.timer);
+
+    // Mark the game as initialized. This is mainly used for ensuring we don't try handling window events prematurely.
+    g_Game.flags |= OC_GAME_FLAG_IS_INITIALIZED;
+
+    // The main loop will call ocStep(), and will return when the application has terminated. The return value is the result code.
+    result = ocMainLoop();
+
+done:
+    ocGraphicsWorldDeleteRT(&g_Game.world.graphicsWorld, g_Game.pWindowRT);
+    ocGraphicsDeleteSwapchain(&g_Game.engine.graphics, g_Game.pSwapchain);
+    ocWorldUninit(&g_Game.world);
+    ocWindowUninit(&g_Game.window);
+    ocEngineUninit(&g_Game.engine);
+    return result;
+}
+
+void ocStep()
+{
+    double dt = ocTimerTick(&g_Game.timer);
+
+    //printf("Step: %f\n", dt);
+
+    // Simple animation test.
+    ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, g_Game.pMeshObject->_position + glm::vec4(0.1f * dt, 0, 0, 0));
+    //g_Game.pWindowRT->view = glm::translate(g_Game.pWindowRT->view, glm::vec3(0.1f * dt, 0, 0));
+
+
+    ocWorldStep(&g_Game.world, dt);
+    ocWorldDraw(&g_Game.world);
+
+    // Present last.
+    ocGraphicsPresent(&g_Game.engine.graphics, g_Game.pSwapchain);
+}
+
+void ocOnWindowEvent(ocWindowEvent e)
+{
+    // Don't care about any events before initialization is complete.
+    if ((g_Game.flags & OC_GAME_FLAG_IS_INITIALIZED) == 0) {
+        return;
+    }
+
+    switch (e.type)
+    {
+        case OC_WINDOW_EVENT_SIZE:
+        {
+            // The render target and swapchain for this window needs to be deleted and recreated.
+            ocGame_RecreateWindowRT(g_Game.pSwapchain->vsyncMode);
+        } break;
+
+
+        case OC_WINDOW_EVENT_MOUSE_MOVE:
+        {
+        } break;
+
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_DOWN:
+        {
+        } break;
+
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_UP:
+        {
+        } break;
+
+
+        case OC_WINDOW_EVENT_KEY_DOWN:
+        {
+            // TESTING
+
+            // V-Sync switching.
+            {
+                bool vsyncChanged = false;
+                ocVSyncMode vsyncMode = ocVSyncMode_Enabled;
+                if (e.data.key_down.key == 'Q') {
+                    vsyncChanged = true;
+                    vsyncMode = ocVSyncMode_Disabled;
+                } else if (e.data.key_down.key == 'W') {
+                    vsyncChanged = true;
+                    vsyncMode = ocVSyncMode_Enabled;
+                } else if (e.data.key_down.key == 'E') {
+                    vsyncChanged = true;
+                    vsyncMode = ocVSyncMode_Adaptive;
+                }
+
+                if (vsyncChanged) {
+                    ocGame_RecreateWindowRT(vsyncMode);
+                }
+            }
+
+            // MSAA
+            {
+                unsigned int msaa = 0;
+                if (e.data.key_down.key == '1') {
+                    msaa = 1;
+                } else if (e.data.key_down.key == '2') {
+                    msaa = 2;
+                } else if (e.data.key_down.key == '3') {
+                    msaa = 4;
+                } else if (e.data.key_down.key == '4') {
+                    msaa = 8;
+                }
+
+                if (msaa != 0) {
+                    // Changing MSAA requires us to completely uninitialize the graphics system and re-create it. Thanks to Vulkan for that one.
+                    // TODO: Come up with a solution for this one. May need to make it so that it can only be changed from the main menu.
+                }
+            }
+
+
+        } break;
+
+        case OC_WINDOW_EVENT_KEY_UP:
+        {
+        } break;
+
+        default: break;
+    }
+}
+
+
+// Make sure the engine is implemented. Do this last.
+#include "../ocEngine/ocEngine.cpp"

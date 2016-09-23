@@ -1,0 +1,7 @@
+--portable
+  Launch the game in portable mode. Portable mode uses the executable's directory as the
+  base location for configs, saves, logs, etc. so that per-user directories can be
+  avoided. This makes it easier to place a copy of the game on a USB drive or whatnot.
+
+--silent
+  Disables printing of log messages to stdout.

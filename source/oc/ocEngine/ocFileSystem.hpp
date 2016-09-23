@@ -1,0 +1,92 @@
+// Copyright (C) 2016 David Reid. See included LICENSE file.
+
+// Access modes. Keep these in sync with dr_fs for simplicity.
+#define OC_READ         DRFS_READ
+#define OC_WRITE        DRFS_WRITE
+#define OC_EXISTING     DRFS_EXISTING
+#define OC_TRUNCATE     DRFS_TRUNCATE
+#define OC_CREATE_DIRS  DRFS_CREATE_DIRS
+
+// File attributes.
+#define OC_FILE_ATTRIBUTE_DIRECTORY DRFS_FILE_ATTRIBUTE_DIRECTORY
+#define OC_FILE_ATTRIBUTE_READONLY  DRFS_FILE_ATTRIBUTE_READONLY
+
+enum ocSeekOrigin
+{
+    ocSeekOrigin_Current,
+    ocSeekOrigin_Start,
+    ocSeekOrigin_End
+};
+
+
+struct ocFileSystem
+{
+    ocEngineContext* pEngine;
+    drfs_context* pInternalFS;
+};
+
+struct ocFile
+{
+    drfs_file* pInternalFile;
+};
+
+
+// Initializes the file system.
+ocResult ocFileSystemInit(ocFileSystem* pFS, ocEngineContext* pEngine);
+
+// Uninitializes the file system.
+//
+// This does _not_ close any open files. All files should be closed at a higher level. The rationale for this is that
+// it simplifies the implementation of the file system.
+void ocFileSystemUninit(ocFileSystem* pFS);
+
+
+// ocFileOpen
+ocResult ocFileOpen(ocFileSystem* pFS, const char* path, unsigned int accessMode, ocFile* pFile);
+
+// ocFileClose
+void ocFileClose(ocFile* pFile);
+
+// ocFileRead
+ocResult ocFileRead(ocFile* pFile, void* pDataOut, size_t bytesToRead, size_t* pBytesReadOut);
+
+// Writes data to the given file.
+ocResult ocFileWrite(ocFile* pFile, const void* pData, size_t bytesToWrite, size_t* pBytesWrittenOut);
+
+// Seeks the file pointer by the given number of bytes, relative to the specified origin.
+ocResult ocFileSeek(ocFile* pFile, int64_t bytesToSeek, ocSeekOrigin origin);
+
+// Retrieves the current position of the file pointer.
+uint64_t ocFileTell(ocFile* pFile);
+
+// Retrieves the size of the given file.
+uint64_t ocFileSize(ocFile* pFile);
+
+// Flushes the given file.
+void ocFileFlush(ocFile* pFile);
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// High Level File API
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Helper function for writing a string.
+ocResult ocFileWriteString(ocFile* pFile, const char* str);
+
+// Helper function for writing a string, and then inserting a new line right after it.
+//
+// The new line character is "\n" and NOT "\r\n".
+ocResult ocFileWriteLine(ocFile* pFile, const char* str);
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Known Folders and Files
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Retrieves the path of the directory that contains the log file.
+void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize);
