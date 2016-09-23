@@ -1,0 +1,15 @@
+[submodule "source/external/dr_libs"]
+	path = source/external/dr_libs
+	url = https://github.com/mackron/dr_libs
+[submodule "source/external/dr_graphics"]
+	path = source/external/dr_graphics
+	url = https://github.com/dr-soft/dr_graphics
+[submodule "source/external/stb"]
+	path = source/external/stb
+	url = https://github.com/nothings/stb
+[submodule "source/external/bullet3"]
+	path = source/external/bullet3
+	url = https://github.com/bulletphysics/bullet3
+[submodule "source/external/glm"]
+	path = source/external/glm
+	url = https://github.com/g-truc/glm.git
