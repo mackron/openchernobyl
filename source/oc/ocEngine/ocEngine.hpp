@@ -132,8 +132,9 @@
 #define ocZeroMemory(p, sz)     memset((p), 0, (sz))
 #define ocZeroObject(p)         ocZeroMemory((p), sizeof(*(p)))
 #define ocMalloc(sz)            malloc(sz)
-#define ocMallocObject(type)    ((type*)malloc(sizeof(type)))
-#define ocCallocObject(type)    ((type*)calloc(1, sizeof(type)))
+#define ocCalloc(c, sz)         calloc(c, sz);
+#define ocMallocObject(type)    ((type*)ocMalloc(sizeof(type)))
+#define ocCallocObject(type)    ((type*)ocCalloc(1, sizeof(type)))
 #define ocFree(p)               free(p)
 #define ocCountOf(obj)          (sizeof(obj) / sizeof(obj[0]))
 #define ocIsBitSet(set, bit)    (((set) & (bit)) != 0)
