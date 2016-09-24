@@ -593,7 +593,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
     colorBlendStateInfo.logicOp = VK_LOGIC_OP_CLEAR;
     colorBlendStateInfo.attachmentCount = ocCountOf(pColorBlendStateAttachments);
     colorBlendStateInfo.pAttachments = pColorBlendStateAttachments;
-    colorBlendStateInfo.blendConstants[4];
+    //colorBlendStateInfo.blendConstants;
 
 
     // Dynamic state.
@@ -1244,7 +1244,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
     if (ppMesh == NULL) return OC_RESULT_INVALID_ARGS;
     *ppMesh = NULL;
 
-    if (pGraphics == NULL || pDesc == NULL || ppMesh == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pGraphics == NULL || pDesc == NULL) return OC_RESULT_INVALID_ARGS;
 
     ocGraphicsMesh* pMesh = ocCallocObject(ocGraphicsMesh);
     if (pMesh == NULL) {
