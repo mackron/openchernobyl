@@ -3,6 +3,7 @@
 #include "ocEngine.hpp"
 
 #include "ocMisc.cpp"
+#include "ocImageUtils.cpp"
 #include "ocCommandLine.cpp"
 #include "ocPlatformLayer.cpp"
 #include "ocMath.cpp"

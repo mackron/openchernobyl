@@ -132,7 +132,7 @@
 #define ocZeroMemory(p, sz)     memset((p), 0, (sz))
 #define ocZeroObject(p)         ocZeroMemory((p), sizeof(*(p)))
 #define ocMalloc(sz)            malloc(sz)
-#define ocCalloc(c, sz)         calloc(c, sz);
+#define ocCalloc(c, sz)         calloc(c, sz)
 #define ocMallocObject(type)    ((type*)ocMalloc(sizeof(type)))
 #define ocCallocObject(type)    ((type*)ocCalloc(1, sizeof(type)))
 #define ocFree(p)               free(p)
@@ -167,6 +167,7 @@ struct ocWorldObject;
 #include "ocStretchyBuffer.hpp"     // <-- stb_stretchy_buffer with a C++ fix. Remove this once the upstream version is fixed.
 #include "ocResultCodes.hpp"
 #include "ocMisc.hpp"
+#include "ocImageUtils.hpp"
 #include "ocCommandLine.hpp"
 #include "ocPlatformLayer.hpp"
 #include "ocColor.hpp"
