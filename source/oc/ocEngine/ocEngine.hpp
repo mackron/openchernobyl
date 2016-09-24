@@ -65,12 +65,12 @@
 //#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
 
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../../../dr_libs/dr.h"
-#include "../../../../../../dr_libs/dr_flac.h"
-#include "../../../../../../dr_libs/dr_wav.h"
-#include "../../../../../../dr_libs/dr_audio.h"
-#include "../../../../../../dr_libs/dr_fs.h"
-#include "../../../../../../dr_libs/dr_obj.h"
+#include "../../../../../dr_libs/dr.h"
+#include "../../../../../dr_libs/dr_flac.h"
+#include "../../../../../dr_libs/dr_wav.h"
+#include "../../../../../dr_libs/dr_audio.h"
+#include "../../../../../dr_libs/dr_fs.h"
+#include "../../../../../dr_libs/dr_obj.h"
 #else
 #include "../../external/dr_libs/dr.h"
 #include "../../external/dr_libs/dr_flac.h"
@@ -89,7 +89,7 @@
 #define DR_GL_ENABLE_ARB_texture_multisample
 #define DR_GL_ENABLE_EXT_swap_control
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../../dr_graphics/dr_gl.h"
+#include "../../../../dr_graphics/dr_gl.h"
 #else
 #include "../../external/dr_graphics/dr_gl.h"
 #endif
@@ -97,9 +97,9 @@
 
 #ifdef OC_USE_VULKAN
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../../dr_graphics/dr_vulkan.h"
+#include "../../../../dr_graphics/dr_vulkan.h"
 #else
-#include "../../../../../dr_graphics/dr_vulkan.h"
+#include "../../external/dr_graphics/dr_vulkan.h"
 #endif
 #endif
 
