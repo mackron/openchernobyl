@@ -65,6 +65,9 @@ uint64_t ocFileSize(ocFile* pFile);
 // Flushes the given file.
 void ocFileFlush(ocFile* pFile);
 
+// Determines whether or not the file is at the end.
+bool ocAtEOF(ocFile* pFile);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //

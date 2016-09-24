@@ -21,14 +21,17 @@ typedef int ocResult;
 #define OC_RESULT_FAILED_TO_INIT_AUDIO          -2048
 
 // File System.
-#define OC_RESULT_DOES_NOT_EXIST                -3096
-#define OC_RESULT_ALREADY_EXISTS                -3097
-#define OC_RESULT_TOO_MANY_OPEN_FILES           -3098
-#define OC_RESULT_FILE_NOT_IN_WRITE_DIRECTORY   -3099
-#define OC_RESULT_PATH_TOO_LONG                 -3100
-#define OC_RESULT_NO_SPACE                      -3101
-#define OC_RESULT_NOT_DIRECTORY                 -3102
-#define OC_RESULT_TOO_LARGE                     -3103
-#define OC_RESULT_AT_END_OF_FILE                -3104
-#define OC_RESULT_INVALID_ARCHIVE               -3105
-#define OC_RESULT_NEGATIVE_SEEK                 -3106
+#define OC_RESULT_DOES_NOT_EXIST                -3072
+#define OC_RESULT_ALREADY_EXISTS                -3073
+#define OC_RESULT_TOO_MANY_OPEN_FILES           -3074
+#define OC_RESULT_FILE_NOT_IN_WRITE_DIRECTORY   -3075
+#define OC_RESULT_PATH_TOO_LONG                 -3076
+#define OC_RESULT_NO_SPACE                      -3077
+#define OC_RESULT_NOT_DIRECTORY                 -3078
+#define OC_RESULT_TOO_LARGE                     -3079
+#define OC_RESULT_AT_END_OF_FILE                -3080
+#define OC_RESULT_INVALID_ARCHIVE               -3081
+#define OC_RESULT_NEGATIVE_SEEK                 -3082
+
+// Resources
+#define OC_RESULT_FAILED_TO_LOAD_RESOURCE       -4096

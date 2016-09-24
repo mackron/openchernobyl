@@ -10,6 +10,7 @@
 #include "ocThreading.cpp"
 #include "ocFileSystem.cpp"
 #include "ocLogger.cpp"
+#include "ocResourceLoader.cpp"
 #include "Graphics/ocGraphics.cpp"
 #include "Audio/ocAudio.cpp"
 #include "Physics/ocPhysics.cpp"

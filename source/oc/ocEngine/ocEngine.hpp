@@ -175,6 +175,7 @@ struct ocWorldObject;
 #include "ocThreading.hpp"
 #include "ocFileSystem.hpp"
 #include "ocLogger.hpp"
+#include "ocResourceLoader.hpp"
 #include "Graphics/ocGraphics.hpp"
 #include "Audio/ocAudio.hpp"
 #include "Physics/ocPhysics.hpp"
