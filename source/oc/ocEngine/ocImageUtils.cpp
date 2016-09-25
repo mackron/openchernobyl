@@ -38,29 +38,34 @@ ocResult ocGetTotalMipmapDataSize(uint32_t baseWidth, uint32_t baseHeight, uint3
         if (mipmapSizeY > 1) mipmapSizeY >>= 1;
     }
 
-    return totalSize;
+    *pSize = totalSize;
+    return OC_RESULT_SUCCESS;
 }
 
 ocResult ocGenerateMipmap(uint32_t baseWidth, uint32_t baseHeight, uint32_t components, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmap)
 {
     if (baseWidth == 0 || baseHeight == 0 || components == 0 || pBaseData == NULL || pDataOut == NULL) return OC_RESULT_INVALID_ARGS;
 
-    // TODO: Optimized branches for 3 and 4 components.
+    // TODO: Optimized branch for 4 components.
 
+    // The y+1 and x+1 statements are used to handle cases when the base image is not evenly divisible by 2, such as when it's 3x3 going to 1x1. It avoids
+    // going out of bounds.
     uint8_t* pRunningDataOut = (uint8_t*)pDataOut;
-    for (uint32_t y = 0; y < baseHeight; y += 2) {
-        for (uint32_t x = 0; x < baseWidth; x += 2) {
+    for (uint32_t y = 0; y+1 < baseHeight; y += 2) {
+        for (uint32_t x = 0; x+1 < baseWidth; x += 2) {
             uint8_t* pBaseTexel = (uint8_t*)pBaseData + (((baseWidth * y) + x) * components);
             for (uint32_t c = 0; c < components; ++c) {
                 uint32_t c00 = pBaseTexel[c + 0];
                 uint32_t c01 = pBaseTexel[c + components];
-                uint32_t c10 = pBaseTexel[c + baseWidth];
-                uint32_t c11 = pBaseTexel[c + baseWidth + components];
+                uint32_t c10 = pBaseTexel[c + baseWidth*components];
+                uint32_t c11 = pBaseTexel[c + baseWidth*components + components];
                 pRunningDataOut[c] = (uint8_t)((c00 + c01 + c10 + c11) >> 2);
             }
 
             pRunningDataOut += components;
         }
+
+        
     }
 
     if (pMipmap != NULL) {
@@ -107,8 +112,8 @@ ocResult ocGenerateMipmaps(uint32_t baseWidth, uint32_t baseHeight, uint32_t com
         runningOffset += prevDataSize;
         runningOffset = ocAlign(runningOffset, alignment);
 
-        size_t dstSizeX = ocMax(1, prevWidth >>= 1);
-        size_t dstSizeY = ocMax(1, prevHeight >>= 1);
+        size_t dstSizeX = ocMax(1, prevWidth >> 1);
+        size_t dstSizeY = ocMax(1, prevHeight >> 1);
         pDstDataOut = ocOffsetPtr(pDataOut, runningOffset);
         ocGenerateMipmap(prevWidth, prevHeight, components, pPrevData, pDstDataOut, NULL);
 
