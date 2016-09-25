@@ -96,7 +96,7 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
     return OC_RESULT_SUCCESS;
 }
 
-ocResult ocResouceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePath, ocImageData* pData)
+ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePath, ocImageData* pData)
 {
     if (pData == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pData);

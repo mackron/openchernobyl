@@ -53,6 +53,29 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
         return result;
     }
 
+    // Resource loader.
+    result = ocResourceLoaderInit(&pEngine->resourceLoader, &pEngine->fs);
+    if (result != OC_RESULT_SUCCESS) {
+        ocComponentAllocatorUninit(&pEngine->componentAllocator);
+        ocAudioUninit(&pEngine->audio);
+        ocGraphicsUninit(&pEngine->graphics);
+        ocLoggerUninit(&pEngine->logger);
+        ocFileSystemUninit(&pEngine->fs);
+        return result;
+    }
+
+    // Resource library.
+    result = ocResourceLibraryInit(&pEngine->resourceLibrary, &pEngine->resourceLoader, &pEngine->graphics);
+    if (result != OC_RESULT_SUCCESS) {
+        ocResourceLoaderUninit(&pEngine->resourceLoader);
+        ocComponentAllocatorUninit(&pEngine->componentAllocator);
+        ocAudioUninit(&pEngine->audio);
+        ocGraphicsUninit(&pEngine->graphics);
+        ocLoggerUninit(&pEngine->logger);
+        ocFileSystemUninit(&pEngine->fs);
+        return result;
+    }
+
 
     // The platform layer is initialized a little bit differently depending on the platform. It needs to come after the graphics system is
     // initialized due to the coupling of X11 and OpenGL.
@@ -73,6 +96,8 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
     result = ocPlatformLayerInit(props);
 #endif
     if (result != OC_RESULT_SUCCESS) {
+        ocResourceLibraryUninit(&pEngine->resourceLibrary);
+        ocResourceLoaderUninit(&pEngine->resourceLoader);
         ocComponentAllocatorUninit(&pEngine->componentAllocator);
         ocAudioUninit(&pEngine->audio);
         ocGraphicsUninit(&pEngine->graphics);
@@ -90,6 +115,8 @@ void ocEngineUninit(ocEngineContext* pEngine)
     if (pEngine == NULL) return;
 
     ocPlatformLayerUninit();
+    ocResourceLibraryUninit(&pEngine->resourceLibrary);
+    ocResourceLoaderUninit(&pEngine->resourceLoader);
     ocComponentAllocatorUninit(&pEngine->componentAllocator);
     ocAudioUninit(&pEngine->audio);
     ocGraphicsUninit(&pEngine->graphics);

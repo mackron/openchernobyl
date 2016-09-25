@@ -38,7 +38,7 @@ void ocResourceLoaderUninit(ocResourceLoader* pLoader);
 
 
 // Loads an image.
-ocResult ocResouceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePath, ocImageData* pData);
+ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePath, ocImageData* pData);
 
 // Unloads an image.
 void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData);

@@ -12,6 +12,8 @@ struct ocEngineContext
     ocGraphicsContext graphics;
     ocAudioContext audio;
     ocComponentAllocator componentAllocator;
+    ocResourceLoader resourceLoader;
+    ocResourceLibrary resourceLibrary;
     uint32_t threadCount;
     uint32_t flags;
 };
