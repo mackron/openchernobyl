@@ -16,14 +16,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-OC_PRIVATE VkFormat ocToVulkanImageFormat(ocGraphicsImageFormat format)
+OC_PRIVATE VkFormat ocToVulkanImageFormat(ocImageFormat format)
 {
     switch (format) {
-        case ocGraphicsImageFormat_R8G8B8:          return VK_FORMAT_R8G8B8_UNORM;
-        case ocGraphicsImageFormat_R8G8B8_SRGB:     return VK_FORMAT_R8G8B8_SRGB;
-        case ocGraphicsImageFormat_R8G8B8A8:        return VK_FORMAT_R8G8B8A8_UNORM;
-        case ocGraphicsImageFormat_R8G8B8A8_SRGB:   return VK_FORMAT_R8G8B8A8_SRGB;
-        default:                                    return VK_FORMAT_UNDEFINED;
+        case ocImageFormat_R8G8B8A8: return VK_FORMAT_R8G8B8A8_UNORM;
+        case ocImageFormat_SRGBA8:   return VK_FORMAT_R8G8B8A8_SRGB;
+        default:                     return VK_FORMAT_UNDEFINED;
     }
 }
 
@@ -308,7 +306,6 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     pGraphics->minMSAA = 1;
     pGraphics->maxMSAA = ocMin(maxMSAAColor, ocMin(maxMSAADepth, maxMSAAStencil));
     pGraphics->msaaSamples = (VkSampleCountFlagBits)ocClamp(desiredMSAASamples, pGraphics->minMSAA, pGraphics->maxMSAA);
-
 
     return OC_RESULT_SUCCESS;
 }
@@ -1095,8 +1092,8 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         pImage->usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     }
 
-    pImage->sizeX = pDesc->pMipmaps[0].sizeX;
-    pImage->sizeY = pDesc->pMipmaps[0].sizeY;
+    pImage->sizeX = pDesc->pMipmaps[0].width;
+    pImage->sizeY = pDesc->pMipmaps[0].height;
     pImage->mipLevels = pDesc->mipLevels;
 
     VkImageCreateInfo imageInfo = drvkDefaultImageCreateInfo();
@@ -1137,9 +1134,8 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
 
         // Finally we need to copy the data from the staging buffer over to the image. We need a command buffer for this.
         VkBufferImageCopy regions[32];
-        VkDeviceSize runningOffset = 0;
         for (uint32_t iMipmap = 0; iMipmap < pImage->mipLevels; ++iMipmap) {
-            regions[iMipmap].bufferOffset = runningOffset;
+            regions[iMipmap].bufferOffset = pDesc->pMipmaps[iMipmap].offset;
             regions[iMipmap].bufferRowLength = 0;
             regions[iMipmap].bufferImageHeight = 0;
             regions[iMipmap].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -1149,9 +1145,8 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
             regions[iMipmap].imageOffset.x = 0;
             regions[iMipmap].imageOffset.y = 0;
             regions[iMipmap].imageOffset.z = 0;
-            regions[iMipmap].imageExtent.width  = pDesc->pMipmaps[iMipmap].sizeX;
-            regions[iMipmap].imageExtent.height = pDesc->pMipmaps[iMipmap].sizeY;
-            runningOffset += pDesc->pMipmaps[iMipmap].dataSize;
+            regions[iMipmap].imageExtent.width  = pDesc->pMipmaps[iMipmap].width;
+            regions[iMipmap].imageExtent.height = pDesc->pMipmaps[iMipmap].height;
         }
 
         VkCommandBuffer cmdbuffer;

@@ -50,30 +50,15 @@ struct ocGraphicsMeshDesc
 };
 
 
-enum ocGraphicsImageFormat
-{
-    ocGraphicsImageFormat_R8G8B8,
-    ocGraphicsImageFormat_R8G8B8A8,
-    ocGraphicsImageFormat_R8G8B8_SRGB,
-    ocGraphicsImageFormat_R8G8B8A8_SRGB,
-};
-
 #define OC_GRAPHICS_IMAGE_USAGE_SHADER_INPUT    (1 << 0)
 #define OC_GRAPHICS_IMAGE_USAGE_RENDER_TARGET   (1 << 1)
 
-struct ocGraphicsMipmapDesc
-{
-    uint32_t sizeX;
-    uint32_t sizeY;
-    size_t dataSize;
-};
-
 struct ocGraphicsImageDesc
 {
-    ocGraphicsImageFormat format;
+    ocImageFormat format;
     uint32_t usage;
     uint32_t mipLevels;
-    ocGraphicsMipmapDesc* pMipmaps;
+    ocMipmapInfo* pMipmaps;
     size_t imageDataSize;
     const void* pImageData;
 };

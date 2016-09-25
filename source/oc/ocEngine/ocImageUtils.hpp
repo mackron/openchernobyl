@@ -1,5 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
+enum ocImageFormat
+{
+    ocImageFormat_Undefined = 0,
+    ocImageFormat_R8G8B8A8  = 1,
+    ocImageFormat_SRGBA8    = 2
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Mipmap Generation

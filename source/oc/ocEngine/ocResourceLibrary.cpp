@@ -47,6 +47,13 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     }
     
     // Meshes.
+    {
+    }
+
+
+    // If we get here it means we were not able to load the resource as any type. It likely means the file does not exist or it's just
+    // an unsupported format.
+    return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
 }
 
 void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)

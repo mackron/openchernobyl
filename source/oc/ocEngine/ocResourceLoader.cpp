@@ -16,6 +16,13 @@ void ocResourceLoaderUninit(ocResourceLoader* pLoader)
 }
 
 
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Images
+//
+///////////////////////////////////////////////////////////////////////////////
+
 OC_PRIVATE ocResult ocLoadImage_OCD(ocFile* pFile, ocImageData* pData)
 {
     ocAssert(pFile != NULL);
@@ -62,6 +69,9 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
     ocAssert(pFile != NULL);
     ocAssert(pData != NULL);
 
+    // The engine expects upside-down images because of OpenGL and Vulkan.
+    stbi_set_flip_vertically_on_load(1);
+
     stbi_io_callbacks cb;
     cb.read = oc__stbi_read;
     cb.skip = oc__stbi_skip;
@@ -69,8 +79,7 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
 
     int imageWidth;
     int imageHeight;
-    int components;
-    stbi_uc* pImageData = stbi_load_from_callbacks(&cb, pFile, &imageWidth, &imageHeight, &components, 0);
+    stbi_uc* pImageData = stbi_load_from_callbacks(&cb, pFile, &imageWidth, &imageHeight, NULL, 4); // Always want RGBA images.
     if (pImageData == NULL) {
         return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
     }
@@ -78,14 +87,15 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
     
     // The payload is simple for single mipmap images. It's just 1 ocMipmapInfo object and then the raw image data.
     size_t mipmapInfoDataSize = sizeof(*pData->pMipmaps)*1;
-    size_t imageDataSize = imageWidth*imageHeight*components;
+    size_t imageDataSize = imageWidth*imageHeight*4;
     pData->_pPayload = malloc(mipmapInfoDataSize + imageDataSize);
 
-    pData->format = (components == 3) ? ocImageFormat_R8G8B8 : ocImageFormat_R8G8B8A8;
+    pData->format = ocImageFormat_R8G8B8A8;
     pData->mipmapCount = 1;
     pData->pMipmaps = (ocMipmapInfo*)pData->_pPayload;
     pData->imageDataSize = imageDataSize;
     pData->pImageData = ocOffsetPtr(pData->_pPayload, mipmapInfoDataSize);
+    memcpy(pData->pImageData, pImageData, imageDataSize);
 
     // Only one mipmap.
     pData->pMipmaps[0].offset = 0;
@@ -93,6 +103,7 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
     pData->pMipmaps[0].width = (uint32_t)imageWidth;
     pData->pMipmaps[0].height = (uint32_t)imageHeight;
 
+    stbi_image_free(pImageData);
     return OC_RESULT_SUCCESS;
 }
 
@@ -145,3 +156,11 @@ void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData)
     if (pLoader == NULL || pData == NULL) return;
     free(pData->_pPayload);
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Meshes
+//
+///////////////////////////////////////////////////////////////////////////////

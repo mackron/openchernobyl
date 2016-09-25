@@ -8,31 +8,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-GLint ocToOpenGLImageInternalFormat(ocGraphicsImageFormat format)
+GLint ocToOpenGLImageInternalFormat(ocImageFormat format)
 {
     switch (format)
     {
-        case ocGraphicsImageFormat_R8G8B8:          return GL_RGB;
-        case ocGraphicsImageFormat_R8G8B8_SRGB:     return GL_SRGB;
-        case ocGraphicsImageFormat_R8G8B8A8:        return GL_RGBA;
-        case ocGraphicsImageFormat_R8G8B8A8_SRGB:   return GL_SRGB_ALPHA;
+        case ocImageFormat_R8G8B8A8: return GL_RGBA;
+        case ocImageFormat_SRGBA8:   return GL_SRGB_ALPHA;
         default: return GL_RGBA;
     }
 }
 
-GLint ocToOpenGLImageFormat(ocGraphicsImageFormat format)
+GLint ocToOpenGLImageFormat(ocImageFormat format)
 {
     switch (format)
     {
-        case ocGraphicsImageFormat_R8G8B8:          return GL_RGB;
-        case ocGraphicsImageFormat_R8G8B8_SRGB:     return GL_RGB;
-        case ocGraphicsImageFormat_R8G8B8A8:        return GL_RGBA;
-        case ocGraphicsImageFormat_R8G8B8A8_SRGB:   return GL_RGBA;
+        case ocImageFormat_R8G8B8A8: return GL_RGBA;
+        case ocImageFormat_SRGBA8:   return GL_RGBA;
         default: return GL_RGBA;
     }
 }
 
-GLenum ocToOpenGLImageFormatType(ocGraphicsImageFormat format)
+GLenum ocToOpenGLImageFormatType(ocImageFormat format)
 {
     // Currently, all image formats are unsigned bytes.
     (void)format;
@@ -212,22 +208,16 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
     GLint format = ocToOpenGLImageFormat(pDesc->format);
     GLenum type = ocToOpenGLImageFormatType(pDesc->format);
 
-    GLenum error = gl.GetError();
-
     gl.GenTextures(1, &pImage->objectGL);
     gl.BindTexture(GL_TEXTURE_2D, pImage->objectGL);
     gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST/*GL_NEAREST_MIPMAP_NEAREST*/);
+    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (pDesc->mipLevels == 1) ? GL_NEAREST : GL_NEAREST_MIPMAP_NEAREST);
     gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    size_t runningOffset = 0;
     for (uint32_t iMipmap = 0; iMipmap < pDesc->mipLevels; ++iMipmap) {
-        gl.TexImage2D(GL_TEXTURE_2D, iMipmap, internalFormat, (GLsizei)pDesc->pMipmaps[iMipmap].sizeX, (GLsizei)pDesc->pMipmaps[iMipmap].sizeY, 0, format, type, ocOffsetPtr(pDesc->pImageData, runningOffset));
-        runningOffset += pDesc->pMipmaps[iMipmap].dataSize;
+        gl.TexImage2D(GL_TEXTURE_2D, iMipmap, internalFormat, (GLsizei)pDesc->pMipmaps[iMipmap].width, (GLsizei)pDesc->pMipmaps[iMipmap].height, 0, format, type, ocOffsetPtr(pDesc->pImageData, pDesc->pMipmaps[iMipmap].offset));
     }
-
-    error = gl.GetError();
 
     *ppImage = pImage;
     return OC_RESULT_SUCCESS;

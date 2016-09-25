@@ -1,21 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-enum ocImageFormat
-{
-    ocImageFormat_Undefined = 0,
-    ocImageFormat_R8G8B8    = 1,
-    ocImageFormat_SRGB8     = 2,
-    ocImageFormat_R8G8B8A8  = 3,
-    ocImageFormat_SRGBA8    = 4
-};
-
 struct ocImageData
 {
     ocImageFormat format;
     uint32_t mipmapCount;
     ocMipmapInfo* pMipmaps;
     size_t imageDataSize;
-    const void* pImageData;
+    void* pImageData;
 
     // [Internal Use Only] Dynamically allocated data as a single allocation.
     //
