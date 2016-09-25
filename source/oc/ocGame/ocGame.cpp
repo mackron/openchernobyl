@@ -70,6 +70,7 @@ int ocInitAndRun(int argc, char** argv)
 
     // TESTING (Image)
     {
+#if 0
         uint32_t sizeX = 2;
         uint32_t sizeY = 2;
         uint8_t data[] = {
@@ -95,6 +96,27 @@ int ocInitAndRun(int argc, char** argv)
         desc.pMipmaps = mipmaps;
         desc.imageDataSize = sizeof(data);
         desc.pImageData = data;
+        result = ocGraphicsCreateImage(&g_Game.engine.graphics, &desc, &g_Game.pImage);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        g_Game.world.graphicsWorld.pCurrentImage = g_Game.pImage;
+#endif
+
+        ocImageData data;
+        result = ocResourceLoaderLoadImage(&g_Game.engine.resourceLoader, "happy_smiley_face.png", &data);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        ocGraphicsImageDesc desc;
+        desc.usage = OC_GRAPHICS_IMAGE_USAGE_SHADER_INPUT;
+        desc.format = data.format;
+        desc.mipLevels = data.mipmapCount;
+        desc.pMipmaps = data.pMipmaps;
+        desc.imageDataSize = data.imageDataSize;
+        desc.pImageData = data.pImageData;
         result = ocGraphicsCreateImage(&g_Game.engine.graphics, &desc, &g_Game.pImage);
         if (result != OC_RESULT_SUCCESS) {
             return result;
