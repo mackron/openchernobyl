@@ -50,6 +50,17 @@ ocResult ocFileSystemInit(ocFileSystem* pFS, ocEngineContext* pEngine)
         return OC_RESULT_UNKNOWN_ERROR;
     }
 
+    // The base directories should always be relative to the executable.
+    char exePath[OC_MAX_PATH];
+    if (dr_get_executable_directory_path(exePath, sizeof(exePath))) {
+        char dataPath[OC_MAX_PATH];
+        drpath_copy_and_append(dataPath, sizeof(dataPath), exePath, "data");
+        drfs_add_base_directory(pFS->pInternalFS, dataPath);
+
+        // The executable's directory should be the lowest priority base directory.
+        drfs_add_base_directory(pFS->pInternalFS, exePath);
+    }
+
     return OC_RESULT_SUCCESS;
 }
 
