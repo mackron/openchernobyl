@@ -1,23 +1,23 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-// Multithreading is implemented differently depending on the platform. Of note is the entry point which is slightly different. This means
-// every thread entry point needs a simple #ifdef check to use the correct signature. Use DRED_THREAD_PROC_SIGNATURE to help with this.
+// Multithreading is implemented differently depending on the platform. Of note is the entry point which is slightly different. The thread
+// entry point needs to be declared like this:
+//     ocThreadResult OC_THREADCALL MyThreadEntryProc(void* pData);
 
 #ifdef OC_WIN32
-typedef DWORD (WINAPI * ocThreadEntryProc)(void* pData);
+#define OC_THREADCALL WINAPI
+typedef DWORD ocThreadResult;
 typedef HANDLE ocThread;
 typedef HANDLE ocMutex;
 typedef HANDLE ocSemaphore;
-
-#define DRED_THREAD_PROC_SIGNATURE(name, data) DWORD WINAPI name(void* data)
 #else
-typedef void* (* ocThreadEntryProc)(void* pData);
+#define OC_THREADCALL
+typedef void* ocThreadResult;
 typedef pthread_t ocThread;
 typedef pthread_mutex_t ocMutex;
 typedef sem_t ocSemaphore;
-
-#define DRED_THREAD_PROC_SIGNATURE(name, data) void* name(void* data)
 #endif
+typedef ocThreadResult (OC_THREADCALL * ocThreadEntryProc)(void* pData);
 
 
 //// Thread ////
