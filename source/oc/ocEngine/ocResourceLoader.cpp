@@ -1,5 +1,9 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
+#define OC_OCD_FOURCC           'OCD '
+#define OC_OCD_TYPE_ID_IMAGE    1
+#define OC_OCD_TYPE_ID_MESH     2
+
 ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS)
 {
     if (pLoader == NULL || pFS == NULL) return OC_RESULT_INVALID_ARGS;
@@ -13,6 +17,69 @@ ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS)
 void ocResourceLoaderUninit(ocResourceLoader* pLoader)
 {
     if (pLoader == NULL) return;
+}
+
+
+OC_PRIVATE ocResult ocResourceLoaderDetermineOCDResourceType(ocResourceLoader* pLoader, const char* filePath, ocResourceType* pType)
+{
+    ocAssert(pLoader != NULL);
+    ocAssert(filePath != NULL);
+    ocAssert(pType != NULL);
+
+    ocFile file;
+    ocResult result = ocFileOpen(pLoader->pFS, filePath, OC_READ, &file);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    size_t bytesRead;
+    uint32_t ids[2];
+    result = ocFileRead(&file, ids, sizeof(ids), &bytesRead);
+    ocFileClose(&file);
+
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    if (bytesRead != sizeof(ids) || ids[0] != OC_OCD_FOURCC) {
+        return OC_RESULT_CORRUPT_FILE;
+    }
+
+    switch (ids[1])
+    {
+        case OC_OCD_TYPE_ID_IMAGE: *pType = ocResourceType_Image; return OC_RESULT_SUCCESS;
+        case OC_OCD_TYPE_ID_MESH:  *pType = ocResourceType_Mesh;  return OC_RESULT_SUCCESS;
+        default: return OC_RESULT_UNKNOWN_RESOURCE_TYPE;
+    }
+}
+
+ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const char* filePath, ocResourceType* pType)
+{
+    if (pType == NULL) return OC_RESULT_INVALID_ARGS;
+    *pType = ocResourceType_Unknown;
+
+    if (pLoader == NULL || filePath == NULL) return OC_RESULT_INVALID_ARGS;
+
+    const char* ext = drpath_extension(filePath);
+    if (_stricmp(ext, "ocd") == 0) {
+        return ocResourceLoaderDetermineOCDResourceType(pLoader, filePath, pType);
+    }
+
+    // Images.
+    if (_stricmp(ext, "png") == 0 ||
+        _stricmp(ext, "tga") == 0 ||
+        _stricmp(ext, "jpg") == 0) {
+        *pType = ocResourceType_Image;
+        return OC_RESULT_SUCCESS;
+    }
+
+    // Meshes.
+    if (_stricmp(ext, "obj") == 0) {
+        *pType = ocResourceType_Mesh;
+        return OC_RESULT_SUCCESS;
+    }
+
+    return OC_RESULT_UNKNOWN_RESOURCE_TYPE;
 }
 
 

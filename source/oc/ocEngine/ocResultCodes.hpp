@@ -32,6 +32,9 @@ typedef int ocResult;
 #define OC_RESULT_AT_END_OF_FILE                -3080
 #define OC_RESULT_INVALID_ARCHIVE               -3081
 #define OC_RESULT_NEGATIVE_SEEK                 -3082
+#define OC_RESULT_CORRUPT_FILE                  -3083
 
 // Resources
 #define OC_RESULT_FAILED_TO_LOAD_RESOURCE       -4096
+#define OC_RESULT_UNKNOWN_RESOURCE_TYPE         -4097
+#define OC_RESULT_UNSUPPORTED_RESOURCE_TYPE     -4098

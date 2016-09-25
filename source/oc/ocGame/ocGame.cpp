@@ -104,6 +104,7 @@ int ocInitAndRun(int argc, char** argv)
         g_Game.world.graphicsWorld.pCurrentImage = g_Game.pImage;
 #endif
 
+#if 0
         ocImageData data;
         result = ocResourceLoaderLoadImage(&g_Game.engine.resourceLoader, "happy_smiley_face.png", &data);
         if (result != OC_RESULT_SUCCESS) {
@@ -123,6 +124,14 @@ int ocInitAndRun(int argc, char** argv)
         }
 
         g_Game.world.graphicsWorld.pCurrentImage = g_Game.pImage;
+#endif
+
+        result = ocResourceLibraryLoad(&g_Game.engine.resourceLibrary, "happy_smiley_face.png", &g_Game.pImageResource);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        g_Game.world.graphicsWorld.pCurrentImage = g_Game.pImageResource->image.pGraphicsImage;
     }
 
 
@@ -185,7 +194,8 @@ void ocStep()
     //printf("Step: %f\n", dt);
 
     // Simple animation test.
-    ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, g_Game.pMeshObject->_position + glm::vec4(0.1f * dt, 0, 0, 0));
+    //ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, g_Game.pMeshObject->_position + glm::vec4(0.1f * dt, 0, 0, 0));
+    ocGraphicsWorldSetObjectScale(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.5f, 0.5f, 0.5f));
     //g_Game.pWindowRT->view = glm::translate(g_Game.pWindowRT->view, glm::vec3(0.1f * dt, 0, 0));
 
 

@@ -18,6 +18,7 @@ struct ocGame
     unsigned int flags;
 
     // TESTING
+    ocResource* pImageResource;
     ocGraphicsImage* pImage;
     ocGraphicsMesh* pMesh;
     ocGraphicsObject* pMeshObject;

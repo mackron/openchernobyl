@@ -1,19 +1,18 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-enum ocResourceType
-{
-    ocResourceType_Unknown,
-    ocResourceType_Image,
-    ocResourceType_Mesh,
-    ocResourceType_Material,
-    ocResourceType_Scene
-};
-
 struct ocResource
 {
     ocResourceType type;
     const char* pAbsolutePath;
     uint32_t referenceCount;
+
+    union
+    {
+        struct
+        {
+            ocGraphicsImage* pGraphicsImage;
+        } image;
+    };
 
     // [Internal Use Only] A single allocation for dynamically sized data.
     //

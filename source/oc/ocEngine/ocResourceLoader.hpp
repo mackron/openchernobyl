@@ -1,5 +1,14 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
+enum ocResourceType
+{
+    ocResourceType_Unknown,
+    ocResourceType_Image,
+    ocResourceType_Mesh,
+    ocResourceType_Material,
+    ocResourceType_Scene
+};
+
 struct ocImageData
 {
     ocImageFormat format;
@@ -26,6 +35,12 @@ ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS);
 
 //
 void ocResourceLoaderUninit(ocResourceLoader* pLoader);
+
+// Determines the type of resource to load.
+//
+// This will use the file path to determine the type, but when the path is ambiguous (such as .ocd files) it
+// will look at the contents of the file.
+ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const char* filePath, ocResourceType* pType);
 
 
 // Loads an image.
