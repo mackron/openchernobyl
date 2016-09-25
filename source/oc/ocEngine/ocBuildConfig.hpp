@@ -72,6 +72,8 @@
 
 #ifndef NDEBUG
 #define OC_DEBUG
+#else
+#define OC_RELEASE
 #endif
 
 

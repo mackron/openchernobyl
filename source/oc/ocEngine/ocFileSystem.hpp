@@ -30,6 +30,8 @@ struct ocFile
     drfs_file* pInternalFile;
 };
 
+typedef struct drfs_file_info ocFileInfo;
+
 
 // Initializes the file system.
 ocResult ocFileSystemInit(ocFileSystem* pFS, ocEngineContext* pEngine);
@@ -40,6 +42,11 @@ ocResult ocFileSystemInit(ocFileSystem* pFS, ocEngineContext* pEngine);
 // it simplifies the implementation of the file system.
 void ocFileSystemUninit(ocFileSystem* pFS);
 
+
+// Retrieves information about the given file.
+//
+// pInfo can be NULL, in which case this function can be used as a simple way of checking whether or not the file exists.
+ocResult ocGetFileInfo(ocFileSystem* pFS, const char* relativePath, ocFileInfo* pInfo);
 
 // Finds the absolute path of a file from it's relative path.
 //

@@ -41,3 +41,6 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
 // Unloads a resource.
 void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource);
+
+// Synchronizes or creates the .ocd file associated with a resource.
+ocResult ocResourceLibrarySyncOCD(ocResourceLibrary* pLibrary, const char* filePath);

@@ -71,6 +71,12 @@ void ocFileSystemUninit(ocFileSystem* pFS)
 }
 
 
+ocResult ocGetFileInfo(ocFileSystem* pFS, const char* relativePath, ocFileInfo* pInfo)
+{
+    if (pInfo != NULL) ocZeroObject(pInfo);
+    return ocToResult(drfs_get_file_info(pFS->pInternalFS, relativePath, pInfo));
+}
+
 ocResult ocFindAbsoluteFilePath(ocFileSystem* pFS, const char* relativePath, char* absolutePath, size_t absolutePathSize)
 {
     if (absolutePath == NULL) return OC_RESULT_INVALID_ARGS;
