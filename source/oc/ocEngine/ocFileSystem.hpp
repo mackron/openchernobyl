@@ -41,6 +41,12 @@ ocResult ocFileSystemInit(ocFileSystem* pFS, ocEngineContext* pEngine);
 void ocFileSystemUninit(ocFileSystem* pFS);
 
 
+// Finds the absolute path of a file from it's relative path.
+//
+// This returns an error if the file could not be found.
+ocResult ocFindAbsoluteFilePath(ocFileSystem* pFS, const char* relativePath, char* absolutePath, size_t absolutePathSize);
+
+
 // ocFileOpen
 ocResult ocFileOpen(ocFileSystem* pFS, const char* path, unsigned int accessMode, ocFile* pFile);
 

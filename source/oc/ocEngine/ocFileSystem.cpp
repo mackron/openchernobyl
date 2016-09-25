@@ -71,6 +71,21 @@ void ocFileSystemUninit(ocFileSystem* pFS)
 }
 
 
+ocResult ocFindAbsoluteFilePath(ocFileSystem* pFS, const char* relativePath, char* absolutePath, size_t absolutePathSize)
+{
+    if (absolutePath == NULL) return OC_RESULT_INVALID_ARGS;
+    if (absolutePathSize > 0) absolutePath[0] = '\0';
+
+    if (pFS == NULL || relativePath == NULL) return OC_RESULT_INVALID_ARGS;
+
+    if (!drfs_find_absolute_path(pFS->pInternalFS, relativePath, absolutePath, absolutePathSize)) {
+        return OC_RESULT_DOES_NOT_EXIST;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+
 
 ocResult ocFileOpen(ocFileSystem* pFS, const char* path, unsigned int accessMode, ocFile* pFile)
 {
