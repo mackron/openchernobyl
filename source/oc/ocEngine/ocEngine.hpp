@@ -12,8 +12,6 @@
 //     - BulletDynamics  / BulletDynamics_Debug
 //     - BulletCollision / BulletCollision_Debug
 //     - LinearMath      / LinearMath_Debug
-//   - Vulkan
-//     - vulkan-1.lib
 
 #ifndef OC_ENGINE_HPP
 #define OC_ENGINE_HPP
