@@ -118,6 +118,6 @@
 
 
 #if !defined OC_USE_OPENGL && !defined OC_USE_VULKAN && !defined OC_USE_CUSTOM_RENDERER
-//#define OC_USE_OPENGL
-#define OC_USE_VULKAN
+#define OC_USE_OPENGL
+//#define OC_USE_VULKAN
 #endif

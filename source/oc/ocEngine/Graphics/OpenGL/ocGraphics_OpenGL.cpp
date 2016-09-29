@@ -51,6 +51,40 @@ OC_PRIVATE void ocGraphicsSetCurrentWindow(ocGraphicsContext* pGraphics, ocWindo
     pGraphics->pCurrentWindow = pWindow;
 }
 
+OC_PRIVATE void APIENTRY ocOpenGLErrorCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    ocGraphicsContext* pGraphics = (ocGraphicsContext*)userParam;
+    ocAssert(pGraphics != NULL);
+
+    (void)source;
+    (void)type;
+    (void)id;
+    (void)length;
+
+    // Dump notifications - I've never seen anything useful come from this and it just makes the log messy.
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
+    
+    switch (severity)
+    {
+        case GL_DEBUG_SEVERITY_HIGH:
+        {
+            ocErrorf(pGraphics->pEngine, "%s", message);
+        } break;
+
+        case GL_DEBUG_SEVERITY_MEDIUM:
+        {
+            ocWarningf(pGraphics->pEngine, "%s", message);
+        } break;
+
+        case GL_DEBUG_SEVERITY_LOW:
+        default:
+        {
+            ocLogf(pGraphics->pEngine, "%s", message);
+        } break;
+    }
+}
 
 ocResult ocGraphicsInit(ocGraphicsContext* pGraphics, ocEngineContext* pEngine, uint32_t desiredMSAASamples)
 {
@@ -86,6 +120,12 @@ ocResult ocGraphicsInit(ocGraphicsContext* pGraphics, ocEngineContext* pEngine, 
         pGraphics->supportFlags |= OC_GRAPHICS_SUPPORT_FLAG_ADAPTIVE_VSYNC;
     }
 
+#ifdef OC_DEBUG
+    if (drglIsExtensionSupported(&gl, "GL_ARB_debug_output")) {
+        gl.Enable(GL_DEBUG_OUTPUT);
+        gl.DebugMessageCallbackARB(ocOpenGLErrorCB, pGraphics);
+    }
+#endif
 
 
 
@@ -435,6 +475,7 @@ OC_PRIVATE const char* ocOpenGLFramebufferStatusToString(GLenum status)
         case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:        return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
         case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:        return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
         case GL_FRAMEBUFFER_UNSUPPORTED:                   return "GL_FRAMEBUFFER_UNSUPPORTED";
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT:    return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT";
         default: return "Unknown";
     }
 }
@@ -464,21 +505,12 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     drgl &gl = pWorld->pGraphics->gl;
 
     // Color texture.
-    gl.GenTextures(1, &pRT->framebuffer.colorTextureGL);
+    gl.GenRenderbuffersEXT(1, &pRT->framebuffer.colorRenderbufferGL);
+    gl.BindRenderbufferEXT(GL_RENDERBUFFER, pRT->framebuffer.colorRenderbufferGL);
     if (pWorld->pGraphics->msaaSamples == 1) {
-        gl.BindTexture(GL_TEXTURE_2D, pRT->framebuffer.colorTextureGL);
-        gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)sizeX, (GLsizei)sizeY, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+        gl.RenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, (GLsizei)sizeX, (GLsizei)sizeY);
     } else {
-        gl.BindTexture(GL_TEXTURE_2D_MULTISAMPLE, pRT->framebuffer.colorTextureGL);
-        gl.TexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl.TexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        gl.TexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl.TexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl.TexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, pWorld->pGraphics->msaaSamples, GL_RGBA8, (GLsizei)sizeX, (GLsizei)sizeY, GL_FALSE);      // <-- TODO: Check for an extension.
+        gl.RenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, pWorld->pGraphics->msaaSamples, GL_RGBA, pRT->sizeX, pRT->sizeY);
     }
 
     // Depth/stencil renderbuffer.
@@ -494,13 +526,12 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     // Framebuffer object.
     gl.GenFramebuffersEXT(1, &pRT->framebuffer.objectGL);
     gl.BindFramebufferEXT(GL_FRAMEBUFFER, pRT->framebuffer.objectGL);
-    if (pWorld->pGraphics->msaaSamples == 1) {
-        gl.FramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pRT->framebuffer.colorTextureGL, 0);
-        gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
-    } else {
-        gl.FramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, pRT->framebuffer.colorTextureGL, 0);
-        gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH24_STENCIL8, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
-    }
+    gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pRT->framebuffer.colorRenderbufferGL);
+    gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
+
+    // Can also do this for depth/stencil which I _think_ is how I had to do it on an Intel implementation at some point in the past:
+    //gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
+    //gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
 
     GLenum status = gl.CheckFramebufferStatusEXT(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -522,7 +553,7 @@ OC_PRIVATE void ocGraphicsWorldUninitRT(ocGraphicsWorld* pWorld, ocGraphicsRT* p
 
     gl.DeleteFramebuffersEXT(1, &pRT->framebuffer.objectGL);
     gl.DeleteRenderbuffersEXT(1, &pRT->framebuffer.depthStencilRenderbufferGL);
-    gl.DeleteTextures(1, &pRT->framebuffer.colorTextureGL);
+    gl.DeleteRenderbuffersEXT(1, &pRT->framebuffer.colorRenderbufferGL);
 }
 
 ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT)

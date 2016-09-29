@@ -16,7 +16,7 @@ struct ocGraphicsContext : public ocGraphicsContextBase
 struct ocGraphicsFB
 {
     GLuint objectGL;                        // The OpenGL framebuffer object.
-    GLuint colorTextureGL;
+    GLuint colorRenderbufferGL;
     GLuint depthStencilRenderbufferGL;      // The depth/stencil OpenGL renderbuffer object.
 };
 
