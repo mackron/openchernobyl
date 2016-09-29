@@ -76,37 +76,37 @@
 #define DR_FS_IMPLEMENTATION
 #define DR_OBJ_IMPLEMENTATION
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../../dr_libs/dr.h"
-#include "../../../../../dr_libs/dr_flac.h"
-#include "../../../../../dr_libs/dr_wav.h"
-#include "../../../../../dr_libs/dr_audio.h"
-#include "../../../../../dr_libs/dr_fs.h"
-#include "../../../../../dr_libs/dr_obj.h"
+    #include "../../../../../dr_libs/dr.h"
+    #include "../../../../../dr_libs/dr_flac.h"
+    #include "../../../../../dr_libs/dr_wav.h"
+    #include "../../../../../dr_libs/dr_audio.h"
+    #include "../../../../../dr_libs/dr_fs.h"
+    #include "../../../../../dr_libs/dr_obj.h"
 #else
-#include "../../external/dr_libs/dr.h"
-#include "../../external/dr_libs/dr_flac.h"
-#include "../../external/dr_libs/dr_wav.h"
-#include "../../external/dr_libs/dr_audio.h"
-#include "../../external/dr_libs/dr_fs.h"
-#include "../../external/dr_libs/dr_obj.h"
+    #include "../../external/dr_libs/dr.h"
+    #include "../../external/dr_libs/dr_flac.h"
+    #include "../../external/dr_libs/dr_wav.h"
+    #include "../../external/dr_libs/dr_audio.h"
+    #include "../../external/dr_libs/dr_fs.h"
+    #include "../../external/dr_libs/dr_obj.h"
 #endif
 
 #ifdef OC_USE_OPENGL
-#define DR_GL_IMPLEMENTATION
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../dr_graphics/dr_gl.h"
-#else
-#include "../../external/dr_graphics/dr_gl.h"
-#endif
+    #define DR_GL_IMPLEMENTATION
+    #ifdef OC_USE_EXTERNAL_DR_LIBS
+        #include "../../../../dr_graphics/dr_gl.h"
+    #else
+        #include "../../external/dr_graphics/dr_gl.h"
+    #endif
 #endif
 
 #ifdef OC_USE_VULKAN
-#define DR_VULKAN_IMPLEMENTATION
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../dr_graphics/dr_vulkan.h"
-#else
-#include "../../external/dr_graphics/dr_vulkan.h"
-#endif
+    #define DR_VULKAN_IMPLEMENTATION
+    #ifdef OC_USE_EXTERNAL_DR_LIBS
+        #include "../../../../dr_graphics/dr_vulkan.h"
+    #else
+        #include "../../external/dr_graphics/dr_vulkan.h"
+    #endif
 #endif
 
 

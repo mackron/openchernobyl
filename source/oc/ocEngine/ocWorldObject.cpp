@@ -26,7 +26,7 @@ void ocWorldObjectUninit(ocWorldObject* pObject)
     ocWorldObjectRemoveAllComponents(pObject);
 }
 
-bool ocWorldObjectIsInWorld(ocWorldObject* pObject)
+drBool32 ocWorldObjectIsInWorld(ocWorldObject* pObject)
 {
     if (pObject == NULL) return false;
     return (pObject->flags & OC_WORLD_OBJECT_FLAG_IN_WORLD) != 0;

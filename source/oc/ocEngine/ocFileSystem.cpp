@@ -149,7 +149,7 @@ void ocFileFlush(ocFile* pFile)
     drfs_flush(pFile->pInternalFile);
 }
 
-bool ocAtEOF(ocFile* pFile)
+drBool32 ocAtEOF(ocFile* pFile)
 {
     if (pFile == NULL) return false;
     return drfs_eof(pFile->pInternalFile);

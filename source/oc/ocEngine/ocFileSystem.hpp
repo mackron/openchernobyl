@@ -79,7 +79,7 @@ uint64_t ocFileSize(ocFile* pFile);
 void ocFileFlush(ocFile* pFile);
 
 // Determines whether or not the file is at the end.
-bool ocAtEOF(ocFile* pFile);
+drBool32 ocAtEOF(ocFile* pFile);
 
 
 ///////////////////////////////////////////////////////////////////////////////

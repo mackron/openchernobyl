@@ -21,7 +21,7 @@ void ocPlatformLayerUninit_Win32()
     // TODO: Unregister window classes.
 }
 
-bool ocIsWin32MouseButtonKeyCode(WPARAM wParam)
+drBool32 ocIsWin32MouseButtonKeyCode(WPARAM wParam)
 {
     return wParam == VK_LBUTTON || wParam == VK_RBUTTON || wParam == VK_MBUTTON || wParam == VK_XBUTTON1 || wParam == VK_XBUTTON2;
 }
@@ -216,7 +216,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
     return DefWindowProcA(hWnd, msg, wParam, lParam);
 }
 
-bool ocWindowInit_Win32(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
+drBool32 ocWindowInit_Win32(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
 {
     assert(pWindow != NULL);
 
@@ -316,11 +316,11 @@ void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int s
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef OC_X11
 static Display* g_X11Display = NULL;
-static bool g_OwnsDisplay = false;
+static drBool32 g_OwnsDisplay = false;
 static XVisualInfo* g_VisualInfo = NULL;
-static bool g_OwnsVisualInfo = false;
+static drBool32 g_OwnsVisualInfo = false;
 static Colormap g_Colormap = 0;
-static bool g_OwnsColormap = false;
+static drBool32 g_OwnsColormap = false;
 static Atom g_WM_DELETE_WINDOW = 0;
 static Atom g_Atom_ocWindow = 0;
 
@@ -418,7 +418,7 @@ OC_PRIVATE void* ocGetX11WindowProperty(Display* display, Window window, Atom pr
     return pUserData;
 }
 
-bool ocWindowInit_X11(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
+drBool32 ocWindowInit_X11(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
 {
     assert(pWindow != NULL);
 
@@ -506,7 +506,7 @@ void ocPlatformLayerUninit()
 }
 
 
-bool ocWindowInit(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
+drBool32 ocWindowInit(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
 {
     if (pWindow == NULL) {
         return false;

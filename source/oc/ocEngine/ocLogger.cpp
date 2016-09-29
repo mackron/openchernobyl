@@ -34,13 +34,13 @@ void ocLoggerUninit(ocLogger* pLogger)
 }
 
 
-bool ocLoggerIsTerminalOutputEnabled(ocLogger* pLogger)
+drBool32 ocLoggerIsTerminalOutputEnabled(ocLogger* pLogger)
 {
     if (pLogger == NULL) return false;
     return (pLogger->flags & OC_LOGGER_FLAG_NO_TERMINAL_OUTPUT) == 0; 
 }
 
-bool ocLoggerIsFileOutputEnabled(ocLogger* pLogger)
+drBool32 ocLoggerIsFileOutputEnabled(ocLogger* pLogger)
 {
     if (pLogger == NULL) return false;
     return (pLogger->flags & OC_LOGGER_FLAG_NO_FILE) == 0;

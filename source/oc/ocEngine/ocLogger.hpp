@@ -18,10 +18,10 @@ void ocLoggerUninit(ocLogger* pLogger);
 
 
 // Determines whether or not terminal output is enabled.
-bool ocLoggerIsTerminalOutputEnabled(ocLogger* pLogger);
+drBool32 ocLoggerIsTerminalOutputEnabled(ocLogger* pLogger);
 
 // Determines whether or not file output is enabled.
-bool ocLoggerIsFileOutputEnabled(ocLogger* pLogger);
+drBool32 ocLoggerIsFileOutputEnabled(ocLogger* pLogger);
 
 
 // Prints a string.

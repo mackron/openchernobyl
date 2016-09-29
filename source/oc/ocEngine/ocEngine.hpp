@@ -63,42 +63,45 @@
 //#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
 
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../../dr_libs/dr.h"
-#include "../../../../../dr_libs/dr_flac.h"
-#include "../../../../../dr_libs/dr_wav.h"
-#include "../../../../../dr_libs/dr_audio.h"
-#include "../../../../../dr_libs/dr_fs.h"
-#include "../../../../../dr_libs/dr_obj.h"
+    #include "../../../../../dr_libs/dr.h"
+    #include "../../../../../dr_libs/dr_flac.h"
+    #include "../../../../../dr_libs/dr_wav.h"
+    #include "../../../../../dr_libs/dr_audio.h"
+    #include "../../../../../dr_libs/dr_fs.h"
+    #include "../../../../../dr_libs/dr_obj.h"
 #else
-#include "../../external/dr_libs/dr.h"
-#include "../../external/dr_libs/dr_flac.h"
-#include "../../external/dr_libs/dr_wav.h"
-#include "../../external/dr_libs/dr_audio.h"
-#include "../../external/dr_libs/dr_fs.h"
-#include "../../external/dr_libs/dr_obj.h"
+    #include "../../external/dr_libs/dr.h"
+    #include "../../external/dr_libs/dr_flac.h"
+    #include "../../external/dr_libs/dr_wav.h"
+    #include "../../external/dr_libs/dr_audio.h"
+    #include "../../external/dr_libs/dr_fs.h"
+    #include "../../external/dr_libs/dr_obj.h"
 #endif
 
 #ifdef OC_USE_OPENGL
-#define DR_GL_VERSION 300
-//#define DR_GL_VERSION 210
-#define DR_GL_ENABLE_EXT_framebuffer_blit
-#define DR_GL_ENABLE_EXT_framebuffer_multisample
-#define DR_GL_ENABLE_EXT_framebuffer_object
-#define DR_GL_ENABLE_ARB_texture_multisample
-#define DR_GL_ENABLE_EXT_swap_control
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../dr_graphics/dr_gl.h"
-#else
-#include "../../external/dr_graphics/dr_gl.h"
-#endif
+    //#define DR_GL_VERSION 300
+    #define DR_GL_VERSION 210
+    #define DR_GL_ENABLE_EXT_framebuffer_blit
+    #define DR_GL_ENABLE_EXT_framebuffer_multisample
+    #define DR_GL_ENABLE_EXT_framebuffer_object
+    #define DR_GL_ENABLE_ARB_texture_multisample
+    #define DR_GL_ENABLE_EXT_swap_control
+    #ifdef OC_DEBUG
+        #define DR_GL_ENABLE_ARB_debug_output
+    #endif
+    #ifdef OC_USE_EXTERNAL_DR_LIBS
+        #include "../../../../dr_graphics/dr_gl.h"
+    #else
+        #include "../../external/dr_graphics/dr_gl.h"
+    #endif
 #endif
 
 #ifdef OC_USE_VULKAN
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-#include "../../../../dr_graphics/dr_vulkan.h"
-#else
-#include "../../external/dr_graphics/dr_vulkan.h"
-#endif
+    #ifdef OC_USE_EXTERNAL_DR_LIBS
+        #include "../../../../dr_graphics/dr_vulkan.h"
+    #else
+        #include "../../external/dr_graphics/dr_vulkan.h"
+    #endif
 #endif
 
 #if defined(_MSC_VER)

@@ -26,7 +26,7 @@ void ocEngineUninit(ocEngineContext* pEngine);
 
 
 // Whether or not we are running the portable version of the game.
-bool ocIsPortable(ocEngineContext* pEngine);
+drBool32 ocIsPortable(ocEngineContext* pEngine);
 
 
 // Posts a log message.

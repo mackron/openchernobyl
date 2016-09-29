@@ -125,7 +125,7 @@ void ocEngineUninit(ocEngineContext* pEngine)
 }
 
 
-bool ocIsPortable(ocEngineContext* pEngine)
+drBool32 ocIsPortable(ocEngineContext* pEngine)
 {
     if (pEngine == NULL) return false;
     return (pEngine->flags & OC_ENGINE_FLAG_PORTABLE) != 0;
