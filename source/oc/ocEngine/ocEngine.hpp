@@ -172,6 +172,7 @@ struct ocWorldObject;
 #include "ocPlatformLayer.hpp"
 #include "ocColor.hpp"
 #include "ocMath.hpp"
+#include "ocCamera.hpp"
 #include "ocThreading.hpp"
 #include "ocFileSystem.hpp"
 #include "ocLogger.hpp"

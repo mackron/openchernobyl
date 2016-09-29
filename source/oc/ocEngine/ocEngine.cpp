@@ -7,6 +7,7 @@
 #include "ocCommandLine.cpp"
 #include "ocPlatformLayer.cpp"
 #include "ocMath.cpp"
+#include "ocCamera.cpp"
 #include "ocThreading.cpp"
 #include "ocFileSystem.cpp"
 #include "ocLogger.cpp"
