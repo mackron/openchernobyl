@@ -22,58 +22,37 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
     // Logging. Initialize logging early so we can output messages during initialization.
     result = ocLoggerInit(&pEngine->logger, pEngine);
     if (result != OC_RESULT_SUCCESS) {
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error1;
     }
 
     // Graphics.
     result = ocGraphicsInit(&pEngine->graphics, pEngine, 4);
     if (result != OC_RESULT_SUCCESS) {
-        ocLoggerUninit(&pEngine->logger);
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error2;
     }
 
     // Audio.
     result = ocAudioInit(&pEngine->audio, pEngine);
     if (result != OC_RESULT_SUCCESS) {
-        ocGraphicsUninit(&pEngine->graphics);
-        ocLoggerUninit(&pEngine->logger);
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error3;
     }
 
     // Component allocator.
     result = ocComponentAllocatorInit(&pEngine->componentAllocator, pEngine);
     if (result != OC_RESULT_SUCCESS) {
-        ocAudioUninit(&pEngine->audio);
-        ocGraphicsUninit(&pEngine->graphics);
-        ocLoggerUninit(&pEngine->logger);
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error4;
     }
 
     // Resource loader.
     result = ocResourceLoaderInit(&pEngine->resourceLoader, &pEngine->fs);
     if (result != OC_RESULT_SUCCESS) {
-        ocComponentAllocatorUninit(&pEngine->componentAllocator);
-        ocAudioUninit(&pEngine->audio);
-        ocGraphicsUninit(&pEngine->graphics);
-        ocLoggerUninit(&pEngine->logger);
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error5;
     }
 
     // Resource library.
     result = ocResourceLibraryInit(&pEngine->resourceLibrary, &pEngine->resourceLoader, &pEngine->graphics);
     if (result != OC_RESULT_SUCCESS) {
-        ocResourceLoaderUninit(&pEngine->resourceLoader);
-        ocComponentAllocatorUninit(&pEngine->componentAllocator);
-        ocAudioUninit(&pEngine->audio);
-        ocGraphicsUninit(&pEngine->graphics);
-        ocLoggerUninit(&pEngine->logger);
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error6;
     }
 
 
@@ -96,18 +75,20 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
     result = ocPlatformLayerInit(props);
 #endif
     if (result != OC_RESULT_SUCCESS) {
-        ocResourceLibraryUninit(&pEngine->resourceLibrary);
-        ocResourceLoaderUninit(&pEngine->resourceLoader);
-        ocComponentAllocatorUninit(&pEngine->componentAllocator);
-        ocAudioUninit(&pEngine->audio);
-        ocGraphicsUninit(&pEngine->graphics);
-        ocLoggerUninit(&pEngine->logger);
-        ocFileSystemUninit(&pEngine->fs);
-        return result;
+        goto on_error7;
     }
 
 
     return OC_RESULT_SUCCESS;
+
+on_error7: ocResourceLibraryUninit(&pEngine->resourceLibrary);
+on_error6: ocResourceLoaderUninit(&pEngine->resourceLoader);
+on_error5: ocComponentAllocatorUninit(&pEngine->componentAllocator);
+on_error4: ocAudioUninit(&pEngine->audio);
+on_error3: ocGraphicsUninit(&pEngine->graphics);
+on_error2: ocLoggerUninit(&pEngine->logger);
+on_error1: ocFileSystemUninit(&pEngine->fs);
+    return result;
 }
 
 void ocEngineUninit(ocEngineContext* pEngine)
