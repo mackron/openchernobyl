@@ -2,7 +2,7 @@
 
 #define OC_OCD_FOURCC           'OCD '
 #define OC_OCD_TYPE_ID_IMAGE    1
-#define OC_OCD_TYPE_ID_MESH     2
+#define OC_OCD_TYPE_ID_SCENE    2
 
 ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS)
 {
@@ -48,7 +48,7 @@ OC_PRIVATE ocResult ocResourceLoaderDetermineOCDResourceType(ocResourceLoader* p
     switch (ids[1])
     {
         case OC_OCD_TYPE_ID_IMAGE: *pType = ocResourceType_Image; return OC_RESULT_SUCCESS;
-        case OC_OCD_TYPE_ID_MESH:  *pType = ocResourceType_Mesh;  return OC_RESULT_SUCCESS;
+        case OC_OCD_TYPE_ID_SCENE: *pType = ocResourceType_Scene; return OC_RESULT_SUCCESS;
         default: return OC_RESULT_UNKNOWN_RESOURCE_TYPE;
     }
 }
@@ -75,7 +75,7 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
 
     // Meshes.
     if (_stricmp(ext, "obj") == 0) {
-        *pType = ocResourceType_Mesh;
+        *pType = ocResourceType_Scene;
         return OC_RESULT_SUCCESS;
     }
 
@@ -194,8 +194,12 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
     if (drpath_extension_equal(filePath, "ocd")) {
         result = ocLoadImage_OCD(&file, pData);
     } else {
+        result = OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+
         // stb_image
-        result = ocLoadImage_STB(&file, pData);
+        if (result != OC_RESULT_SUCCESS) {
+            result = ocLoadImage_STB(&file, pData);
+        }
 
 #if 0
         // PCX
@@ -215,6 +219,7 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
 #endif
     }
 
+    ocFileClose(&file);
     return result;
 }
 
@@ -228,6 +233,105 @@ void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Meshes
+// Scenes
 //
 ///////////////////////////////////////////////////////////////////////////////
+
+OC_PRIVATE ocResult ocLoadScene_OCD(ocFile* pFile, ocSceneData* pData)
+{
+    ocAssert(pFile != NULL);
+    ocAssert(pData != NULL);
+
+    // TODO: Implement me.
+    (void)pFile;
+    (void)pData;
+    return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+}
+
+
+OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesToRead)
+{
+    size_t bytesRead;
+    ocResult result = ocFileRead((ocFile*)userData, bufferOut, bytesToRead, &bytesRead);
+    if (result != OC_RESULT_SUCCESS) {
+        return 0;
+    }
+
+    return bytesRead;
+}
+
+OC_PRIVATE drBool32 oc__drobj_seek_to_start(void* userData)
+{
+    return ocFileSeek((ocFile*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocLoadScene_OBJ(ocFile* pFile, ocSceneData* pData)
+{
+    ocAssert(pFile != NULL);
+    ocAssert(pData != NULL);
+
+    drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pFile);
+    if (obj == NULL) {
+        return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+    }
+
+    // The first thing to do is calculate the size of the raw data. 
+
+    drobj_delete(obj);
+
+    // TODO: Implement me.
+    (void)pFile;
+    (void)pData;
+    return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+}
+
+ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePath, ocSceneData* pData)
+{
+    if (pData == NULL) return OC_RESULT_INVALID_ARGS;
+    ocZeroObject(pData);
+
+    if (pLoader == NULL || filePath == NULL) return OC_RESULT_INVALID_ARGS;
+
+    // Try opening the file to begin with.
+    ocFile file;
+    ocResult result = ocFileOpen(pLoader->pFS, filePath, OC_READ, &file);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    // We use a trial and error system for loading different file formats. If one fails, we just fall through to the
+    // next sub-loader and try again. The exception is .ocd files which is the native file format for the engine. When
+    // a file with this extension is specified, it will _not_ fall through to the next sub-loaders.
+    if (drpath_extension_equal(filePath, "ocd")) {
+        result = ocLoadScene_OCD(&file, pData);
+    } else {
+        result = OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+
+        // OBJ.
+        if (result != OC_RESULT_SUCCESS && drpath_extension_equal(filePath, "obj")) {
+            result = ocLoadScene_OBJ(&file, pData);
+        }
+
+#if 0
+        // glTF
+        if (result != OC_RESULT_SUCCESS) {
+            result = ocLoadScene_glTF(&file, pData);
+        }
+
+        // Assimp, maybe?
+        if (result != OC_RESULT_SUCCESS) {
+            result = ocLoadScene_Assimp(&file, pData);
+        }
+#endif
+    }
+
+    ocFileClose(&file);
+    return result;
+}
+
+void ocResourceLoaderUnloadScene(ocResourceLoader* pLoader, ocSceneData* pData)
+{
+    if (pLoader == NULL || pData == NULL) return;
+    free(pData->_pPayload);
+}
+

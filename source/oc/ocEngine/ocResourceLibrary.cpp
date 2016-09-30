@@ -165,7 +165,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
             result = ocResourceLibraryLoad_Image(pLibrary, absolutePath, ppResource);
         } break;
 
-        case ocResourceType_Mesh:
+        case ocResourceType_Scene:
         {
             result = OC_RESULT_UNSUPPORTED_RESOURCE_TYPE;
         } break;
@@ -198,7 +198,7 @@ void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
             ocGraphicsDeleteImage(pLibrary->pGraphics, pResource->image.pGraphicsImage);
         } break;
 
-        case ocResourceType_Mesh:
+        case ocResourceType_Scene:
         {
         } break;
 
