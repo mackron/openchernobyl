@@ -241,7 +241,7 @@ void ocOnWindowEvent(ocWindowEvent e)
 
             // V-Sync switching.
             {
-                drBool32 vsyncChanged = false;
+                dr_bool32 vsyncChanged = false;
                 ocVSyncMode vsyncMode = ocVSyncMode_Enabled;
                 if (e.data.key_down.key == 'Q') {
                     vsyncChanged = true;

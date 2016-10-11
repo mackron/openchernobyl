@@ -138,7 +138,7 @@ struct ocWindowEvent
 };
 
 
-drBool32 ocWindowInit(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY);
+dr_bool32 ocWindowInit(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY);
 void ocWindowUninit(ocWindow* pWindow);
 void ocWindowShow(ocWindow* pWindow);
 

@@ -4,6 +4,17 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
 {
     if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
 
+    #if defined(OC_USE_OPENGL) && defined(OC_X11)
+    uintptr_t props[] = {
+        OC_PLATFORM_LAYER_PROP_XDISPLAY, (uintptr_t)pEngine->graphics.gl.pDisplay,
+        OC_PLATFORM_LAYER_PROP_XVISUALINFO, (uintptr_t)pEngine->graphics.gl.pFBVisualInfo,
+        OC_PLATFORM_LAYER_PROP_XCOLORMAP, pEngine->graphics.gl.colormap,
+        0, 0
+    };
+    #else
+    uintptr_t* props = NULL;
+    #endif
+
     ocZeroObject(pEngine);
     pEngine->argc = argc;
     pEngine->argv = argv;
@@ -58,22 +69,7 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
 
     // The platform layer is initialized a little bit differently depending on the platform. It needs to come after the graphics system is
     // initialized due to the coupling of X11 and OpenGL.
-#if defined(OC_WIN32)
-    result = ocPlatformLayerInit(NULL);
-#endif
-#if defined(OC_X11)
-    #if defined(OC_USE_OPENGL)
-    uintptr_t props[] = {
-        OC_PLATFORM_LAYER_PROP_XDISPLAY, (uintptr_t)pEngine->graphics.gl.pDisplay,
-        OC_PLATFORM_LAYER_PROP_XVISUALINFO, (uintptr_t)pEngine->graphics.gl.pFBVisualInfo,
-        OC_PLATFORM_LAYER_PROP_XCOLORMAP, pEngine->graphics.gl.colormap,
-        0, 0
-    };
-    #else
-    uintptr_t* props = NULL;
-    #endif
     result = ocPlatformLayerInit(props);
-#endif
     if (result != OC_RESULT_SUCCESS) {
         goto on_error7;
     }
@@ -106,7 +102,7 @@ void ocEngineUninit(ocEngineContext* pEngine)
 }
 
 
-drBool32 ocIsPortable(ocEngineContext* pEngine)
+dr_bool32 ocIsPortable(ocEngineContext* pEngine)
 {
     if (pEngine == NULL) return false;
     return (pEngine->flags & OC_ENGINE_FLAG_PORTABLE) != 0;

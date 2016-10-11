@@ -30,11 +30,11 @@
 #endif
 #if defined(__GNUC__)
     #pragma GCC diagnostic push
+#if __GNUC__ >= 6
     #pragma GCC diagnostic ignored "-Wshift-negative-value"
-
-    // Clang emits a warning when trying to disable unknown warnings. *sigh*
 #ifndef __clang__
     #pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#endif
 #endif
 #endif
 #define STB_IMAGE_IMPLEMENTATION

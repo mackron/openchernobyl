@@ -1,8 +1,8 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-#define OC_OCD_FOURCC           'OCD '
-#define OC_OCD_TYPE_ID_IMAGE    1
-#define OC_OCD_TYPE_ID_SCENE    2
+#define OC_OCD_FOURCC           0x2044434f /*'OCD ' LE*/
+#define OC_OCD_TYPE_ID_IMAGE    0x31474d49 /*'IMG1' LE*/
+#define OC_OCD_TYPE_ID_SCENE    0x314e4353 /*'SCN1' LE*/
 
 ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS)
 {
@@ -260,7 +260,7 @@ OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesTo
     return bytesRead;
 }
 
-OC_PRIVATE drBool32 oc__drobj_seek_to_start(void* userData)
+OC_PRIVATE dr_bool32 oc__drobj_seek_to_start(void* userData)
 {
     return ocFileSeek((ocFile*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
 }

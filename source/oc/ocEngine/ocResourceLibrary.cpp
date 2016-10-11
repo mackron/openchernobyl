@@ -51,7 +51,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
 
 
     // TODO: This needs a clean up, particularly the mipmap generation stuff.
-    drBool32 freeImageData = false;
+    dr_bool32 freeImageData = false;
     size_t imageDataSize = data.imageDataSize;
     void* pImageData = data.pImageData;
     uint32_t mipmapCount = data.mipmapCount;
@@ -130,10 +130,10 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
     // If it's an .ocd file just load it directly without looking at the original source asset.
     ocFileInfo fileInfoSrc;
-    drBool32 hasSrc = ocGetFileInfo(pLibrary->pLoader->pFS, filePath, &fileInfoSrc) == OC_RESULT_SUCCESS;
+    dr_bool32 hasSrc = ocGetFileInfo(pLibrary->pLoader->pFS, filePath, &fileInfoSrc) == OC_RESULT_SUCCESS;
 
     ocFileInfo fileInfoOCD;
-    drBool32 hasOCD = false;
+    dr_bool32 hasOCD = false;
     if (!drpath_extension_equal(filePath, "ocd")) {
         char filePathOCD[OC_MAX_PATH];
         if (drpath_copy_and_append_extension(filePathOCD, sizeof(filePathOCD), filePath, "ocd")) {
@@ -148,7 +148,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
     // TODO: Reference count and return early based on the absolute path in fileInfoSrc.
 
-    drBool32 isOCDOutOfDate = (hasSrc && hasOCD) && (fileInfoSrc.lastModifiedTime > fileInfoOCD.lastModifiedTime);
+    dr_bool32 isOCDOutOfDate = (hasSrc && hasOCD) && (fileInfoSrc.lastModifiedTime > fileInfoOCD.lastModifiedTime);
 
     // Here is where we actually load the asset. The file path we load from depends on whether or not we have an up-to-date OCD file.
     ocResourceType resourceType;

@@ -8,4 +8,4 @@ void ocFreeArgv(char** argv);
 
 
 // Determines whether or not the given command line argument is present.
-drBool32 ocCmdLineIsSet(int argc, char** argv, const char* arg);
+dr_bool32 ocCmdLineIsSet(int argc, char** argv, const char* arg);

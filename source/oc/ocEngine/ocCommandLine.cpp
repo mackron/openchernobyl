@@ -25,7 +25,7 @@ ocCmdLineIterator ocCmdLineBegin(const char* cmdlineWinMain)
     return i;
 }
 
-drBool32 ocCmdLineNext(ocCmdLineIterator* i)
+dr_bool32 ocCmdLineNext(ocCmdLineIterator* i)
 {
     if (i == NULL) {
         return false;
@@ -162,7 +162,7 @@ void ocFreeArgv(char** argv)
 }
 
 
-drBool32 ocCmdLineIsSet(int argc, char** argv, const char* arg)
+dr_bool32 ocCmdLineIsSet(int argc, char** argv, const char* arg)
 {
     if (argv == NULL || arg == NULL) return false;
 
