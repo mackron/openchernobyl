@@ -63,7 +63,7 @@
 
 #if !defined(OC_64BIT) && !defined(OC_32BIT)
 #include <stdint.h>
-#if SIZE_MAX == ~0ULL
+#if INTPTR_MAX == INT64_MAX
 #define OC_64BIT
 #else
 #define OC_32BIT
