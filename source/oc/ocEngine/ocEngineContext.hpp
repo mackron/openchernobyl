@@ -6,6 +6,7 @@ struct ocEngineContext
 {
     int argc;
     char** argv;
+    void* pUserData;
 
     ocFileSystem fs;
     ocLogger logger;
@@ -19,7 +20,7 @@ struct ocEngineContext
 };
 
 // ocEngineInit
-ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv);
+ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv, void* pUserData);
 
 // ocEngineUninit
 void ocEngineUninit(ocEngineContext* pEngine);

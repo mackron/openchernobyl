@@ -184,7 +184,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
             e.type = OC_WINDOW_EVENT_SIZE;
             e.data.size.width  = LOWORD(lParam);
             e.data.size.height = HIWORD(lParam);
-            ocOnWindowEvent(e);
+            ocOnWindowEvent(pWindow->pEngine, e);
         } break;
 
         case WM_MOVE:
@@ -192,7 +192,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
             e.type = OC_WINDOW_EVENT_MOVE;
             e.data.move.x = (int)(short)LOWORD(lParam);
             e.data.move.y = (int)(short)HIWORD(lParam);
-            ocOnWindowEvent(e);
+            ocOnWindowEvent(pWindow->pEngine, e);
         } break;
 
         case WM_KEYDOWN:
@@ -206,7 +206,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
                 e.type = OC_WINDOW_EVENT_KEY_DOWN;
                 e.data.key_down.key = ocKeyFromWin32(wParam);
                 e.data.key_down.modifierState = modifierState;
-                ocOnWindowEvent(e);
+                ocOnWindowEvent(pWindow->pEngine, e);
             }
         } break;
 
@@ -506,13 +506,14 @@ void ocPlatformLayerUninit()
 }
 
 
-dr_bool32 ocWindowInit(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
+dr_bool32 ocWindowInit(ocWindow* pWindow, ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY)
 {
     if (pWindow == NULL) {
         return false;
     }
 
     ocZeroObject(pWindow);
+    pWindow->pEngine = pEngine;
 
 #ifdef OC_WIN32
     return ocWindowInit_Win32(pWindow, resolutionX, resolutionY);
@@ -696,7 +697,7 @@ double ocTimerTick(ocTimer* pTimer)
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef OC_WIN32
-int ocMainLoop_Win32()
+int ocMainLoop_Win32(ocEngineContext* pEngine)
 {
     for (;;)
     {
@@ -713,7 +714,7 @@ int ocMainLoop_Win32()
         }
 
         // After handling the next event in the queue we let the game know it should do the next frame.
-        ocStep();
+        ocStep(pEngine);
     }
 }
 #endif  // Win32
@@ -733,7 +734,7 @@ void ocHandleX11Event(XEvent* ex)
             e.type = OC_WINDOW_EVENT_SIZE;
             e.data.size.width = ex->xconfigure.width;
             e.data.size.height = ex->xconfigure.height;
-            ocOnWindowEvent(e);
+            ocOnWindowEvent(e.pWindow->pEngine, e);
         } break;
 
 
@@ -764,7 +765,7 @@ void ocHandleX11Event(XEvent* ex)
     }
 }
 
-int ocMainLoop_X11()
+int ocMainLoop_X11(ocEngineContext* pEngine)
 {
     for (;;) {
         if (XPending(g_X11Display) > 0) {   // <-- Use a while loop instead?
@@ -780,18 +781,18 @@ int ocMainLoop_X11()
             ocHandleX11Event(&x11Event);
         }
 
-        ocStep();
+        ocStep(pEngine);
     }
 }
 #endif  // X11
 
-int ocMainLoop()
+int ocMainLoop(ocEngineContext* pEngine)
 {
 #ifdef OC_WIN32
-    return ocMainLoop_Win32();
+    return ocMainLoop_Win32(pEngine);
 #endif
 
 #ifdef OC_X11
-    return ocMainLoop_X11();
+    return ocMainLoop_X11(pEngine);
 #endif
 }

@@ -34,14 +34,14 @@ int ocInitAndRun(int argc, char** argv)
     ocZeroObject(&g_Game);
 
     // Engine.
-    ocResult result = ocEngineInit(&g_Game.engine, argc, argv);
+    ocResult result = ocEngineInit(&g_Game.engine, argc, argv, &g_Game);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
 
 
     // Window.
-    if (!ocWindowInit(&g_Game.window, 640, 480)) {
+    if (!ocWindowInit(&g_Game.window, &g_Game.engine, 640, 480)) {
         goto done;
     }
 
@@ -176,7 +176,7 @@ int ocInitAndRun(int argc, char** argv)
     g_Game.flags |= OC_GAME_FLAG_IS_INITIALIZED;
 
     // The main loop will call ocStep(), and will return when the application has terminated. The return value is the result code.
-    result = ocMainLoop();
+    result = ocMainLoop(&g_Game.engine);
 
 done:
     ocGraphicsWorldDeleteRT(&g_Game.world.graphicsWorld, g_Game.pWindowRT);
@@ -187,8 +187,10 @@ done:
     return result;
 }
 
-void ocStep()
+void ocStep(ocEngineContext* pEngine)
 {
+    (void)pEngine;
+
     double dt = ocTimerTick(&g_Game.timer);
 
     //printf("Step: %f\n", dt);
@@ -206,8 +208,10 @@ void ocStep()
     ocGraphicsPresent(&g_Game.engine.graphics, g_Game.pSwapchain);
 }
 
-void ocOnWindowEvent(ocWindowEvent e)
+void ocOnWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
 {
+    (void)pEngine;
+
     // Don't care about any events before initialization is complete.
     if ((g_Game.flags & OC_GAME_FLAG_IS_INITIALIZED) == 0) {
         return;

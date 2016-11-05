@@ -1,6 +1,6 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
+ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv, void* pUserData)
 {
     if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
 
@@ -18,6 +18,7 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv)
     ocZeroObject(pEngine);
     pEngine->argc = argc;
     pEngine->argv = argv;
+    pEngine->pUserData = pUserData;
 
     if (ocCmdLineIsSet(argc, argv, "--portable")) {
         pEngine->flags |= OC_ENGINE_FLAG_PORTABLE;

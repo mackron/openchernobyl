@@ -26,7 +26,5 @@ struct ocGame
 extern ocGame g_Game;
 
 int ocInitAndRun(int argc, char** argv);
-void ocStep();
-void ocOnWindowEvent(ocWindowEvent e);
 
 #endif

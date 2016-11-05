@@ -193,4 +193,8 @@ struct ocWorldObject;
 #include "ocEngineContext.hpp"
 #include "ocStretchyBuffer.hpp"     // <-- stb_stretchy_buffer with a C++ fix. Remove this once the upstream version is fixed.
 
+// Applications need to implement these functions.
+void ocStep(ocEngineContext* pEngine);
+void ocOnWindowEvent(ocEngineContext* pEngine, ocWindowEvent e);
+
 #endif

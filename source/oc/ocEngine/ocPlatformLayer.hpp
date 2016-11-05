@@ -73,6 +73,8 @@ void ocPlatformLayerUninit();
 
 struct ocWindow
 {
+    ocEngineContext* pEngine;
+
 #ifdef OC_WIN32
     HWND hWnd;
     HDC hDC;
@@ -138,7 +140,7 @@ struct ocWindowEvent
 };
 
 
-dr_bool32 ocWindowInit(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY);
+dr_bool32 ocWindowInit(ocWindow* pWindow, ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY);
 void ocWindowUninit(ocWindow* pWindow);
 void ocWindowShow(ocWindow* pWindow);
 
@@ -175,4 +177,4 @@ double ocTimerTick(ocTimer* pTimer);
 ///////////////////////////////////////////////////////////////////////////////
 
 // Runs the main loop. This is where ocStep() will be called from.
-int ocMainLoop();
+int ocMainLoop(ocEngineContext* pEngine);
