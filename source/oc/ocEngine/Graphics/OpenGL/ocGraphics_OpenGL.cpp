@@ -212,8 +212,8 @@ void ocGraphicsGetSwapchainSize(ocGraphicsContext* pGraphics, ocGraphicsSwapchai
     unsigned int sizeY;
     ocWindowGetSize(pSwapchain->pWindow, &sizeX, &sizeY);
 
-    if (pSizeX != NULL) *pSizeX = (unsigned int)sizeX;
-    if (pSizeY != NULL) *pSizeY = (unsigned int)sizeY;
+    if (pSizeX != NULL) *pSizeX = (uint32_t)sizeX;
+    if (pSizeY != NULL) *pSizeY = (uint32_t)sizeY;
 }
 
 void ocGraphicsPresent(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapchain)
