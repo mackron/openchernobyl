@@ -62,15 +62,21 @@
 
 //#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
 
+#ifndef DR_IMPLEMENTATION
+    #ifdef OC_USE_EXTERNAL_DR_LIBS
+        #include "../../../../../dr_libs/dr.h"
+    #else
+        #include "../../external/dr_libs/dr.h"
+    #endif
+#endif
+
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../../dr_libs/dr.h"
     #include "../../../../../dr_libs/dr_flac.h"
     #include "../../../../../dr_libs/dr_wav.h"
     #include "../../../../../dr_libs/dr_audio.h"
     #include "../../../../../dr_libs/dr_fs.h"
     #include "../../../../../dr_libs/dr_obj.h"
 #else
-    #include "../../external/dr_libs/dr.h"
     #include "../../external/dr_libs/dr_flac.h"
     #include "../../external/dr_libs/dr_wav.h"
     #include "../../external/dr_libs/dr_audio.h"

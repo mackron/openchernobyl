@@ -70,21 +70,27 @@
 #define STB_PERLIN_IMPLEMENTATION
 #include "../../external/stb/stb_perlin.h"
 
-#define DR_IMPLEMENTATION
+#ifndef DR_IMPLEMENTATION
+    #define DR_IMPLEMENTATION
+    #ifdef OC_USE_EXTERNAL_DR_LIBS
+        #include "../../../../../dr_libs/dr.h"
+    #else
+        #include "../../external/dr_libs/dr.h"
+    #endif
+#endif
+
 #define DR_FLAC_IMPLEMENTATION
 #define DR_WAV_IMPLEMENTATION
 #define DR_AUDIO_IMPLEMENTATION
 #define DR_FS_IMPLEMENTATION
 #define DR_OBJ_IMPLEMENTATION
 #ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../../dr_libs/dr.h"
     #include "../../../../../dr_libs/dr_flac.h"
     #include "../../../../../dr_libs/dr_wav.h"
     #include "../../../../../dr_libs/dr_audio.h"
     #include "../../../../../dr_libs/dr_fs.h"
     #include "../../../../../dr_libs/dr_obj.h"
 #else
-    #include "../../external/dr_libs/dr.h"
     #include "../../external/dr_libs/dr_flac.h"
     #include "../../external/dr_libs/dr_wav.h"
     #include "../../external/dr_libs/dr_audio.h"
