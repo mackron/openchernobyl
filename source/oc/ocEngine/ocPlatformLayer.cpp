@@ -7,18 +7,30 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef OC_WIN32
 static const char* g_OCWndClassName = "OC.WindowClass";
+static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 ocResult ocPlatformLayerInit_Win32(uintptr_t props[])
 {
     (void)props;    // Don't need any properties, yet.
 
-    // TODO: Register window classes.
+    WNDCLASSEXA wc;
+    ZeroMemory(&wc, sizeof(wc));
+    wc.cbSize        = sizeof(wc);
+    wc.cbWndExtra    = sizeof(void*);
+    wc.lpfnWndProc   = (WNDPROC)DefaultWindowProcWin32;
+    wc.lpszClassName = g_OCWndClassName;
+    wc.hCursor       = LoadCursorA(NULL, MAKEINTRESOURCEA(32512));
+    wc.style         = CS_OWNDC | CS_DBLCLKS;
+    if (!RegisterClassExA(&wc)) {
+        return OC_RESULT_UNKNOWN_ERROR;   // Failed to initialize the window class.
+    }
+
     return OC_RESULT_SUCCESS;
 }
 
 void ocPlatformLayerUninit_Win32()
 {
-    // TODO: Unregister window classes.
+    UnregisterClassA(g_OCWndClassName, GetModuleHandleA(NULL));
 }
 
 dr_bool32 ocIsWin32MouseButtonKeyCode(WPARAM wParam)
@@ -220,19 +232,6 @@ dr_bool32 ocWindowInit_Win32(ocWindow* pWindow, unsigned int resolutionX, unsign
 {
     assert(pWindow != NULL);
 
-    WNDCLASSEXA wc;
-    ZeroMemory(&wc, sizeof(wc));
-    wc.cbSize        = sizeof(wc);
-    wc.cbWndExtra    = sizeof(void*);
-    wc.lpfnWndProc   = (WNDPROC)DefaultWindowProcWin32;
-    wc.lpszClassName = g_OCWndClassName;
-    wc.hCursor       = LoadCursorA(NULL, MAKEINTRESOURCEA(32512));
-    wc.style         = CS_OWNDC | CS_DBLCLKS;
-    if (!RegisterClassExA(&wc)) {
-        return false;   // Failed to initialize the window class.
-    }
-
-
     DWORD dwExStyle = 0;
     DWORD dwStyle = WS_OVERLAPPEDWINDOW;
     pWindow->hWnd = CreateWindowExA(dwExStyle, g_OCWndClassName, OC_PRODUCT_NAME, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, resolutionX, resolutionY, NULL, NULL, NULL, NULL);
@@ -265,7 +264,6 @@ void ocWindowUninit_Win32(ocWindow* pWindow)
     assert(pWindow != NULL);
 
     DestroyWindow(pWindow->hWnd);
-    UnregisterClassA(g_OCWndClassName, GetModuleHandleA(NULL));
 }
 
 void ocWindowShow_Win32(ocWindow* pWindow)
