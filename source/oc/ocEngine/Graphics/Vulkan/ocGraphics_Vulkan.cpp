@@ -6,7 +6,7 @@
 //
 // - Positive Y = DOWN (Opposite to OpenGL)
 //   - Means back faces are now the front with counter-clockwise polygon winding
-//   - Can make this consistent by multiplying the projection matrix with an adjustment matrix as per ocMakeMat4_VulkanClipCorrection()
+//   - Can make this consistent by multiplying the projection matrix with an adjustment matrix: ocMakeMat4_VulkanClipCorrection()
 // - Depth range is [-1,1] (OpenGL is [0,1])
 //   - Can also make this consistent with ocMakeMat4_VulkanClipCorrection()
 
