@@ -20,7 +20,7 @@ struct ocEngineContext
 };
 
 // ocEngineInit
-ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv, void* pUserData);
+ocResult ocEngineInit(int argc, char** argv, void* pUserData, ocEngineContext* pEngine);
 
 // ocEngineUninit
 void ocEngineUninit(ocEngineContext* pEngine);

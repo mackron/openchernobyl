@@ -4,7 +4,7 @@
 #define OC_OCD_TYPE_ID_IMAGE    0x31474d49 /*'IMG1' LE*/
 #define OC_OCD_TYPE_ID_SCENE    0x314e4353 /*'SCN1' LE*/
 
-ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS)
+ocResult ocResourceLoaderInit(ocFileSystem* pFS, ocResourceLoader* pLoader)
 {
     if (pLoader == NULL || pFS == NULL) return OC_RESULT_INVALID_ARGS;
 

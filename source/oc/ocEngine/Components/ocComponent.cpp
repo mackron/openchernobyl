@@ -1,10 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocComponentInit(ocComponent* pComponent, ocWorldObject* pObject, ocComponentType type)
+ocResult ocComponentInit(ocWorldObject* pObject, ocComponentType type, ocComponent* pComponent)
 {
-    if (pComponent == NULL || pObject == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pComponent == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pComponent);
+
+    if (pObject == NULL) return OC_RESULT_INVALID_ARGS;
+
     pComponent->pObject = pObject;
     pComponent->type = type;
 

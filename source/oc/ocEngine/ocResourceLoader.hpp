@@ -14,7 +14,7 @@ struct ocResourceLoader
 };
 
 // Initializes the resource loader.
-ocResult ocResourceLoaderInit(ocResourceLoader* pLoader, ocFileSystem* pFS);
+ocResult ocResourceLoaderInit(ocFileSystem* pFS, ocResourceLoader* pLoader);
 
 // Uninitializes the resource loader.
 void ocResourceLoaderUninit(ocResourceLoader* pLoader);

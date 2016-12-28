@@ -1,10 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocResourceLibraryInit(ocResourceLibrary* pLibrary, ocResourceLoader* pLoader, ocGraphicsContext* pGraphics)
+ocResult ocResourceLibraryInit(ocResourceLoader* pLoader, ocGraphicsContext* pGraphics, ocResourceLibrary* pLibrary)
 {
-    if (pLibrary == NULL || pLoader == NULL || pGraphics == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pLibrary == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pLibrary);
+
+    if (pLoader == NULL || pGraphics == NULL) return OC_RESULT_INVALID_ARGS;
+
     pLibrary->pLoader = pLoader;
     pLibrary->pGraphics = pGraphics;
 

@@ -1,6 +1,6 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-void ocCameraInitOrtho(ocCamera* pCamera, float left, float right, float top, float bottom)
+void ocCameraInitOrtho(float left, float right, float top, float bottom, ocCamera* pCamera)
 {
     if (pCamera == NULL) return;
 
@@ -9,7 +9,7 @@ void ocCameraInitOrtho(ocCamera* pCamera, float left, float right, float top, fl
     pCamera->rotation = glm::quat(1, 0, 0, 0);
 }
 
-void ocCameraInitPerspective(ocCamera* pCamera, float fov, float aspect, float znear, float zfar)
+void ocCameraInitPerspective(float fov, float aspect, float znear, float zfar, ocCamera* pCamera)
 {
     if (pCamera == NULL) return;
 

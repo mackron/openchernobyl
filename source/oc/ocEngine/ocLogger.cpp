@@ -1,10 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocLoggerInit(ocLogger* pLogger, ocEngineContext* pEngine)
+ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger)
 {
-    if (pLogger == NULL || pEngine == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pLogger == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pLogger);
+
+    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+
     pLogger->pEngine = pEngine;
 
     if (ocCmdLineIsSet(pEngine->argc, pEngine->argv, "--silent")) {

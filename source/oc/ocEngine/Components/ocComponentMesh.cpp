@@ -1,8 +1,8 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocComponentMeshInit(ocComponentMesh* pComponent, ocWorldObject* pObject)
+ocResult ocComponentMeshInit(ocWorldObject* pObject, ocComponentMesh* pComponent)
 {
-    ocResult result = ocComponentInit(pComponent, pObject, OC_COMPONENT_TYPE_MESH);
+    ocResult result = ocComponentInit(pObject, OC_COMPONENT_TYPE_MESH, pComponent);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }

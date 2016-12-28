@@ -12,11 +12,13 @@ OC_INLINE ocResult ocToResultFromDRA(dra_result draresult)
     }
 }
 
-ocResult ocAudioInit(ocAudioContext* pAudio, ocEngineContext* pEngine)
+ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
 {
-    if (pAudio == NULL || pEngine == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pAudio == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pAudio);
+
+    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+
     pAudio->pEngine = pEngine;
 
     dra_result draresult = dra_context_init(&pAudio->internalContext);

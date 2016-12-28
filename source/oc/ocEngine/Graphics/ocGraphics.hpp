@@ -80,7 +80,7 @@ struct ocGraphicsContextBase
 };
 
 //
-ocResult ocGraphicsInitBase(ocGraphicsContextBase* pGraphics, ocEngineContext* pEngine);
+ocResult ocGraphicsInitBase(ocEngineContext* pEngine, ocGraphicsContextBase* pGraphics);
 
 //
 void ocGraphicsUninitBase(ocGraphicsContextBase* pGraphics);
@@ -100,7 +100,7 @@ struct ocGraphicsSwapchainBase
 };
 
 //
-ocResult ocGraphicsSwapchainBaseInit(ocGraphicsSwapchainBase* pSwapchain, ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode);
+ocResult ocGraphicsSwapchainBaseInit(ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode, ocGraphicsSwapchainBase* pSwapchain);
 
 //
 void ocGraphicsSwapchainBaseUninit(ocGraphicsSwapchainBase* pSwapchain);
@@ -117,7 +117,7 @@ struct ocGraphicsWorldBase
 };
 
 //
-ocResult ocGraphicsWorldInitBase(ocGraphicsWorldBase* pWorld, ocGraphicsContext* pGraphics);
+ocResult ocGraphicsWorldInitBase(ocGraphicsContext* pGraphics, ocGraphicsWorldBase* pWorld);
 
 //
 void ocGraphicsWorldUninitBase(ocGraphicsWorldBase* pWorld);
@@ -130,7 +130,7 @@ struct ocGraphicsObjectBase
 };
 
 //
-ocResult ocGraphicsObjectBaseInit(ocGraphicsObjectBase* pObject, ocGraphicsWorld* pWorld, ocGraphicsObjectType type);
+ocResult ocGraphicsObjectBaseInit(ocGraphicsWorld* pWorld, ocGraphicsObjectType type, ocGraphicsObjectBase* pObject);
 
 //
 void ocGraphicsObjectBaseUninit(ocGraphicsObjectBase* pObject);
@@ -147,7 +147,7 @@ struct ocGraphicsRTBase
 };
 
 //
-ocResult ocGraphicsRTInitBase(ocGraphicsRTBase* pRT, ocGraphicsWorld* pWorld);
+ocResult ocGraphicsRTInitBase(ocGraphicsWorld* pWorld, ocGraphicsRTBase* pRT);
 
 //
 void ocGraphicsRTUninitBase(ocGraphicsRTBase* pRT);
@@ -184,7 +184,7 @@ struct ocGraphicsRT;
 ///////////////////////////////////////////////////////////////////////////////
 
 // ocGraphicsInit
-ocResult ocGraphicsInit(ocGraphicsContext* pGraphics, ocEngineContext* pEngine, uint32_t desiredMSAASamples);
+ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, ocGraphicsContext* pGraphics);
 
 // ocGraphicsUninit
 void ocGraphicsUninit(ocGraphicsContext* pGraphics);
@@ -225,7 +225,7 @@ void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh);
 ///////////////////////////////////////////////////////////////////////////////
 
 // ocGraphicsWorldInit()
-ocResult ocGraphicsWorldInit(ocGraphicsWorld* pWorld, ocGraphicsContext* pGraphics);
+ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWorld);
 
 // ocGraphicsWorldUninit()
 void ocGraphicsWorldUninit(ocGraphicsWorld* pWorld);

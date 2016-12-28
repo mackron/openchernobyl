@@ -6,7 +6,7 @@ struct ocComponentLight : public ocComponent
 };
 
 //
-ocResult ocComponentLightInit(ocComponentLight* pComponent, ocWorldObject* pObject);
+ocResult ocComponentLightInit(ocWorldObject* pObject, ocComponentLight* pComponent);
 
 //
 void ocComponentLightUninit(ocComponentLight* pComponent);

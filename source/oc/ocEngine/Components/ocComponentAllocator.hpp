@@ -18,7 +18,7 @@ struct ocComponentAllocator
 };
 
 //
-ocResult ocComponentAllocatorInit(ocComponentAllocator* pAllocator, ocEngineContext* pEngine);
+ocResult ocComponentAllocatorInit(ocEngineContext* pEngine, ocComponentAllocator* pAllocator);
 
 //
 void ocComponentAllocatorUninit(ocComponentAllocator* pAllocator);

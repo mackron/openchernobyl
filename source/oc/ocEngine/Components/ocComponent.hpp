@@ -7,7 +7,7 @@ struct ocComponent
 };
 
 //
-ocResult ocComponentInit(ocComponent* pComponent, ocWorldObject* pObject, ocComponentType type);
+ocResult ocComponentInit(ocWorldObject* pObject, ocComponentType type, ocComponent* pComponent);
 
 //
 void ocComponentUninit(ocComponent* pComponent);

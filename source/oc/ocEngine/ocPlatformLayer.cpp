@@ -228,7 +228,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
     return DefWindowProcA(hWnd, msg, wParam, lParam);
 }
 
-dr_bool32 ocWindowInit_Win32(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
+dr_bool32 ocWindowInit_Win32(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
     assert(pWindow != NULL);
 
@@ -416,7 +416,7 @@ OC_PRIVATE void* ocGetX11WindowProperty(Display* display, Window window, Atom pr
     return pUserData;
 }
 
-dr_bool32 ocWindowInit_X11(ocWindow* pWindow, unsigned int resolutionX, unsigned int resolutionY)
+dr_bool32 ocWindowInit_X11(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
     assert(pWindow != NULL);
 
@@ -504,34 +504,28 @@ void ocPlatformLayerUninit()
 }
 
 
-dr_bool32 ocWindowInit(ocWindow* pWindow, ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY)
+dr_bool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
-    if (pWindow == NULL) {
-        return false;
-    }
-
+    if (pWindow == NULL) return false;
     ocZeroObject(pWindow);
+
     pWindow->pEngine = pEngine;
 
 #ifdef OC_WIN32
-    return ocWindowInit_Win32(pWindow, resolutionX, resolutionY);
+    return ocWindowInit_Win32(resolutionX, resolutionY, pWindow);
 #endif
-
 #ifdef OC_X11
-    return ocWindowInit_X11(pWindow, resolutionX, resolutionY);
+    return ocWindowInit_X11(resolutionX, resolutionY, pWindow);
 #endif
 }
 
 void ocWindowUninit(ocWindow* pWindow)
 {
-    if (pWindow == NULL) {
-        return;
-    }
+    if (pWindow == NULL) return;
 
 #ifdef OC_WIN32
     ocWindowUninit_Win32(pWindow);
 #endif
-
 #ifdef OC_X11
     ocWindowUninit_X11(pWindow);
 #endif
@@ -539,14 +533,11 @@ void ocWindowUninit(ocWindow* pWindow)
 
 void ocWindowShow(ocWindow* pWindow)
 {
-    if (pWindow == NULL) {
-        return;
-    }
+    if (pWindow == NULL) return;
 
 #ifdef OC_WIN32
     ocWindowShow_Win32(pWindow);
 #endif
-
 #ifdef OC_X11
     ocWindowShow_X11(pWindow);
 #endif
@@ -555,14 +546,11 @@ void ocWindowShow(ocWindow* pWindow)
 
 void ocWindowGetSize(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
 {
-    if (pWindow == NULL) {
-        return;
-    }
+    if (pWindow == NULL) return;
 
 #ifdef OC_WIN32
     ocWindowGetSize_Win32(pWindow, pSizeX, pSizeY);
 #endif
-
 #ifdef OC_X11
     ocWindowGetSize_X11(pWindow, pSizeX, pSizeY);
 #endif
@@ -570,19 +558,15 @@ void ocWindowGetSize(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSiz
 
 void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY)
 {
-    if (pWindow == NULL) {
-        return;
-    }
+    if (pWindow == NULL) return;
 
     // Clamp to 1x1.
     if (sizeX == 0) sizeX = 1;
     if (sizeY == 0) sizeY = 1;
 
-
 #ifdef OC_WIN32
     ocWindowSetSize_Win32(pWindow, sizeX, sizeY);
 #endif
-
 #ifdef OC_X11
     ocWindowSetSize_X11(pWindow, sizeX, sizeY);
 #endif

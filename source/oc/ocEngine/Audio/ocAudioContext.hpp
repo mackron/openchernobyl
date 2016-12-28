@@ -8,7 +8,7 @@ struct ocAudioContext
 };
 
 //
-ocResult ocAudioInit(ocAudioContext* pAudio, ocEngineContext* pEngine);
+ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio);
 
 //
 void ocAudioUninit(ocAudioContext* pAudio);

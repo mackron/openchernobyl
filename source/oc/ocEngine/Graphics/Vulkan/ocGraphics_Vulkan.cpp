@@ -776,9 +776,9 @@ OC_PRIVATE ocResult ocGraphicsInit_Vulkan(ocGraphicsContext* pGraphics, uint32_t
     return OC_RESULT_SUCCESS;
 }
 
-ocResult ocGraphicsInit(ocGraphicsContext* pGraphics, ocEngineContext* pEngine, uint32_t desiredMSAASamples)
+ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, ocGraphicsContext* pGraphics)
 {
-    ocResult result = ocGraphicsInitBase(pGraphics, pEngine);
+    ocResult result = ocGraphicsInitBase(pEngine, pGraphics);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
@@ -831,7 +831,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
         return OC_RESULT_OUT_OF_MEMORY;
     }
 
-    ocResult result = ocGraphicsSwapchainBaseInit(pSwapchain, pGraphics, pWindow, vsyncMode);
+    ocResult result = ocGraphicsSwapchainBaseInit(pGraphics, pWindow, vsyncMode, pSwapchain);
     if (result != OC_RESULT_SUCCESS) {
         ocFree(pSwapchain);
         return result;
@@ -1326,9 +1326,9 @@ void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-ocResult ocGraphicsWorldInit(ocGraphicsWorld* pWorld, ocGraphicsContext* pGraphics)
+ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWorld)
 {
-    ocResult result = ocGraphicsWorldInitBase(pWorld, pGraphics);
+    ocResult result = ocGraphicsWorldInitBase(pGraphics, pWorld);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
@@ -1782,7 +1782,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     ocGraphicsRT* pRT = (ocGraphicsRT*)calloc(1, sizeof(*pRT));
     if (pRT == NULL) return OC_RESULT_OUT_OF_MEMORY;
 
-    ocResult result = ocGraphicsRTInitBase(pRT, pWorld);
+    ocResult result = ocGraphicsRTInitBase(pWorld, pRT);
     if (result != OC_RESULT_SUCCESS) {
         free(pRT);
         return result;
@@ -1913,7 +1913,7 @@ void ocGraphicsWorldDeleteRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 
 OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWorld* pWorld, ocGraphicsObjectType type)
 {
-    ocResult result = ocGraphicsObjectBaseInit(pObject, pWorld, type);
+    ocResult result = ocGraphicsObjectBaseInit(pWorld, type, pObject);
     if (result != OC_RESULT_SUCCESS) {
         ocFree(pObject);
         return result;

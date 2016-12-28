@@ -1,6 +1,6 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv, void* pUserData)
+ocResult ocEngineInit(int argc, char** argv, void* pUserData, ocEngineContext* pEngine)
 {
     if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
 
@@ -32,37 +32,37 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv, void* pUs
     }
 
     // Logging. Initialize logging early so we can output messages during initialization.
-    result = ocLoggerInit(&pEngine->logger, pEngine);
+    result = ocLoggerInit(pEngine, &pEngine->logger);
     if (result != OC_RESULT_SUCCESS) {
         goto on_error1;
     }
 
     // Graphics.
-    result = ocGraphicsInit(&pEngine->graphics, pEngine, 4);
+    result = ocGraphicsInit(pEngine, 4, &pEngine->graphics);
     if (result != OC_RESULT_SUCCESS) {
         goto on_error2;
     }
 
     // Audio.
-    result = ocAudioInit(&pEngine->audio, pEngine);
+    result = ocAudioInit(pEngine, &pEngine->audio);
     if (result != OC_RESULT_SUCCESS) {
         goto on_error3;
     }
 
     // Component allocator.
-    result = ocComponentAllocatorInit(&pEngine->componentAllocator, pEngine);
+    result = ocComponentAllocatorInit(pEngine, &pEngine->componentAllocator);
     if (result != OC_RESULT_SUCCESS) {
         goto on_error4;
     }
 
     // Resource loader.
-    result = ocResourceLoaderInit(&pEngine->resourceLoader, &pEngine->fs);
+    result = ocResourceLoaderInit(&pEngine->fs, &pEngine->resourceLoader);
     if (result != OC_RESULT_SUCCESS) {
         goto on_error5;
     }
 
     // Resource library.
-    result = ocResourceLibraryInit(&pEngine->resourceLibrary, &pEngine->resourceLoader, &pEngine->graphics);
+    result = ocResourceLibraryInit(&pEngine->resourceLoader, &pEngine->graphics, &pEngine->resourceLibrary);
     if (result != OC_RESULT_SUCCESS) {
         goto on_error6;
     }

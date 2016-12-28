@@ -13,7 +13,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef OC_THREADING_WIN32
-bool ocThreadCreate__Win32(ocThread* pThread, ocThreadEntryProc entryProc, void* pData)
+bool ocThreadCreate__Win32(ocThreadEntryProc entryProc, void* pData, ocThread* pThread)
 {
     *pThread = CreateThread(NULL, 0, entryProc, pData, 0, NULL);
     if (*pThread == NULL) {
@@ -29,8 +29,7 @@ void ocThreadWait__Win32(ocThread* pThread)
 }
 
 
-
-bool ocMutexCreate__Win32(ocMutex* pMutex)
+bool ocMutexInit__Win32(ocMutex* pMutex)
 {
     *pMutex = CreateEventA(NULL, FALSE, TRUE, NULL);
     if (*pMutex == NULL) {
@@ -40,7 +39,7 @@ bool ocMutexCreate__Win32(ocMutex* pMutex)
     return true;
 }
 
-void ocMutexDelete__Win32(ocMutex* pMutex)
+void ocMutexUninit__Win32(ocMutex* pMutex)
 {
     CloseHandle(*pMutex);
 }
@@ -56,8 +55,7 @@ void ocMutexUnlock__Win32(ocMutex* pMutex)
 }
 
 
-
-bool ocSemaphoreCreate__Win32(ocSemaphore* pSemaphore, int initialValue)
+bool ocSemaphoreInit__Win32(int initialValue, ocSemaphore* pSemaphore)
 {
     *pSemaphore = CreateSemaphoreA(NULL, initialValue, LONG_MAX, NULL);
     if (*pSemaphore == NULL) {
@@ -67,7 +65,7 @@ bool ocSemaphoreCreate__Win32(ocSemaphore* pSemaphore, int initialValue)
     return true;
 }
 
-void ocSemaphoreDelete__Win32(ocSemaphore* pSemaphore)
+void ocSemaphoreUninit__Win32(ocSemaphore* pSemaphore)
 {
     CloseHandle(*pSemaphore);
 }
@@ -90,7 +88,7 @@ bool ocSemaphoreRelease__Win32(ocSemaphore* pSemaphore)
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef OC_THREADING_POSIX
-bool ocThreadCreate__Posix(ocThread* pThread, ocThreadEntryProc entryProc, void* pData)
+bool ocThreadCreate__Posix(ocThreadEntryProc entryProc, void* pData, ocThread* pThread)
 {
     return pthread_create(pThread, NULL, entryProc, pData) == 0;
 }
@@ -101,13 +99,12 @@ void ocThreadWait__Posix(ocThread* pThread)
 }
 
 
-
-bool ocMutexCreate__Posix(ocMutex* pMutex)
+bool ocMutexInit__Posix(ocMutex* pMutex)
 {
     return pthread_mutex_init(pMutex, NULL) == 0;
 }
 
-void ocMutexDelete__Posix(ocMutex* pMutex)
+void ocMutexUninit__Posix(ocMutex* pMutex)
 {
     pthread_mutex_destroy(pMutex);
 }
@@ -123,13 +120,12 @@ void ocMutexUnlock__Posix(ocMutex* pMutex)
 }
 
 
-
-bool ocSemaphoreCreate__Posix(ocSemaphore* pSemaphore, int initialValue)
+bool ocSemaphoreInit__Posix(int initialValue, ocSemaphore* pSemaphore)
 {
     return sem_init(pSemaphore, 0, (unsigned int)initialValue) != -1;
 }
 
-void ocSemaphoreDelete__Posix(ocSemaphore* pSemaphore)
+void ocSemaphoreUninit__Posix(ocSemaphore* pSemaphore)
 {
     sem_close(pSemaphore);
 }
@@ -150,31 +146,28 @@ bool ocSemaphoreRelease__Posix(ocSemaphore* pSemaphore)
 
 //// Thread ////
 
-bool ocThreadCreate(ocThread* pThread, ocThreadEntryProc entryProc, void* pData)
+bool ocThreadCreate(ocThreadEntryProc entryProc, void* pData, ocThread* pThread)
 {
-    if (pThread == NULL || entryProc == NULL) {
-        return false;
-    }
+    if (pThread == NULL) return false;
+    ocZeroObject(pThread);
+
+    if (entryProc == NULL) return false;
 
 #ifdef OC_THREADING_WIN32
-    return ocThreadCreate__Win32(pThread, entryProc, pData);
+    return ocThreadCreate__Win32(entryProc, pData, pThread);
 #endif
-
 #ifdef OC_THREADING_POSIX
-    return ocThreadCreate__Posix(pThread, entryProc, pData);
+    return ocThreadCreate__Posix(entryProc, pData, pThread);
 #endif
 }
 
 void ocThreadWait(ocThread* pThread)
 {
-    if (pThread == NULL) {
-        return;
-    }
+    if (pThread == NULL) return;
 
 #ifdef OC_THREADING_WIN32
     ocThreadWait__Win32(pThread);
 #endif
-
 #ifdef OC_THREADING_POSIX
     ocThreadWait__Posix(pThread);
 #endif
@@ -183,46 +176,37 @@ void ocThreadWait(ocThread* pThread)
 
 //// Mutex ////
 
-bool ocMutexCreate(ocMutex* pMutex)
+bool ocMutexInit(ocMutex* pMutex)
 {
-    if (pMutex == NULL) {
-        return false;
-    }
+    if (pMutex == NULL) return false;
 
 #ifdef OC_THREADING_WIN32
-    return ocMutexCreate__Win32(pMutex);
+    return ocMutexInit__Win32(pMutex);
 #endif
-
 #ifdef OC_THREADING_POSIX
-    return ocMutexCreate__Posix(pMutex);
+    return ocMutexInit__Posix(pMutex);
 #endif
 }
 
-void ocMutexDelete(ocMutex* pMutex)
+void ocMutexUninit(ocMutex* pMutex)
 {
-    if (pMutex == NULL) {
-        return;
-    }
+    if (pMutex == NULL) return;
 
 #ifdef OC_THREADING_WIN32
-    ocMutexDelete__Win32(pMutex);
+    ocMutexUninit__Win32(pMutex);
 #endif
-
 #ifdef OC_THREADING_POSIX
-    ocMutexDelete__Posix(pMutex);
+    ocMutexUninit__Posix(pMutex);
 #endif
 }
 
 void ocMutexLock(ocMutex* pMutex)
 {
-    if (pMutex == NULL) {
-        return;
-    }
+    if (pMutex == NULL) return;
 
 #ifdef OC_THREADING_WIN32
     ocMutexLock__Win32(pMutex);
 #endif
-
 #ifdef OC_THREADING_POSIX
     ocMutexLock__Posix(pMutex);
 #endif
@@ -230,14 +214,11 @@ void ocMutexLock(ocMutex* pMutex)
 
 void ocMutexUnlock(ocMutex* pMutex)
 {
-    if (pMutex == NULL) {
-        return;
-    }
+    if (pMutex == NULL) return;
 
 #ifdef OC_THREADING_WIN32
     ocMutexUnlock__Win32(pMutex);
 #endif
-
 #ifdef OC_THREADING_POSIX
     ocMutexUnlock__Posix(pMutex);
 #endif
@@ -246,46 +227,37 @@ void ocMutexUnlock(ocMutex* pMutex)
 
 //// Semaphore ///
 
-bool ocSemaphoreCreate(ocSemaphore* pSemaphore, int initialValue)
+bool ocSemaphoreInit(int initialValue, ocSemaphore* pSemaphore)
 {
-    if (pSemaphore == NULL) {
-        return false;
-    }
+    if (pSemaphore == NULL) return false;
 
 #ifdef OC_THREADING_WIN32
-    return ocSemaphoreCreate__Win32(pSemaphore, initialValue);
+    return ocSemaphoreInit__Win32(initialValue, pSemaphore);
 #endif
-
 #ifdef OC_THREADING_POSIX
-    return ocSemaphoreCreate__Posix(pSemaphore, initialValue);
+    return ocSemaphoreInit__Posix(initialValue, pSemaphore);
 #endif
 }
 
-void ocSemaphoreDelete(ocSemaphore* pSemaphore)
+void ocSemaphoreUninit(ocSemaphore* pSemaphore)
 {
-    if (pSemaphore == NULL) {
-        return;
-    }
+    if (pSemaphore == NULL) return;
 
 #ifdef OC_THREADING_WIN32
-    ocSemaphoreDelete__Win32(pSemaphore);
+    ocSemaphoreUninit__Win32(pSemaphore);
 #endif
-
 #ifdef OC_THREADING_POSIX
-    ocSemaphoreDelete__Posix(pSemaphore);
+    ocSemaphoreUninit__Posix(pSemaphore);
 #endif
 }
 
 bool ocSemaphoreWait(ocSemaphore* pSemaphore)
 {
-    if (pSemaphore == NULL) {
-        return false;
-    }
+    if (pSemaphore == NULL) return false;
 
 #ifdef OC_THREADING_WIN32
     return ocSemaphoreWait__Win32(pSemaphore);
 #endif
-
 #ifdef OC_THREADING_POSIX
     return ocSemaphoreWait__Posix(pSemaphore);
 #endif
@@ -293,14 +265,11 @@ bool ocSemaphoreWait(ocSemaphore* pSemaphore)
 
 bool ocSemaphoreRelease(ocSemaphore* pSemaphore)
 {
-    if (pSemaphore == NULL) {
-        return false;
-    }
+    if (pSemaphore == NULL) return false;
 
 #ifdef OC_THREADING_WIN32
     return ocSemaphoreRelease__Win32(pSemaphore);
 #endif
-
 #ifdef OC_THREADING_POSIX
     return ocSemaphoreRelease__Posix(pSemaphore);
 #endif

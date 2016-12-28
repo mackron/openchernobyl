@@ -7,7 +7,7 @@ struct ocAudioWorld
 };
 
 //
-ocResult ocAudioWorldInit(ocAudioWorld* pWorld, ocAudioContext* pAudio);
+ocResult ocAudioWorldInit(ocAudioContext* pAudio, ocAudioWorld* pWorld);
 
 //
 void ocAudioWorldUninit(ocAudioWorld* pWorld);

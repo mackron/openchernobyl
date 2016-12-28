@@ -1,19 +1,20 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocWorldInit(ocWorld* pWorld, ocEngineContext* pEngine)
+ocResult ocWorldInit(ocEngineContext* pEngine, ocWorld* pWorld)
 {
-    if (pWorld == NULL || pEngine == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pWorld);
 
+    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+
     // Graphics.
-    ocResult result = ocGraphicsWorldInit(&pWorld->graphicsWorld, &pEngine->graphics);
+    ocResult result = ocGraphicsWorldInit(&pEngine->graphics, &pWorld->graphicsWorld);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
 
     // Audio.
-    result = ocAudioWorldInit(&pWorld->audioWorld, &pEngine->audio);
+    result = ocAudioWorldInit(&pEngine->audio, &pWorld->audioWorld);
     if (result != OC_RESULT_SUCCESS) {
         ocGraphicsWorldUninit(&pWorld->graphicsWorld);
         return result;

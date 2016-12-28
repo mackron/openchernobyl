@@ -6,7 +6,7 @@ struct ocComponentMesh : public ocComponent
 };
 
 //
-ocResult ocComponentMeshInit(ocComponentMesh* pComponent, ocWorldObject* pObject);
+ocResult ocComponentMeshInit(ocWorldObject* pObject, ocComponentMesh* pComponent);
 
 //
 void ocComponentMeshUninit(ocComponentMesh* pComponent);

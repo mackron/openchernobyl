@@ -34,14 +34,14 @@ int ocInitAndRun(int argc, char** argv)
     ocZeroObject(&g_Game);
 
     // Engine.
-    ocResult result = ocEngineInit(&g_Game.engine, argc, argv, &g_Game);
+    ocResult result = ocEngineInit(argc, argv, &g_Game, &g_Game.engine);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
 
 
     // Window.
-    if (!ocWindowInit(&g_Game.window, &g_Game.engine, 640, 480)) {
+    if (!ocWindowInit(&g_Game.engine, 640, 480, &g_Game.window)) {
         goto done;
     }
 
@@ -55,7 +55,7 @@ int ocInitAndRun(int argc, char** argv)
 
 
     // World.
-    result = ocWorldInit(&g_Game.world, &g_Game.engine);
+    result = ocWorldInit(&g_Game.engine, &g_Game.world);
     if (result != OC_RESULT_SUCCESS) {
         goto done;
     }

@@ -30,7 +30,7 @@ struct ocResourceLibrary
 };
 
 //
-ocResult ocResourceLibraryInit(ocResourceLibrary* pLibrary, ocResourceLoader* pLoader, ocGraphicsContext* pGraphics);
+ocResult ocResourceLibraryInit(ocResourceLoader* pLoader, ocGraphicsContext* pGraphics, ocResourceLibrary* pLibrary);
 
 //
 void ocResourceLibraryUninit(ocResourceLibrary* pLibrary);

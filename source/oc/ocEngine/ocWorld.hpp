@@ -9,7 +9,7 @@ struct ocWorld
 };
 
 //
-ocResult ocWorldInit(ocWorld* pWorld, ocEngineContext* pEngine);
+ocResult ocWorldInit(ocEngineContext* pEngine, ocWorld* pWorld);
 
 //
 void ocWorldUninit(ocWorld* pWorld);

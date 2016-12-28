@@ -14,7 +14,7 @@ struct ocWorldObject
 };
 
 // Initializes a world object. This does not add the object to the world - use ocWorldInsertObject() to add do this.
-ocResult ocWorldObjectInit(ocWorldObject* pObject, ocWorld* pWorld);
+ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject);
 
 // Uninitializes the object. The object must be removed from the world with ocWorldRemoveObject() beforehand.
 void ocWorldObjectUninit(ocWorldObject* pObject);

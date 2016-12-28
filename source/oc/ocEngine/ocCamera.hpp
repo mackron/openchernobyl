@@ -34,8 +34,8 @@ struct ocCamera
 };
 
 // Initialization.
-void ocCameraInitOrtho(ocCamera* pCamera, float left, float right, float top, float bottom);
-void ocCameraInitPerspective(ocCamera* pCamera, float fov, float aspect, float znear, float zfar);
+void ocCameraInitOrtho(float left, float right, float top, float bottom, ocCamera* pCamera);
+void ocCameraInitPerspective(float fov, float aspect, float znear, float zfar, ocCamera* pCamera);
 
 // Projection.
 void ocCameraSetOrtho(ocCamera* pCamera, float left, float right, float top, float bottom);

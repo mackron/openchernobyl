@@ -6,11 +6,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-ocResult ocGraphicsInitBase(ocGraphicsContextBase* pGraphics, ocEngineContext* pEngine)
+ocResult ocGraphicsInitBase(ocEngineContext* pEngine, ocGraphicsContextBase* pGraphics)
 {
-    if (pGraphics == NULL || pEngine == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pGraphics == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pGraphics);
+
+    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+
     pGraphics->pEngine = pEngine;
 
     return OC_RESULT_SUCCESS;
@@ -29,11 +31,13 @@ void ocGraphicsUninitBase(ocGraphicsContextBase* pGraphics)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-ocResult ocGraphicsSwapchainBaseInit(ocGraphicsSwapchainBase* pSwapchain, ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode)
+ocResult ocGraphicsSwapchainBaseInit(ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode, ocGraphicsSwapchainBase* pSwapchain)
 {
-    if (pSwapchain == NULL || pGraphics == NULL || pWindow == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pSwapchain == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pSwapchain);
+
+    if (pGraphics == NULL || pWindow == NULL) return OC_RESULT_INVALID_ARGS;
+
     pSwapchain->pGraphics = pGraphics;
     pSwapchain->pWindow   = pWindow;
     pSwapchain->vsyncMode = vsyncMode;
@@ -54,11 +58,13 @@ void ocGraphicsSwapchainBaseUninit(ocGraphicsSwapchainBase* pSwapchain)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-ocResult ocGraphicsWorldInitBase(ocGraphicsWorldBase* pWorld, ocGraphicsContext* pGraphics)
+ocResult ocGraphicsWorldInitBase(ocGraphicsContext* pGraphics, ocGraphicsWorldBase* pWorld)
 {
-    if (pWorld == NULL || pGraphics == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pWorld);
+
+    if (pGraphics == NULL) return OC_RESULT_INVALID_ARGS;
+
     pWorld->pGraphics = pGraphics;
 
     return OC_RESULT_SUCCESS;
@@ -70,11 +76,13 @@ void ocGraphicsWorldUninitBase(ocGraphicsWorldBase* pWorld)
 }
 
 
-ocResult ocGraphicsObjectBaseInit(ocGraphicsObjectBase* pObject, ocGraphicsWorld* pWorld, ocGraphicsObjectType type)
+ocResult ocGraphicsObjectBaseInit(ocGraphicsWorld* pWorld, ocGraphicsObjectType type, ocGraphicsObjectBase* pObject)
 {
-    if (pObject == NULL || pWorld == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pObject == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pObject);
+
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+
     pObject->pWorld = pWorld;
     pObject->type = type;
 
@@ -94,11 +102,13 @@ void ocGraphicsObjectBaseUninit(ocGraphicsObjectBase* pObject)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-ocResult ocGraphicsRTInitBase(ocGraphicsRTBase* pRT, ocGraphicsWorld* pWorld)
+ocResult ocGraphicsRTInitBase(ocGraphicsWorld* pWorld, ocGraphicsRTBase* pRT)
 {
-    if (pRT == NULL || pWorld == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pRT == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pRT);
+
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+
     pRT->pWorld = pWorld;
 
     return OC_RESULT_SUCCESS;

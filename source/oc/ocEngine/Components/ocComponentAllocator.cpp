@@ -15,7 +15,7 @@ OC_PRIVATE ocComponent* ocCreateComponent_Mesh(ocEngineContext* pEngine, ocCompo
         return NULL;
     }
 
-    if (ocComponentMeshInit(pComponent, pObject)) {
+    if (ocComponentMeshInit(pObject, pComponent)) {
         free(pComponent);
         return NULL;
     }
@@ -45,7 +45,7 @@ OC_PRIVATE ocComponent* ocCreateComponent_Light(ocEngineContext* pEngine, ocComp
         return NULL;
     }
 
-    if (ocComponentLightInit(pComponent, pObject)) {
+    if (ocComponentLightInit(pObject, pComponent)) {
         free(pComponent);
         return NULL;
     }
@@ -63,11 +63,13 @@ OC_PRIVATE void ocDeleteComponent_Light(ocComponent* pComponent, void* pUserData
 ///////////////////////////////////////////////////////////////////////////////
 
 
-ocResult ocComponentAllocatorInit(ocComponentAllocator* pAllocator, ocEngineContext* pEngine)
+ocResult ocComponentAllocatorInit(ocEngineContext* pEngine, ocComponentAllocator* pAllocator)
 {
-    if (pAllocator == NULL || pEngine == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pAllocator == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pAllocator);
+
+    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+
     pAllocator->pEngine = pEngine;
     pAllocator->pAllocators = NULL;
 

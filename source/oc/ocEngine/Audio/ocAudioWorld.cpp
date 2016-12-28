@@ -1,10 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocAudioWorldInit(ocAudioWorld* pWorld, ocAudioContext* pAudio)
+ocResult ocAudioWorldInit(ocAudioContext* pAudio, ocAudioWorld* pWorld)
 {
-    if (pWorld == NULL || pAudio == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pWorld);
+
+    if (pAudio == NULL) return OC_RESULT_INVALID_ARGS;
+
     pWorld->pAudio = pAudio;
     pWorld->pInternalWorld = dra_sound_world_create(&pAudio->playbackDevice);
     if (pWorld->pInternalWorld == NULL) {

@@ -1,10 +1,12 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocWorldObjectInit(ocWorldObject* pObject, ocWorld* pWorld)
+ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject)
 {
-    if (pObject == NULL || pWorld == NULL) return OC_RESULT_INVALID_ARGS;
-
+    if (pObject == NULL) return OC_RESULT_INVALID_ARGS;
     ocZeroObject(pObject);
+
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+
     pObject->pWorld   = pWorld;
     pObject->position = glm::vec4(0, 0, 0, 0);
     pObject->rotation = glm::quat(1, 0, 0, 0);

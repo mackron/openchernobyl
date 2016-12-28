@@ -11,7 +11,7 @@ struct ocLogger
 };
 
 // Initializes the logging system.
-ocResult ocLoggerInit(ocLogger* pLogger, ocEngineContext* pEngine);
+ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger);
 
 // Uninitializes the logging system.
 void ocLoggerUninit(ocLogger* pLogger);

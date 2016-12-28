@@ -24,8 +24,8 @@ typedef ocThreadResult (OC_THREADCALL * ocThreadEntryProc)(void* pData);
 
 // Starts a new thread.
 //
-// There is no delete function. Threads should be terminated naturally.
-bool ocThreadCreate(ocThread* pThread, ocThreadEntryProc entryProc, void* pData);
+// There is no uninit function. Threads should be terminated naturally.
+bool ocThreadCreate(ocThreadEntryProc entryProc, void* pData, ocThread* pThread);
 
 // Waits for a thread to return.
 void ocThreadWait(ocThread* pThread);
@@ -34,10 +34,10 @@ void ocThreadWait(ocThread* pThread);
 //// Mutex ////
 
 // Creates a mutex.
-bool ocMutexCreate(ocMutex* pMutex);
+bool ocMutexInit(ocMutex* pMutex);
 
 // Deletes a mutex.
-void ocMutexDelete(ocMutex* pMutex);
+void ocMutexUninit(ocMutex* pMutex);
 
 // Locks a mutex.
 void ocMutexLock(ocMutex* pMutex);
@@ -49,10 +49,10 @@ void ocMutexUnlock(ocMutex* pMutex);
 //// Semaphore ///
 
 // Creates a semaphore.
-bool ocSemaphoreCreate(ocSemaphore* pSemaphore, int initialValue);
+bool ocSemaphoreInit(int initialValue, ocSemaphore* pSemaphore);
 
 // Delets a semaphore.
-void ocSemaphoreDelete(ocSemaphore* pSemaphore);
+void ocSemaphoreUninit(ocSemaphore* pSemaphore);
 
 // Waits on the given semaphore object and decrements it's counter by one upon returning.
 bool ocSemaphoreWait(ocSemaphore* pSemaphore);
