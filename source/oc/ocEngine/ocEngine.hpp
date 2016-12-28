@@ -42,15 +42,6 @@
 #include <semaphore.h>
 #endif
 
-#ifdef OC_WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
-#ifdef OC_X11
-#define VK_USE_PLATFORM_XLIB_KHR
-#endif
-//#include <vulkan/vulkan.h>
-
-
 // External libraries.
 #define STBI_WRITE_NO_STDIO
 #define STB_VORBIS_HEADER_ONLY
@@ -73,16 +64,23 @@
 #ifdef OC_USE_EXTERNAL_DR_LIBS
     #include "../../../../../dr_libs/dr_flac.h"
     #include "../../../../../dr_libs/dr_wav.h"
-    #include "../../../../../dr_libs/dr_audio.h"
     #include "../../../../../dr_libs/dr_fs.h"
     #include "../../../../../dr_libs/dr_obj.h"
 #else
     #include "../../external/dr_libs/dr_flac.h"
     #include "../../external/dr_libs/dr_wav.h"
-    #include "../../external/dr_libs/dr_audio.h"
     #include "../../external/dr_libs/dr_fs.h"
     #include "../../external/dr_libs/dr_obj.h"
 #endif
+
+#ifdef OC_ENABLE_PCX
+#ifdef OC_USE_EXTERNAL_DR_LIBS
+    #include "../../../../../dr_libs/dr_pcx.h"
+#else
+    #include "../../external/dr_libs/dr_pcx.h"
+#endif
+#endif
+
 
 #ifdef OC_USE_OPENGL
     //#define DR_GL_VERSION 300
@@ -103,11 +101,24 @@
 #endif
 
 #ifdef OC_USE_VULKAN
+    #ifdef OC_WIN32
+        #define VK_USE_PLATFORM_WIN32_KHR
+    #endif
+    #ifdef OC_X11
+        #define VK_USE_PLATFORM_XLIB_KHR
+    #endif
+
     #ifdef OC_USE_EXTERNAL_DR_LIBS
         #include "../../../../dr_graphics/dr_vulkan.h"
     #else
         #include "../../external/dr_graphics/dr_vulkan.h"
     #endif
+#endif
+
+#ifdef OC_USE_EXTERNAL_DR_LIBS
+    #include "../../../../mini_al/mini_al.h"
+#else
+    #include "../../external/mini_al/mini_al.h"
 #endif
 
 #if defined(_MSC_VER)

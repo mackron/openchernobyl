@@ -3,7 +3,6 @@
 struct ocAudioWorld
 {
     ocAudioContext* pAudio;
-    dra_sound_world* pInternalWorld;
 };
 
 //

@@ -14,3 +14,6 @@
 [submodule "source/external/glm"]
 	path = source/external/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "source/external/mini_al"]
+	path = source/external/mini_al
+	url = https://github.com/dr-soft/mini_al.git

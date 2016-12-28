@@ -81,21 +81,27 @@
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_WAV_IMPLEMENTATION
-#define DR_AUDIO_IMPLEMENTATION
 #define DR_FS_IMPLEMENTATION
 #define DR_OBJ_IMPLEMENTATION
 #ifdef OC_USE_EXTERNAL_DR_LIBS
     #include "../../../../../dr_libs/dr_flac.h"
     #include "../../../../../dr_libs/dr_wav.h"
-    #include "../../../../../dr_libs/dr_audio.h"
     #include "../../../../../dr_libs/dr_fs.h"
     #include "../../../../../dr_libs/dr_obj.h"
 #else
     #include "../../external/dr_libs/dr_flac.h"
     #include "../../external/dr_libs/dr_wav.h"
-    #include "../../external/dr_libs/dr_audio.h"
     #include "../../external/dr_libs/dr_fs.h"
     #include "../../external/dr_libs/dr_obj.h"
+#endif
+
+#ifdef OC_ENABLE_PCX
+#define DR_PCX_IMPLEMENTATION
+#ifdef OC_USE_EXTERNAL_DR_LIBS
+    #include "../../../../../dr_libs/dr_pcx.h"
+#else
+    #include "../../external/dr_libs/dr_pcx.h"
+#endif
 #endif
 
 #ifdef OC_USE_OPENGL
@@ -114,6 +120,13 @@
     #else
         #include "../../external/dr_graphics/dr_vulkan.h"
     #endif
+#endif
+
+#define MAL_IMPLEMENTATION
+#ifdef OC_USE_EXTERNAL_DR_LIBS
+    #include "../../../../mini_al/mini_al.h"
+#else
+    #include "../../external/mini_al/mini_al.h"
 #endif
 
 

@@ -73,6 +73,26 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
         return OC_RESULT_SUCCESS;
     }
 
+#ifdef OC_ENABLE_PCX
+    if (_stricmp(ext, "pcx") == 0) {
+        *pType = ocResourceType_Image;
+        return OC_RESULT_SUCCESS;
+    }
+#endif
+#ifdef OC_ENABLE_KTX
+    if (_stricmp(ext, "ktx") == 0) {
+        *pType = ocResourceType_Image;
+        return OC_RESULT_SUCCESS;
+    }
+#endif
+#ifdef OC_ENABLE_DDS
+    if (_stricmp(ext, "dds") == 0) {
+        *pType = ocResourceType_Image;
+        return OC_RESULT_SUCCESS;
+    }
+#endif
+
+
     // Meshes.
     if (_stricmp(ext, "obj") == 0) {
         *pType = ocResourceType_Scene;
@@ -201,18 +221,17 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
             result = ocLoadImage_STB(&file, pData);
         }
 
-#if 0
-        // PCX
+#ifdef OC_ENABLE_PCX
         if (result != OC_RESULT_SUCCESS) {
             result = ocLoadImage_PCX(&file, pData);
         }
-
-        // KTX
+#endif
+#ifdef OC_ENABLE_KTX
         if (result != OC_RESULT_SUCCESS) {
             result = ocLoadImage_KTX(&file, pData);
         }
-
-        // DDS
+#endif
+#ifdef OC_ENABLE_DDS
         if (result != OC_RESULT_SUCCESS) {
             result = ocLoadImage_DDS(&file, pData);
         }
