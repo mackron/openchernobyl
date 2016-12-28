@@ -21,8 +21,8 @@ enum ocSeekOrigin
 
 struct ocFileSystem
 {
+    drfs_context internalFS;
     ocEngineContext* pEngine;
-    drfs_context* pInternalFS;
 };
 
 struct ocFile
@@ -34,7 +34,7 @@ typedef struct drfs_file_info ocFileInfo;
 
 
 // Initializes the file system.
-ocResult ocFileSystemInit(ocFileSystem* pFS, ocEngineContext* pEngine);
+ocResult ocFileSystemInit(ocEngineContext* pEngine, ocFileSystem* pFS);
 
 // Uninitializes the file system.
 //

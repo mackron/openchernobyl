@@ -26,7 +26,7 @@ ocResult ocEngineInit(ocEngineContext* pEngine, int argc, char** argv, void* pUs
 
 
     // File system. This is done early so we can open a log file ASAP.
-    ocResult result = ocFileSystemInit(&pEngine->fs, pEngine);
+    ocResult result = ocFileSystemInit(pEngine, &pEngine->fs);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
