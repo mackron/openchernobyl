@@ -1,6 +1,6 @@
 // Copyright (C) 2016 David Reid. See included LICENSE file.
 
-ocResult ocComponentLightInit(ocWorldObject* pObject, ocComponentLight* pComponent)
+ocResult ocComponentLightInit(ocWorldObject* pObject, ocLightComponent* pComponent)
 {
     ocResult result = ocComponentInit(pObject, OC_COMPONENT_TYPE_LIGHT, pComponent);
     if (result != OC_RESULT_SUCCESS) {
@@ -15,7 +15,7 @@ ocResult ocComponentLightInit(ocWorldObject* pObject, ocComponentLight* pCompone
     return OC_RESULT_SUCCESS;
 }
 
-void ocComponentLightUninit(ocComponentLight* pComponent)
+void ocComponentLightUninit(ocLightComponent* pComponent)
 {
     ocComponentUninit(pComponent);
 }

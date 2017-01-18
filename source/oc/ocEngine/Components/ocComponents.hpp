@@ -7,6 +7,6 @@ typedef unsigned int ocComponentType;
 #define OC_COMPONENT_TYPE_DYNAMICS_BODY     4
 
 #include "ocComponent.hpp"
-#include "ocComponentMesh.hpp"
-#include "ocComponentLight.hpp"
+#include "ocMeshComponent.hpp"
+#include "ocLightComponent.hpp"
 #include "ocComponentAllocator.hpp"

@@ -10,7 +10,7 @@ OC_PRIVATE ocComponent* ocCreateComponent_Mesh(ocEngineContext* pEngine, ocCompo
 
     ocAssert(type == OC_COMPONENT_TYPE_MESH);
 
-    ocComponentMesh* pComponent = (ocComponentMesh*)calloc(1, sizeof(*pComponent));
+    ocMeshComponent* pComponent = (ocMeshComponent*)calloc(1, sizeof(*pComponent));
     if (pComponent == NULL) {
         return NULL;
     }
@@ -27,7 +27,7 @@ OC_PRIVATE void ocDeleteComponent_Mesh(ocComponent* pComponent, void* pUserData)
 {
     (void)pUserData;
 
-    ocComponentMeshUninit(reinterpret_cast<ocComponentMesh*>(pComponent));
+    ocComponentMeshUninit(reinterpret_cast<ocMeshComponent*>(pComponent));
     free(pComponent);
 }
 
@@ -40,7 +40,7 @@ OC_PRIVATE ocComponent* ocCreateComponent_Light(ocEngineContext* pEngine, ocComp
 
     ocAssert(type == OC_COMPONENT_TYPE_MESH);
 
-    ocComponentLight* pComponent = (ocComponentLight*)calloc(1, sizeof(*pComponent));
+    ocLightComponent* pComponent = (ocLightComponent*)calloc(1, sizeof(*pComponent));
     if (pComponent == NULL) {
         return NULL;
     }
@@ -57,7 +57,7 @@ OC_PRIVATE void ocDeleteComponent_Light(ocComponent* pComponent, void* pUserData
 {
     (void)pUserData;
 
-    ocComponentLightUninit(reinterpret_cast<ocComponentLight*>(pComponent));
+    ocComponentLightUninit(reinterpret_cast<ocLightComponent*>(pComponent));
     free(pComponent);
 }
 ///////////////////////////////////////////////////////////////////////////////
