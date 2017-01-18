@@ -22,6 +22,7 @@ struct ocGame
     ocGraphicsImage* pImage;
     ocGraphicsMesh* pMesh;
     ocGraphicsObject* pMeshObject;
+    ocWorldObject object;
 };
 extern ocGame g_Game;
 

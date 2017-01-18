@@ -135,3 +135,56 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
         }
     }
 }
+
+void ocWorldSetObjectPosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position)
+{
+    if (pWorld == NULL || pObject == NULL) return;
+    return ocWorldSetObjectTransform(pWorld, pObject, position, pObject->rotation, glm::vec3(pObject->scale));
+}
+
+void ocWorldSetObjectRotation(ocWorld* pWorld, ocWorldObject* pObject, const glm::quat &rotation)
+{
+    if (pWorld == NULL || pObject == NULL) return;
+    return ocWorldSetObjectTransform(pWorld, pObject, pObject->position, rotation, glm::vec3(pObject->scale));
+}
+
+void ocWorldSetObjectScale(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &scale)
+{
+    if (pWorld == NULL || pObject == NULL) return;
+    return ocWorldSetObjectTransform(pWorld, pObject, pObject->position, pObject->rotation, scale);
+}
+
+void ocWorldSetObjectTransform(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
+{
+    if (pWorld == NULL || pObject == NULL) return;
+
+    pObject->position = glm::vec4(position, 0);
+    pObject->rotation = rotation;
+    pObject->scale    = glm::vec4(scale, 0);
+
+    // If the object is already in the world we'll need to update the backends.
+    if (ocWorldObjectIsInWorld(pObject)) {
+        for (uint16_t iComponent = 0; iComponent < pObject->componentCount; ++iComponent) {
+            switch (pObject->ppComponents[iComponent]->type)
+            {
+                case OC_COMPONENT_TYPE_MESH:
+                {
+                    ocComponentMesh* pMeshComponent = OC_COMPONENT_MESH(pObject->ppComponents[iComponent]);
+                    ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, position, rotation, scale);
+                } break;
+
+                case OC_COMPONENT_TYPE_PARTICLE_SYSTEM:
+                {
+                } break;
+
+                case OC_COMPONENT_TYPE_LIGHT:
+                {
+                } break;
+
+                case OC_COMPONENT_TYPE_DYNAMICS_BODY:
+                {
+                } break;
+            }
+        }
+    }
+}

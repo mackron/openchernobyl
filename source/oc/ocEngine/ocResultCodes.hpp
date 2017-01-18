@@ -6,10 +6,12 @@ typedef int ocResult;
 #define OC_RESULT_SUCCESS                        0
 #define OC_RESULT_UNKNOWN_ERROR                 -1
 #define OC_RESULT_INVALID_ARGS                  -2
-#define OC_RESULT_OUT_OF_MEMORY                 -3
-#define OC_RESULT_NO_BACKEND                    -4
-#define OC_RESULT_PERMISSION_DENIED             -5
-#define OC_RESULT_FEATURE_NOT_SUPPORTED         -6
+#define OC_RESULT_INVALID_OPERATION             -3
+#define OC_RESULT_OUT_OF_MEMORY                 -4
+#define OC_RESULT_NO_BACKEND                    -5
+#define OC_RESULT_PERMISSION_DENIED             -6
+#define OC_RESULT_FEATURE_NOT_SUPPORTED         -7
+#define OC_RESULT_TOO_MANY_COMPONENTS           -8
 
 // Graphics
 #define OC_RESULT_FAILED_TO_INIT_GRAPHICS       -1024

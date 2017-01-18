@@ -66,7 +66,6 @@ int ocInitAndRun(int argc, char** argv)
         goto done;
     }
 
-
     // TESTING (Image)
     {
 #if 0
@@ -158,12 +157,30 @@ int ocInitAndRun(int argc, char** argv)
             return result;
         }
 
+#if 0
         result = ocGraphicsWorldCreateMeshObject(&g_Game.world.graphicsWorld, g_Game.pMesh, &g_Game.pMeshObject);
         if (result != OC_RESULT_SUCCESS) {
             return result;
         }
 
         ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.2f, 0, 0));
+#endif
+
+
+        // Object Test.
+        result = ocWorldObjectInit(&g_Game.world, &g_Game.object);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        ocComponent* pComponent = ocWorldObjectAddComponent(&g_Game.object, OC_COMPONENT_TYPE_MESH);
+        if (pComponent == NULL) {
+            return -1;
+        }
+
+        ocComponentMeshSetMesh(OC_COMPONENT_MESH(pComponent), g_Game.pMesh);
+        ocWorldInsertObject(&g_Game.world, &g_Game.object);
+        
     }
 
 

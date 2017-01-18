@@ -35,6 +35,26 @@ dr_bool32 ocWorldObjectIsInWorld(ocWorldObject* pObject)
 }
 
 
+ocComponent* ocWorldObjectAddComponent(ocWorldObject* pObject, ocComponentType type)
+{
+    if (pObject == NULL) return NULL;
+    
+    // Check that we haven't hit the component limit.
+    if (pObject->componentCount == ocCountOf(pObject->ppComponents)) {
+        return NULL;
+    }
+
+    ocComponent* pComponent = ocCreateComponent(pObject->pWorld->pEngine, type, pObject);
+    if (pComponent == NULL) {
+        return NULL;
+    }
+
+    pObject->ppComponents[pObject->componentCount] = pComponent;
+    pObject->componentCount += 1;
+
+    return NULL;
+}
+
 void ocWorldObjectRemoveComponentByIndex(ocWorldObject* pObject, uint32_t index)
 {
     if (pObject == NULL) return;
@@ -57,4 +77,32 @@ void ocWorldObjectRemoveAllComponents(ocWorldObject* pObject)
     while (pObject->componentCount > 0) {
         ocWorldObjectRemoveComponentByIndex(pObject, pObject->componentCount-1);
     }
+}
+
+
+void ocWorldObjectSetPosition(ocWorldObject* pObject, const glm::vec3 &position)
+{
+    if (pObject == NULL) return;
+    ocWorldObjectSetTransform(pObject, position, pObject->rotation, glm::vec3(pObject->scale));
+}
+
+void ocWorldObjectSetRotation(ocWorldObject* pObject, const glm::quat &rotation)
+{
+    if (pObject == NULL) return;
+    ocWorldObjectSetTransform(pObject, pObject->position, rotation, glm::vec3(pObject->scale));
+}
+
+void ocWorldObjectSetScale(ocWorldObject* pObject, const glm::vec3 &scale)
+{
+    if (pObject == NULL) return;
+    ocWorldObjectSetTransform(pObject, pObject->position, pObject->rotation, scale);
+}
+
+void ocWorldObjectSetTransform(ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
+{
+    if (pObject == NULL) return;
+
+    // The state of the world itself needs to be modified when an object is transformed. Thus, we just
+    // redirect this and let the world sort out the actual transformation.
+    ocWorldSetObjectTransform(pObject->pWorld, pObject, position, rotation, scale);
 }
