@@ -178,9 +178,10 @@ int ocInitAndRun(int argc, char** argv)
             return -1;
         }
 
-        ocComponentMeshSetMesh(OC_COMPONENT_MESH(pComponent), g_Game.pMesh);
+        ocComponentMeshSetMesh(OC_MESH_COMPONENT(pComponent), g_Game.pMesh);
         ocWorldInsertObject(&g_Game.world, &g_Game.object);
-        
+        ocWorldObjectSetPosition(&g_Game.object, glm::vec3(0.2f, 0, 0));
+        ocWorldObjectSetScale(&g_Game.object, glm::vec3(0.5f, 0.5f, 0.5f));
     }
 
 
@@ -213,7 +214,7 @@ void ocStep(ocEngineContext* pEngine)
 
     // Simple animation test.
     //ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, g_Game.pMeshObject->_position + glm::vec4(0.1f * dt, 0, 0, 0));
-    ocGraphicsWorldSetObjectScale(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.5f, 0.5f, 0.5f));
+    //ocGraphicsWorldSetObjectScale(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.5f, 0.5f, 0.5f));
     //g_Game.pWindowRT->view = glm::translate(g_Game.pWindowRT->view, glm::vec3(0.1f * dt, 0, 0));
 
 

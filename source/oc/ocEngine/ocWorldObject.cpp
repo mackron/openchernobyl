@@ -52,7 +52,7 @@ ocComponent* ocWorldObjectAddComponent(ocWorldObject* pObject, ocComponentType t
     pObject->ppComponents[pObject->componentCount] = pComponent;
     pObject->componentCount += 1;
 
-    return NULL;
+    return pComponent;
 }
 
 void ocWorldObjectRemoveComponentByIndex(ocWorldObject* pObject, uint32_t index)

@@ -7,6 +7,9 @@ ocResult ocWorldInit(ocEngineContext* pEngine, ocWorld* pWorld)
 
     if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
 
+    pWorld->pEngine = pEngine;
+
+
     // Graphics.
     ocResult result = ocGraphicsWorldInit(&pEngine->graphics, &pWorld->graphicsWorld);
     if (result != OC_RESULT_SUCCESS) {
@@ -79,6 +82,10 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
         {
             case OC_COMPONENT_TYPE_MESH:
             {
+                ocMeshComponent* pMeshComponent = OC_MESH_COMPONENT(pObject->ppComponents[iComponent]);
+                ocAssert(pMeshComponent->pMeshObject == NULL);  // <-- You've done something wrong if the mesh object is not null at this point.
+                ocGraphicsWorldCreateMeshObject(&pWorld->graphicsWorld, pMeshComponent->pMesh, &pMeshComponent->pMeshObject);
+                ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, pObject->position, pObject->rotation, pObject->scale);
             } break;
 
             case OC_COMPONENT_TYPE_PARTICLE_SYSTEM:
@@ -99,6 +106,8 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
             } break;
         }
     }
+
+    pObject->flags |= OC_WORLD_OBJECT_FLAG_IN_WORLD;
 }
 
 void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
@@ -114,6 +123,11 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
         {
             case OC_COMPONENT_TYPE_MESH:
             {
+                ocMeshComponent* pMeshComponent = OC_MESH_COMPONENT(pObject->ppComponents[iComponent]);
+                if (pMeshComponent->pMeshObject != NULL) {
+                    ocGraphicsWorldDeleteObject(&pWorld->graphicsWorld, pMeshComponent->pMeshObject);
+                    pMeshComponent->pMeshObject = NULL;
+                }
             } break;
 
             case OC_COMPONENT_TYPE_PARTICLE_SYSTEM:
@@ -134,6 +148,8 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
             } break;
         }
     }
+
+    pObject->flags &= ~OC_WORLD_OBJECT_FLAG_IN_WORLD;
 }
 
 void ocWorldSetObjectPosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position)
@@ -169,7 +185,7 @@ void ocWorldSetObjectTransform(ocWorld* pWorld, ocWorldObject* pObject, const gl
             {
                 case OC_COMPONENT_TYPE_MESH:
                 {
-                    ocComponentMesh* pMeshComponent = OC_COMPONENT_MESH(pObject->ppComponents[iComponent]);
+                    ocMeshComponent* pMeshComponent = OC_MESH_COMPONENT(pObject->ppComponents[iComponent]);
                     ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, position, rotation, scale);
                 } break;
 
