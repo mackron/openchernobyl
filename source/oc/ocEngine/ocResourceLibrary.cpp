@@ -74,7 +74,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
         freeImageData = true;
         ocGenerateMipmaps(baseWidth, baseHeight, 4, sizeof(uintptr_t), data.pImageData, pImageData, pMipmaps);
     } else {
-        // Use pre-determined mipmaps.
+        // Use pre-generated mipmaps.
         memcpy(pMipmaps, data.pMipmaps, mipmapCount * sizeof(ocMipmapInfo));
     }
                 
