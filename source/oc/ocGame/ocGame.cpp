@@ -60,9 +60,8 @@ int ocInitAndRun(int argc, char** argv)
         goto done;
     }
 
-
     // Render target for the main window.
-    result = ocGraphicsWorldCreateRTFromSwapchain(&g_Game.world.graphicsWorld, g_Game.pSwapchain, &g_Game.pWindowRT);
+    result = ocWorldCreateRTFromSwapchain(&g_Game.world, g_Game.pSwapchain, &g_Game.pWindowRT);
     if (result != OC_RESULT_SUCCESS) {
         goto done;
     }

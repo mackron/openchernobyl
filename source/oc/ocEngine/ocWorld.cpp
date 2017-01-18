@@ -41,6 +41,14 @@ void ocWorldUninit(ocWorld* pWorld)
 }
 
 
+ocResult ocWorldCreateRTFromSwapchain(ocWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT)
+{
+    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+
+    return ocGraphicsWorldCreateRTFromSwapchain(&pWorld->graphicsWorld, pSwapchain, ppRT);
+}
+
+
 void ocWorldStep(ocWorld* pWorld, double dt)
 {
     if (pWorld == NULL) return;

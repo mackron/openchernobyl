@@ -16,6 +16,10 @@ void ocWorldUninit(ocWorld* pWorld);
 
 
 //
+ocResult ocWorldCreateRTFromSwapchain(ocWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT);
+
+
+//
 void ocWorldStep(ocWorld* pWorld, double dt);
 
 // Draws the world, but does _not_ present it to the game windows. Window presentation needs to be done at a higher level.
