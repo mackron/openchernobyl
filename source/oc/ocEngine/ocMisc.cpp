@@ -348,8 +348,6 @@ void ocDateYYYYMMDD(time_t t, char* strOut, size_t strOutSize)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO: All of this needs to be tested.
-
 unsigned int ocBitScanForward32(uint32_t x)
 {
 #if defined(_MSC_VER)
