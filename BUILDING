@@ -12,15 +12,5 @@ Building Open Chernobyl Itself
 Once you've compiled the dependencies it should be fairly easy to compile the game. If you are not
 intending on doing any serious development you can simply compile ocMain.cpp.
 
-If you are wanting to do more serious development you will first need to build the Open Chernobyl
-build tool. The code for this is found in source/oc_build and can be compiled by simply compiling
-the ocbMain.cpp file. The build tool is a simple command-line interface and you simply run it as
-a pre-build step.
-
-
-The Open Chernobyl Build Tool
-=============================
-Serious work on Open Chernobyl depends on the build tool mentioned above. The main responsibility
-for this tool is code generation and certain compile-time optimizations. An example might be shader
-compilation: shaders can be written in GLSL and then compiled into Spir-V at compile time to avoid
-run-time overhead.
+If you are wanting to do more serious development you will need to run build/oc_build/bin/oc_build.bat
+as a pre-build step. This tool is mainly responsible for code generation.

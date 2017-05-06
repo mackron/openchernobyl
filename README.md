@@ -1,3 +1,14 @@
+Open Chernobyl
+==============
+Open Chernobyl is an open source game loosly inspired by the S.T.A.L.K.E.R.
+series. At the moment it's just a hobby project that I'm tinkering on in my
+free time, but hopefully it'll become playable at some point.
+
+Social media:
+* Twitter: http://twitter.com/openchernobyl (@openchernobyl)
+* Google+/Email: openchernobyl@gmail.com
+
+
 
 Distributing
 ============
