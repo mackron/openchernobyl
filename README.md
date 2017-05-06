@@ -9,6 +9,13 @@ Social media:
 * Google+/Email: openchernobyl@gmail.com
 
 
+Contributing
+============
+Please see BUILDING for instructions on how to compile the project.
+
+Also keep in mind that all code contributions are released under the BSD
+license which can be viewed in the LINCENSE file.
+
 
 Distributing
 ============
