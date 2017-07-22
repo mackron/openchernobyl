@@ -27,6 +27,8 @@
 #if defined(_MSC_VER)
     #pragma warning(push)
     #pragma warning(disable:4244)
+    #pragma warning(disable:4100)
+    #pragma warning(disable:4456)
 #endif
 #if defined(__GNUC__)
     #pragma GCC diagnostic push
@@ -52,9 +54,16 @@
     #pragma GCC diagnostic pop
 #endif
 
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4996)
+#endif
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STBI_WRITE_NO_STDIO
 #include "../../external/stb/stb_image_write.h"
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#endif
 
 #if defined(_MSC_VER)
     #pragma warning(push)

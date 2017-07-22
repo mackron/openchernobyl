@@ -400,9 +400,9 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
             gl.EnableClientState(GL_NORMAL_ARRAY);
 
             gl.BindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
-            gl.VertexPointer(3, GL_FLOAT, ocGetVertexSizeFromFormat(pMesh->format), 0);
-            gl.TexCoordPointer(2, GL_FLOAT, ocGetVertexSizeFromFormat(pMesh->format), (const GLvoid*)(sizeof(float)*(3)));
-            gl.NormalPointer(GL_FLOAT, ocGetVertexSizeFromFormat(pMesh->format), (const GLvoid*)(sizeof(float)*(3+2)));
+            gl.VertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->format), 0);
+            gl.TexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->format), (const GLvoid*)(sizeof(float)*(3)));
+            gl.NormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->format), (const GLvoid*)(sizeof(float)*(3+2)));
 
             gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
             gl.DrawElements(GL_TRIANGLES, pMesh->indexCount, GL_UNSIGNED_INT, 0);

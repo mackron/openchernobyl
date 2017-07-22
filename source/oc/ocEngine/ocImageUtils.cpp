@@ -85,13 +85,13 @@ ocResult ocGenerateMipmaps(uint32_t baseWidth, uint32_t baseHeight, uint32_t com
 
     size_t runningOffset = 0;
 
-    size_t prevWidth = baseWidth;
-    size_t prevHeight = baseHeight;
+    uint32_t prevWidth = baseWidth;
+    uint32_t prevHeight = baseHeight;
     const void* pPrevData = pBaseData;
 
-    size_t iMipmap = 0;
+    uint32_t iMipmap = 0;
     for (;;) {
-        size_t prevDataSize = prevWidth * prevHeight * components;
+        uint32_t prevDataSize = prevWidth * prevHeight * components;
 
         void* pDstDataOut = ocOffsetPtr(pDataOut, runningOffset);
         memcpy(pDstDataOut, pPrevData, prevDataSize);
@@ -112,8 +112,8 @@ ocResult ocGenerateMipmaps(uint32_t baseWidth, uint32_t baseHeight, uint32_t com
         runningOffset += prevDataSize;
         runningOffset = ocAlign(runningOffset, alignment);
 
-        size_t dstSizeX = ocMax(1, prevWidth >> 1);
-        size_t dstSizeY = ocMax(1, prevHeight >> 1);
+        uint32_t dstSizeX = ocMax(1, prevWidth >> 1);
+        uint32_t dstSizeY = ocMax(1, prevHeight >> 1);
         pDstDataOut = ocOffsetPtr(pDataOut, runningOffset);
         ocGenerateMipmap(prevWidth, prevHeight, components, pPrevData, pDstDataOut, NULL);
 

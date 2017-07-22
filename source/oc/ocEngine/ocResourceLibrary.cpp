@@ -127,7 +127,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     // _all_ of the data of the resource which means it's able to work without the original asset.
     //
     // When loading an asset, we first need to check if there's a .ocd file associated with it. If so, we need to load it up. However, there's
-    // a chance the original source asset ("my_texture.png" as per the example above) has been updated. In this the .ocd file needs to be
+    // a chance the original source asset ("my_texture.png" as per the example above) has been updated. In this case the .ocd file needs to be
     // updated to reflect the changes.
 
     // If it's an .ocd file just load it directly without looking at the original source asset.
@@ -135,6 +135,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     dr_bool32 hasSrc = ocGetFileInfo(pLibrary->pLoader->pFS, filePath, &fileInfoSrc) == OC_RESULT_SUCCESS;
 
     ocFileInfo fileInfoOCD;
+    ocZeroObject(&fileInfoOCD);
     dr_bool32 hasOCD = false;
     if (!drpath_extension_equal(filePath, "ocd")) {
         char filePathOCD[OC_MAX_PATH];
