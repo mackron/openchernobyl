@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 #define OC_WORLD_OBJECT_FLAG_IN_WORLD     (1 << 0)
 

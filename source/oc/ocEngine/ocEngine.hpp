@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 // To Compile:
 //
@@ -144,13 +144,46 @@
     #pragma warning(pop)
 #endif
 
+// Sized types.
+#if defined(_MSC_VER) && _MSC_VER < 1600
+typedef   signed char    oc_int8;
+typedef unsigned char    oc_uint8;
+typedef   signed short   oc_int16;
+typedef unsigned short   oc_uint16;
+typedef   signed int     oc_int32;
+typedef unsigned int     oc_uint32;
+typedef   signed __int64 oc_int64;
+typedef unsigned __int64 oc_uint64;
+#else
+#include <stdint.h>
+typedef int8_t           oc_int8;
+typedef uint8_t          oc_uint8;
+typedef int16_t          oc_int16;
+typedef uint16_t         oc_uint16;
+typedef int32_t          oc_int32;
+typedef uint32_t         oc_uint32;
+typedef int64_t          oc_int64;
+typedef uint64_t         oc_uint64;
+#endif
+typedef oc_uint8         oc_bool8;
+typedef oc_uint32        oc_bool32;
+#define OC_TRUE          1
+#define OC_FALSE         0
+
 #define OC_PRIVATE static
+
+#if defined(_MSC_VER)
+#define OC_INLINE static __inline
+#else
+#define OC_INLINE static inline
+#endif
 
 #define ocAssert(expression)    assert(expression)
 #define ocZeroMemory(p, sz)     memset((p), 0, (sz))
 #define ocZeroObject(p)         ocZeroMemory((p), sizeof(*(p)))
 #define ocMalloc(sz)            malloc(sz)
 #define ocCalloc(c, sz)         calloc(c, sz)
+#define ocRealloc(p, sz)        realloc(p, sz)
 #define ocMallocObject(type)    ((type*)ocMalloc(sizeof(type)))
 #define ocCallocObject(type)    ((type*)ocCalloc(1, sizeof(type)))
 #define ocFree(p)               free(p)
@@ -171,9 +204,6 @@ const T* ocOffsetPtr(const T* p, size_t offset)
     return reinterpret_cast<const T*>(reinterpret_cast<const char*>(p) + offset);
 }
 
-
-typedef uint32_t ocBool32;
-
 struct ocEngineContext;
 struct ocGraphicsContext;
 struct ocGraphicsDevice;
@@ -184,6 +214,7 @@ struct ocWorldObject;
 // Open Chernobyl headers.
 #include "ocResultCodes.hpp"
 #include "ocMisc.hpp"
+#include "ocString.hpp"
 #include "ocImageUtils.hpp"
 #include "ocCommandLine.hpp"
 #include "ocPlatformLayer.hpp"

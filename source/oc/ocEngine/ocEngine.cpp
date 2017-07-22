@@ -1,8 +1,9 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 #include "ocEngine.hpp"
 
 #include "ocMisc.cpp"
+#include "ocString.cpp"
 #include "ocImageUtils.cpp"
 #include "ocCommandLine.cpp"
 #include "ocPlatformLayer.cpp"

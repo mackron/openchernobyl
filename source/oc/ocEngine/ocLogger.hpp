@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 #define OC_LOGGER_FLAG_NO_TERMINAL_OUTPUT   (1 << 0)
 #define OC_LOGGER_FLAG_NO_FILE              (1 << 1)

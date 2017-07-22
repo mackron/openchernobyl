@@ -27,7 +27,7 @@ in the root directory of this repository with your distribution.
 
 License
 =======
-Copyright (c) 2016, David Reid
+Copyright (c) 2017, David Reid
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

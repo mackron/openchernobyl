@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 #define OC_OCD_FOURCC           0x2044434f /*'OCD ' LE*/
 #define OC_OCD_TYPE_ID_IMAGE    0x31474d49 /*'IMG1' LE*/

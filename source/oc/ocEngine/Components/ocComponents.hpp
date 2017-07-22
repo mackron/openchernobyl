@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 typedef unsigned int ocComponentType;
 #define OC_COMPONENT_TYPE_MESH              1

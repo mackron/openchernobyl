@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 ocResult ocEngineInit(int argc, char** argv, void* pUserData, ocEngineContext* pEngine)
 {
@@ -128,18 +128,11 @@ void ocLogf(ocEngineContext* pEngine, const char* format, ...)
     va_list args;
     va_start(args, format);
     {
-#if 0
-        char* msg = ocMakeFormattedStringV(format, args);
+        char* msg = ocMakeStringv(format, args);
         if (msg != NULL) {
             ocLog(pEngine, msg);
             ocFreeString(msg);
         }
-#endif
-
-        char msg[4096];
-        vsnprintf(msg, sizeof(msg), format, args);
-
-        ocLog(pEngine, msg);
     }
     va_end(args);
 }
@@ -158,10 +151,11 @@ void ocWarningf(ocEngineContext* pEngine, const char* format, ...)
     va_list args;
     va_start(args, format);
     {
-        char msg[4096];
-        vsnprintf(msg, sizeof(msg), format, args);
-
-        ocWarning(pEngine, msg);
+        char* msg = ocMakeStringv(format, args);
+        if (msg != NULL) {
+            ocWarning(pEngine, msg);
+            ocFreeString(msg);
+        }
     }
     va_end(args);
 }
@@ -180,10 +174,11 @@ void ocErrorf(ocEngineContext* pEngine, const char* format, ...)
     va_list args;
     va_start(args, format);
     {
-        char msg[4096];
-        vsnprintf(msg, sizeof(msg), format, args);
-
-        ocError(pEngine, msg);
+        char* msg = ocMakeStringv(format, args);
+        if (msg != NULL) {
+            ocError(pEngine, msg);
+            ocFreeString(msg);
+        }
     }
     va_end(args);
 }

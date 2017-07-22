@@ -1,3 +1,3 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 #include "ocDynamicsWorld.cpp"

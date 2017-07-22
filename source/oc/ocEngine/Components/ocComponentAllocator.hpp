@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 typedef ocComponent* (* ocCreateComponentProc)(ocEngineContext* pEngine, ocComponentType type, ocWorldObject* pObject, void* pUserData);
 typedef void         (* ocDeleteComponentProc)(ocComponent* pComponent, void* pUserData);

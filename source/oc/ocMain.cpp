@@ -1,4 +1,4 @@
-// Copyright (C) 2016 David Reid. See included LICENSE file.
+// Copyright (C) 2017 David Reid. See included LICENSE file.
 
 // This is main source file for the entire game, and is the only file that needs to be compiled (not including dependencies).
 
