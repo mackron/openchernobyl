@@ -108,8 +108,11 @@
 #define OC_MAX_GPU_THREADS      8
 #endif
 
-#if !defined OC_MAX_COMPONENTS || OC_MAX_COMPONENTS > 65535
+#if !defined OC_MAX_COMPONENTS
 #define OC_MAX_COMPONENTS       8
+#endif
+#if OC_MAX_COMPONENTS > 65535
+error "OC_MAX_COMPONENTS cannot exceed 65535."
 #endif
 
 #ifndef OC_MAX_RENDER_TARGETS

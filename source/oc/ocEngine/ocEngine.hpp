@@ -189,7 +189,7 @@ typedef oc_uint32        oc_bool32;
 #define ocFree(p)               free(p)
 #define ocCountOf(obj)          (sizeof(obj) / sizeof(obj[0]))
 #define ocIsBitSet(set, bit)    (((set) & (bit)) != 0)
-#define ocAlign(x, a)           ((((x) + (a) - 1) / (a)) * (a));
+#define ocAlign(x, a)           ((((x) + (a) - 1) / (a)) * (a))
 
 // ocOffsetPtr()
 template <typename T>
