@@ -293,26 +293,69 @@ OC_PRIVATE ocBool32 oc__drobj_seek_to_start(void* userData)
     return ocStreamReaderSeek((ocStreamReader*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
 }
 
-OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
+OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWriter* pOCDWriter)
 {
-    ocAssert(pReader != NULL);
-    ocAssert(pData != NULL);
+    ocAssert(pOBJReader != NULL);
+    ocAssert(pOCDWriter != NULL);
 
-    drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pReader);
+    drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pOBJReader);
     if (obj == NULL) {
         return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
     }
 
     // The first thing to do is calculate the size of the raw data. 
-    
+    // TODO: Implement me.
 
     drobj_delete(obj);
 
-
-    // TODO: Implement me.
-    (void)pReader;
-    (void)pData;
     return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+}
+
+OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
+{
+    ocAssert(pReader != NULL);
+    ocAssert(pData != NULL);
+
+    // Loading an OBJ file is a bit unintuitive. We actually convert it to an in-memory OCD file first, and then simply load the resulting OCD. The
+    // reason for this design is that loading scene resources is complicated, and I want all types to be loaded through the same code path for safety
+    // and maintainability (that code path being the OCD loading routine). In addition, all scene resource types need to be convertible to OCD anyway
+    // which makes this design choice good for the sake of code reuse.
+
+    // A stream writer is the where the OCD file is output.
+    void* pDataOCD;
+    ocSizeT dataSizeOCD;
+    ocStreamWriter writerOCD;
+    ocResult result = ocStreamWriterInit(&pDataOCD, &dataSizeOCD, &writerOCD);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    // Convert the OBJ file to an OCD file. pReader is the OBJ file, writerOCD is the OCD file.
+    result = ocConvertToOCD_OBJ(pReader, &writerOCD);
+    if (result != OC_RESULT_SUCCESS) {
+        ocStreamWriterUninit(&writerOCD);
+        ocFree(pDataOCD);
+        return result;
+    }
+
+
+    // The stream writer is no longer needed. At this point, pDataOCD contains the raw OCD data (which needs to be ocFree()'d by us).
+    ocStreamWriterUninit(&writerOCD);
+
+
+    // Now we just load the OCD file like normal.
+    ocStreamReader readerOCD;
+    result = ocStreamReaderInit(pDataOCD, dataSizeOCD, &readerOCD);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFree(pDataOCD);
+        return result;
+    }
+
+    result = ocLoadScene_OCD(&readerOCD, pData);
+    
+    ocStreamReaderUninit(&readerOCD);
+    ocFree(pDataOCD);
+    return result;
 }
 
 

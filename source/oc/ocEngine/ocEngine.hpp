@@ -226,6 +226,7 @@ struct ocWorldObject;
 #include "ocThreading.hpp"
 #include "ocFileSystem.hpp"
 #include "ocStreamReader.hpp"
+#include "ocStreamWriter.hpp"
 #include "ocLogger.hpp"
 #include "Graphics/ocGraphics.hpp"
 #include "Audio/ocAudio.hpp"

@@ -12,6 +12,7 @@
 #include "ocThreading.cpp"
 #include "ocFileSystem.cpp"
 #include "ocStreamReader.cpp"
+#include "ocStreamWriter.cpp"
 #include "ocLogger.cpp"
 #include "Graphics/ocGraphics.cpp"
 #include "Audio/ocAudio.cpp"
