@@ -65,7 +65,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
         ocGetMipmapCount(baseWidth, baseHeight, &mipmapCount);
         ocGetTotalMipmapDataSize(baseWidth, baseHeight, 4, sizeof(uintptr_t), &imageDataSize);
 
-        pImageData = malloc(imageDataSize);
+        pImageData = ocMalloc(imageDataSize);
         if (pImageData == NULL) {
             ocResourceLoaderUnloadImage(pLibrary->pLoader, &data);
             return OC_RESULT_OUT_OF_MEMORY;
@@ -90,12 +90,12 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
     ocGraphicsImage* pGraphicsImage;
     result = ocGraphicsCreateImage(pLibrary->pGraphics, &desc, &pGraphicsImage);
     if (result != OC_RESULT_SUCCESS) {
-        if (freeImageData) free(pImageData);
+        if (freeImageData) ocFree(pImageData);
         ocResourceLoaderUnloadImage(pLibrary->pLoader, &data);
         return result;
     }
 
-    if (freeImageData) free(pImageData);
+    if (freeImageData) ocFree(pImageData);
 
     ocResource* pResource = ocAllocResource(ocResourceType_Image, 0, absolutePath);
     if (pResource == NULL) {
@@ -209,7 +209,7 @@ void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
         default: break;
     }
 
-    free(pResource);
+    ocFree(pResource);
 }
 
 ocResult ocResourceLibrarySyncOCD(ocResourceLibrary* pLibrary, const char* filePath)

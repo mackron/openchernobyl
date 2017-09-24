@@ -17,7 +17,7 @@ ocCmdLineIterator ocCmdLineBegin(const char* cmdlineWinMain)
     i.valueEnd      = NULL;
 
     size_t length = strlen(cmdlineWinMain);
-    i.win32_payload = (char*)malloc(length + 2);         // +2 for a double null terminator.
+    i.win32_payload = (char*)ocMalloc(length + 2);         // +2 for a double null terminator.
     strcpy_s(i.win32_payload, length + 2, cmdlineWinMain);
     i.win32_payload[length + 1] = '\0';
     i.valueEnd = i.win32_payload;
@@ -48,7 +48,7 @@ ocBool32 ocCmdLineNext(ocCmdLineIterator* i)
     // If at this point we are sitting on the null terminator it means we have finished iterating.
     if (i->value[0] == '\0')
     {
-        free(i->win32_payload);
+        ocFree(i->win32_payload);
         i->win32_payload = NULL;
         i->value = NULL;
         i->valueEnd = NULL;
@@ -117,7 +117,7 @@ int ocWinMainToArgv(const char* cmdlineWinMain, char*** argvOut)
 
 
     // The entire data for the command line is stored in a single buffer.
-    char* data = (char*)malloc((argc * sizeof(char**)) + (cmdlineLen * sizeof(char)));
+    char* data = (char*)ocMalloc((argc * sizeof(char**)) + (cmdlineLen * sizeof(char)));
     if (data == NULL) {
         return 0;   // Ran out of memory.
     }
@@ -158,7 +158,7 @@ void ocFreeArgv(char** argv)
         return;
     }
 
-    free(argv);
+    ocFree(argv);
 }
 
 

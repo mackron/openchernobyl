@@ -487,12 +487,12 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
 
     if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
 
-    ocGraphicsRT* pRT = (ocGraphicsRT*)calloc(1, sizeof(*pRT));
+    ocGraphicsRT* pRT = (ocGraphicsRT*)ocCalloc(1, sizeof(*pRT));
     if (pRT == NULL) return OC_RESULT_OUT_OF_MEMORY;
 
     ocResult result = ocGraphicsRTInitBase(pWorld, pRT);
     if (result != OC_RESULT_SUCCESS) {
-        free(pRT);
+        ocFree(pRT);
         return result;
     }
 

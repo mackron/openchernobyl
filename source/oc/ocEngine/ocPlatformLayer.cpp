@@ -357,7 +357,7 @@ ocResult ocPlatformLayerInit_X11(uintptr_t props[])
     }
 
     if (g_VisualInfo == NULL) {
-        g_VisualInfo = (XVisualInfo*)malloc(sizeof(*g_VisualInfo));
+        g_VisualInfo = (XVisualInfo*)ocMalloc(sizeof(*g_VisualInfo));
         if (g_VisualInfo == NULL) {
             return OC_RESULT_OUT_OF_MEMORY;
         }
@@ -385,7 +385,7 @@ void ocPlatformLayerUninit_X11()
     g_X11Display = NULL;
     g_OwnsDisplay = false;
 
-    if (g_OwnsVisualInfo) free(g_VisualInfo);
+    if (g_OwnsVisualInfo) ocFree(g_VisualInfo);
     g_VisualInfo = NULL;
     g_OwnsVisualInfo = false;
 

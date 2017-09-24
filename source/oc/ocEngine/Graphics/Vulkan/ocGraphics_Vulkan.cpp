@@ -1779,12 +1779,12 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
     if (pSwapchain != NULL && pImage != NULL) return OC_RESULT_INVALID_ARGS;   // It's not valid for a swapchain _and_ an image to be the output of an RT.
 
-    ocGraphicsRT* pRT = (ocGraphicsRT*)calloc(1, sizeof(*pRT));
+    ocGraphicsRT* pRT = (ocGraphicsRT*)ocCalloc(1, sizeof(*pRT));
     if (pRT == NULL) return OC_RESULT_OUT_OF_MEMORY;
 
     ocResult result = ocGraphicsRTInitBase(pWorld, pRT);
     if (result != OC_RESULT_SUCCESS) {
-        free(pRT);
+        ocFree(pRT);
         return result;
     }
 
@@ -1798,7 +1798,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     // Main framebuffer.
     result = ocGraphicsWorldAllocAndInitRT_MainFramebuffer(pWorld, pRT, sizeX, sizeY);
     if (result != OC_RESULT_SUCCESS) {
-        free(pRT);
+        ocFree(pRT);
         return result;
     }
 
@@ -1806,7 +1806,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     result = ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(pWorld, pRT, sizeX, sizeY, outputImageCount, pOutputImages, outputImageFormat);
     if (result != OC_RESULT_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
-        free(pRT);
+        ocFree(pRT);
         return result;
     }
 
@@ -1825,7 +1825,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_OutputFramebuffers(pWorld, pRT);
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
-        free(pRT);
+        ocFree(pRT);
         return result;
     }
 
@@ -1834,7 +1834,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
         vkDestroyBuffer(pWorld->pGraphics->device, pRT->uniformBuffer, NULL);
         ocGraphicsWorldUninitRT_OutputFramebuffers(pWorld, pRT);
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
-        free(pRT);
+        ocFree(pRT);
         return result;
     }
 
