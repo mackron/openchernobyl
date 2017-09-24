@@ -22,7 +22,7 @@ void ocWorldObjectUninit(ocWorldObject* pObject);
 
 // A world object isn't inside the world until ocWorldInsertObject() is called. This function determines whether or not
 // the object is in the world or not.
-dr_bool32 ocWorldObjectIsInWorld(ocWorldObject* pObject);
+ocBool32 ocWorldObjectIsInWorld(ocWorldObject* pObject);
 
 
 // Creates and adds a new component to an object.

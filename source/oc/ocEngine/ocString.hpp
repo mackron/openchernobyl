@@ -1,7 +1,7 @@
 // Copyright (C) 2017 David Reid. See included LICENSE file.
 
 // Determines whether or not the given string is null or empty.
-OC_INLINE oc_bool32 ocStringIsNullOrEmpty(const char* str)
+OC_INLINE ocBool32 ocStringIsNullOrEmpty(const char* str)
 {
     return str == NULL || str[0] == '\0';
 }
@@ -209,7 +209,7 @@ OC_INLINE int oc_stricmp(const char* string1, const char* string2)
 
 
 // Converts a UTF-16 character to UTF-32.
-OC_INLINE uint32_t ocUTF16ToUTF32ch(oc_uint16 utf16[2])
+OC_INLINE uint32_t ocUTF16ToUTF32ch(ocUInt16 utf16[2])
 {
     if (utf16 == NULL) {
         return 0;
@@ -219,7 +219,7 @@ OC_INLINE uint32_t ocUTF16ToUTF32ch(oc_uint16 utf16[2])
         return utf16[0];
     } else {
         if ((utf16[0] & 0xFC00) == 0xD800 && (utf16[1] & 0xFC00) == 0xDC00) {
-            return ((oc_uint32)utf16[0] << 10) + utf16[1] - 0x35FDC00;
+            return ((ocUInt32)utf16[0] << 10) + utf16[1] - 0x35FDC00;
         } else {
             return 0;   // Invalid.
         }
@@ -227,29 +227,29 @@ OC_INLINE uint32_t ocUTF16ToUTF32ch(oc_uint16 utf16[2])
 }
 
 // Converts a UTF-16 surrogate pair to UTF-32.
-OC_INLINE oc_uint32 ocUTF16PairToUTF32ch(oc_uint16 utf160, oc_uint16 utf161)
+OC_INLINE ocUInt32 ocUTF16PairToUTF32ch(ocUInt16 utf160, ocUInt16 utf161)
 {
-    oc_uint16 utf16[2];
+    ocUInt16 utf16[2];
     utf16[0] = utf160;
     utf16[1] = utf161;
     return ocUTF16ToUTF32ch(utf16);
 }
 
 // Converts a UTF-32 character to a UTF-16. Returns the number fo UTF-16 values making up the character.
-OC_INLINE oc_uint32 ocUTF32ToUTF16ch(oc_uint32 utf32, oc_uint16 utf16[2])
+OC_INLINE ocUInt32 ocUTF32ToUTF16ch(ocUInt32 utf32, ocUInt16 utf16[2])
 {
     if (utf16 == NULL) {
         return 0;
     }
 
     if (utf32 < 0xD800 || (utf32 >= 0xE000 && utf32 <= 0xFFFF)) {
-        utf16[0] = (oc_uint16)utf32;
+        utf16[0] = (ocUInt16)utf32;
         utf16[1] = 0;
         return 1;
     } else {
         if (utf32 >= 0x10000 && utf32 <= 0x10FFFF) {
-            utf16[0] = (oc_uint16)(0xD7C0 + (oc_uint16)(utf32 >> 10));
-            utf16[1] = (oc_uint16)(0xDC00 + (oc_uint16)(utf32 & 0x3FF));
+            utf16[0] = (ocUInt16)(0xD7C0 + (ocUInt16)(utf32 >> 10));
+            utf16[1] = (ocUInt16)(0xDC00 + (ocUInt16)(utf32 & 0x3FF));
             return 2;
         } else {
             // Invalid.
@@ -261,9 +261,9 @@ OC_INLINE oc_uint32 ocUTF32ToUTF16ch(oc_uint32 utf32, oc_uint16 utf16[2])
 }
 
 // Converts a UTF-32 character to a UTF-8 character. Returns the number of bytes making up the UTF-8 character.
-OC_INLINE oc_uint32 ocUTF32ToUTF8ch(oc_uint32 utf32, char* utf8, size_t utf8Size)
+OC_INLINE ocUInt32 ocUTF32ToUTF8ch(ocUInt32 utf32, char* utf8, size_t utf8Size)
 {
-    oc_uint32 utf8ByteCount = 0;
+    ocUInt32 utf8ByteCount = 0;
     if (utf32 < 0x80) {
         utf8ByteCount = 1;
     } else if (utf32 < 0x800) {
@@ -299,7 +299,7 @@ OC_INLINE oc_uint32 ocUTF32ToUTF8ch(oc_uint32 utf32, char* utf8, size_t utf8Size
     return utf8ByteCount;
 }
 
-OC_INLINE oc_bool32 ocIsWhitespace(oc_uint32 utf32)
+OC_INLINE ocBool32 ocIsWhitespace(ocUInt32 utf32)
 {
     return utf32 == ' ' || utf32 == '\t' || utf32 == '\n' || utf32 == '\v' || utf32 == '\f' || utf32 == '\r';
 }

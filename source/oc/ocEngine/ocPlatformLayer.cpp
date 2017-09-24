@@ -33,7 +33,7 @@ void ocPlatformLayerUninit_Win32()
     UnregisterClassA(g_OCWndClassName, GetModuleHandleA(NULL));
 }
 
-dr_bool32 ocIsWin32MouseButtonKeyCode(WPARAM wParam)
+ocBool32 ocIsWin32MouseButtonKeyCode(WPARAM wParam)
 {
     return wParam == VK_LBUTTON || wParam == VK_RBUTTON || wParam == VK_MBUTTON || wParam == VK_XBUTTON1 || wParam == VK_XBUTTON2;
 }
@@ -228,7 +228,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
     return DefWindowProcA(hWnd, msg, wParam, lParam);
 }
 
-dr_bool32 ocWindowInit_Win32(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
+ocBool32 ocWindowInit_Win32(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
     assert(pWindow != NULL);
 
@@ -314,11 +314,11 @@ void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int s
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef OC_X11
 static Display* g_X11Display = NULL;
-static dr_bool32 g_OwnsDisplay = false;
+static ocBool32 g_OwnsDisplay = false;
 static XVisualInfo* g_VisualInfo = NULL;
-static dr_bool32 g_OwnsVisualInfo = false;
+static ocBool32 g_OwnsVisualInfo = false;
 static Colormap g_Colormap = 0;
-static dr_bool32 g_OwnsColormap = false;
+static ocBool32 g_OwnsColormap = false;
 static Atom g_WM_DELETE_WINDOW = 0;
 static Atom g_Atom_ocWindow = 0;
 
@@ -416,7 +416,7 @@ OC_PRIVATE void* ocGetX11WindowProperty(Display* display, Window window, Atom pr
     return pUserData;
 }
 
-dr_bool32 ocWindowInit_X11(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
+ocBool32 ocWindowInit_X11(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
     assert(pWindow != NULL);
 
@@ -504,7 +504,7 @@ void ocPlatformLayerUninit()
 }
 
 
-dr_bool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
+ocBool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
     if (pWindow == NULL) return false;
     ocZeroObject(pWindow);

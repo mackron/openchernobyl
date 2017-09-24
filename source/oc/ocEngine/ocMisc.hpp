@@ -1,12 +1,5 @@
 // Copyright (C) 2017 David Reid. See included LICENSE file.
 
-#ifdef _MSC_VER
-#define OC_INLINE static __inline
-#else
-#define OC_INLINE static inline
-#endif
-
-
 #ifdef OC_WIN32
 // Win32 Only: Makes the application DPI aware.
 void ocMakeDPIAware_Win32();

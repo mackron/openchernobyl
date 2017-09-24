@@ -140,7 +140,7 @@ struct ocWindowEvent
 };
 
 
-dr_bool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow);
+ocBool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow);
 void ocWindowUninit(ocWindow* pWindow);
 void ocWindowShow(ocWindow* pWindow);
 

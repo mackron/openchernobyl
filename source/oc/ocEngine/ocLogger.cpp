@@ -10,7 +10,7 @@ ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger)
     pLogger->pEngine = pEngine;
 
     if (ocCmdLineIsSet(pEngine->argc, pEngine->argv, "--silent")) {
-        pLogger->flags |= OC_LOGGER_FLAG_NO_TERMINAL_OUTPUT;
+        pLogger->noTerminalOutput = OC_TRUE;
     }
 
     char logFilePath[OC_MAX_PATH];
@@ -20,7 +20,7 @@ ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger)
     ocResult result = ocFileOpen(&pEngine->fs, logFilePath, OC_WRITE | OC_CREATE_DIRS, &pLogger->file);
     if (result != OC_RESULT_SUCCESS) {
         // We failed to create the log file, but it's not a critical error. Just mark it as such so we don't try to use the file.
-        pEngine->flags |= OC_LOGGER_FLAG_NO_FILE;
+        pLogger->noFileOutput = OC_TRUE;
     }
 
     return OC_RESULT_SUCCESS;
@@ -36,16 +36,16 @@ void ocLoggerUninit(ocLogger* pLogger)
 }
 
 
-dr_bool32 ocLoggerIsTerminalOutputEnabled(ocLogger* pLogger)
+ocBool32 ocLoggerIsTerminalOutputEnabled(ocLogger* pLogger)
 {
     if (pLogger == NULL) return false;
-    return (pLogger->flags & OC_LOGGER_FLAG_NO_TERMINAL_OUTPUT) == 0; 
+    return pLogger->noTerminalOutput == OC_FALSE;
 }
 
-dr_bool32 ocLoggerIsFileOutputEnabled(ocLogger* pLogger)
+ocBool32 ocLoggerIsFileOutputEnabled(ocLogger* pLogger)
 {
     if (pLogger == NULL) return false;
-    return (pLogger->flags & OC_LOGGER_FLAG_NO_FILE) == 0;
+    return pLogger->noFileOutput == OC_FALSE;
 }
 
 

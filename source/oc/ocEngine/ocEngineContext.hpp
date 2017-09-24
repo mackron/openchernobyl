@@ -15,8 +15,8 @@ struct ocEngineContext
     ocComponentAllocator componentAllocator;
     ocResourceLoader resourceLoader;
     ocResourceLibrary resourceLibrary;
-    uint32_t threadCount;
-    uint32_t flags;
+    ocUInt32 threadCount;
+    ocUInt32 flags;
 };
 
 // ocEngineInit
@@ -27,7 +27,7 @@ void ocEngineUninit(ocEngineContext* pEngine);
 
 
 // Whether or not we are running the portable version of the game.
-dr_bool32 ocIsPortable(ocEngineContext* pEngine);
+ocBool32 ocIsPortable(ocEngineContext* pEngine);
 
 
 // Posts a log message.

@@ -279,7 +279,7 @@ OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesTo
     return bytesRead;
 }
 
-OC_PRIVATE dr_bool32 oc__drobj_seek_to_start(void* userData)
+OC_PRIVATE ocBool32 oc__drobj_seek_to_start(void* userData)
 {
     return ocFileSeek((ocFile*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
 }

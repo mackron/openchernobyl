@@ -146,27 +146,27 @@
 
 // Sized types.
 #if defined(_MSC_VER) && _MSC_VER < 1600
-typedef   signed char    oc_int8;
-typedef unsigned char    oc_uint8;
-typedef   signed short   oc_int16;
-typedef unsigned short   oc_uint16;
-typedef   signed int     oc_int32;
-typedef unsigned int     oc_uint32;
-typedef   signed __int64 oc_int64;
-typedef unsigned __int64 oc_uint64;
+typedef   signed char    ocInt8;
+typedef unsigned char    ocUInt8;
+typedef   signed short   ocInt16;
+typedef unsigned short   ocUInt16;
+typedef   signed int     ocInt32;
+typedef unsigned int     ocUInt32;
+typedef   signed __int64 ocInt64;
+typedef unsigned __int64 ocUInt64;
 #else
 #include <stdint.h>
-typedef int8_t           oc_int8;
-typedef uint8_t          oc_uint8;
-typedef int16_t          oc_int16;
-typedef uint16_t         oc_uint16;
-typedef int32_t          oc_int32;
-typedef uint32_t         oc_uint32;
-typedef int64_t          oc_int64;
-typedef uint64_t         oc_uint64;
+typedef int8_t           ocInt8;
+typedef uint8_t          ocUInt8;
+typedef int16_t          ocInt16;
+typedef uint16_t         ocUInt16;
+typedef int32_t          ocInt32;
+typedef uint32_t         ocUInt32;
+typedef int64_t          ocInt64;
+typedef uint64_t         ocUInt64;
 #endif
-typedef oc_uint8         oc_bool8;
-typedef oc_uint32        oc_bool32;
+typedef ocUInt8          ocBool8;
+typedef ocUInt32         ocBool32;
 #define OC_TRUE          1
 #define OC_FALSE         0
 
