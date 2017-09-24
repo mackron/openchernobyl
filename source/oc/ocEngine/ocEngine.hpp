@@ -216,6 +216,7 @@ struct ocWorldObject;
 // Open Chernobyl headers.
 #include "ocResultCodes.hpp"
 #include "ocMisc.hpp"
+#include "ocContainers.hpp"
 #include "ocString.hpp"
 #include "ocImageUtils.hpp"
 #include "ocCommandLine.hpp"
@@ -227,6 +228,7 @@ struct ocWorldObject;
 #include "ocFileSystem.hpp"
 #include "ocStreamReader.hpp"
 #include "ocStreamWriter.hpp"
+#include "ocOCD.hpp"
 #include "ocLogger.hpp"
 #include "Graphics/ocGraphics.hpp"
 #include "Audio/ocAudio.hpp"

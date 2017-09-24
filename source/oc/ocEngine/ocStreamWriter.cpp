@@ -91,3 +91,9 @@ ocResult ocStreamWriterWrite(ocStreamWriter* pWriter, const void* pData, ocSizeT
     ocAssert(pWriter->onWrite != NULL);
     return pWriter->onWrite(pWriter->pUserData, pData, bytesToWrite, pBytesWritten);
 }
+
+ocResult ocStreamWriterWriteString(ocStreamWriter* pWriter, const char* str)
+{
+    if (pWriter == NULL || str == NULL) return OC_RESULT_INVALID_ARGS;
+    return ocStreamWriterWrite(pWriter, str, strlen(str)+1, NULL);  // <-- Include null terminator in output.
+}

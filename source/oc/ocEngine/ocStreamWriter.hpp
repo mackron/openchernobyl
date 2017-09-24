@@ -39,3 +39,9 @@ ocResult ocStreamWriterUninit(ocStreamWriter* pWriter);
 
 //
 ocResult ocStreamWriterWrite(ocStreamWriter* pWriter, const void* pData, ocSizeT bytesToWrite, ocSizeT* pBytesWritten);
+ocResult ocStreamWriterWriteString(ocStreamWriter* pWriter, const char* str);
+
+template <typename T> ocResult ocStreamWriterWrite(ocStreamWriter* pWriter, T value)
+{
+    return ocStreamWriterWrite(pWriter, &value, sizeof(value), NULL);
+}
