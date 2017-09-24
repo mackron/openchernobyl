@@ -110,13 +110,13 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-OC_PRIVATE ocResult ocLoadImage_OCD(ocFile* pFile, ocImageData* pData)
+OC_PRIVATE ocResult ocLoadImage_OCD(ocStreamReader* pReader, ocImageData* pData)
 {
-    ocAssert(pFile != NULL);
+    ocAssert(pReader != NULL);
     ocAssert(pData != NULL);
 
     // TODO: Implement me.
-    (void)pFile;
+    (void)pReader;
     (void)pData;
     return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
 }
@@ -124,11 +124,11 @@ OC_PRIVATE ocResult ocLoadImage_OCD(ocFile* pFile, ocImageData* pData)
 
 OC_PRIVATE int oc__stbi_read(void* user, char *data, int size)
 {
-    ocFile* pFile = (ocFile*)user;
-    ocAssert(pFile != NULL);
+    ocStreamReader* pReader = (ocStreamReader*)user;
+    ocAssert(pReader != NULL);
 
     size_t bytesRead;
-    if (ocFileRead(pFile, data, (size_t)size, &bytesRead) == OC_RESULT_SUCCESS) {
+    if (ocStreamReaderRead(pReader, data, (size_t)size, &bytesRead) == OC_RESULT_SUCCESS) {
         return (int)bytesRead;
     }
 
@@ -137,23 +137,23 @@ OC_PRIVATE int oc__stbi_read(void* user, char *data, int size)
 
 OC_PRIVATE void oc__stbi_skip(void* user, int n)
 {
-    ocFile* pFile = (ocFile*)user;
-    ocAssert(pFile != NULL);
+    ocStreamReader* pReader = (ocStreamReader*)user;
+    ocAssert(pReader != NULL);
 
-    ocFileSeek(pFile, n, ocSeekOrigin_Current);
+    ocStreamReaderSeek(pReader, n, ocSeekOrigin_Current);
 }
 
 OC_PRIVATE int oc__stbi_eof(void* user)
 {
-    ocFile* pFile = (ocFile*)user;
-    ocAssert(pFile != NULL);
+    ocStreamReader* pReader = (ocStreamReader*)user;
+    ocAssert(pReader != NULL);
 
-    return ocAtEOF(pFile);
+    return ocStreamReaderAtEnd(pReader);
 }
 
-OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
+OC_PRIVATE ocResult ocLoadImage_STB(ocStreamReader* pReader, ocImageData* pData)
 {
-    ocAssert(pFile != NULL);
+    ocAssert(pReader != NULL);
     ocAssert(pData != NULL);
 
     // The engine expects upside-down images because of OpenGL and Vulkan.
@@ -166,7 +166,7 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
 
     int imageWidth;
     int imageHeight;
-    stbi_uc* pImageData = stbi_load_from_callbacks(&cb, pFile, &imageWidth, &imageHeight, NULL, 4); // Always want RGBA images.
+    stbi_uc* pImageData = stbi_load_from_callbacks(&cb, pReader, &imageWidth, &imageHeight, NULL, 4); // Always want RGBA images.
     if (pImageData == NULL) {
         return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
     }
@@ -208,36 +208,45 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
         return result;
     }
 
+    ocStreamReader reader;
+    result = ocStreamReaderInit(&file, &reader);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFileClose(&file);
+        return result;
+    }
+
+
     // We use a trial and error system for loading different file formats. If one fails, we just fall through to the
     // next sub-loader and try again. The exception is .ocd files which is the native file format for the engine. When
     // a file with this extension is specified, it will _not_ fall through to the next sub-loaders.
     if (drpath_extension_equal(filePath, "ocd")) {
-        result = ocLoadImage_OCD(&file, pData);
+        result = ocLoadImage_OCD(&reader, pData);
     } else {
         result = OC_RESULT_FAILED_TO_LOAD_RESOURCE;
 
         // stb_image
         if (result != OC_RESULT_SUCCESS) {
-            result = ocLoadImage_STB(&file, pData);
+            result = ocLoadImage_STB(&reader, pData);
         }
 
 #ifdef OC_ENABLE_PCX
         if (result != OC_RESULT_SUCCESS) {
-            result = ocLoadImage_PCX(&file, pData);
+            result = ocLoadImage_PCX(&reader, pData);
         }
 #endif
 #ifdef OC_ENABLE_KTX
         if (result != OC_RESULT_SUCCESS) {
-            result = ocLoadImage_KTX(&file, pData);
+            result = ocLoadImage_KTX(&reader, pData);
         }
 #endif
 #ifdef OC_ENABLE_DDS
         if (result != OC_RESULT_SUCCESS) {
-            result = ocLoadImage_DDS(&file, pData);
+            result = ocLoadImage_DDS(&reader, pData);
         }
 #endif
     }
 
+    ocStreamReaderUninit(&reader);
     ocFileClose(&file);
     return result;
 }
