@@ -1,0 +1,164 @@
+OCD File Format
+===============
+(THIS FILE IS WORK IN PROGRESS AND SUBJECT TO CHANGE)
+
+The OCD file format is a monolithic file format for storing different types of data for use by
+Open Chernobyl. OCD stands for Open Chernobyl Data. It is optimized for Open Chernobyl and is
+focused on simplicity and avoiding over-engineering.
+
+Everything is little-endian and aligned to 32-bits.
+
+Header
+------
+[4 bytes] Magic Number ('OCD ')
+[4 bytes] Data Type
+
+The header is the only part of that's consistent across every different data type. An application
+will want to branch based on the value of the <Data Type> identifier (bytes [5,8]).
+
+The different values for <Data Type> are:
+
+Data Type | Description
+--------- | ----------------
+'IMG1'    | Images
+'SCN1'    | Scenes
+'PTL1'    | Particle Systems
+'PAK1'    | Archive/Package
+
+After the header comes data which is formatted specifically for the data type.
+
+
+Images ('IMG1')
+---------------
+[4 bytes] Image Format
+[4 bytes] Mipmap Count
+[24 * <Mipmap Count> bytes] Mipmap Data
+[8 bytes] Image Data Size (The total size of the image data including the entire mipmap chain. Does not include padding.)
+[<Image Data Size> bytes] Image Data
+[<Image Data Size> mod 4 bytes] Padding (for 32-bit alignment)
+
+The format of each <Mipmap Data> is:
+[8 bytes] Data Offset (Offset of <Image Data>)
+[8 bytes] Data Size
+[4 bytes] Width
+[4 bytes] Height
+
+Mipmaps are _always_ ordered such that the highest LOD mipmap is first and the lowest LOD mipmap
+is last. The size of the image can be determined by looking at the width and height of the first
+mipmap.
+
+The image format can be anything, but Open Chernobyl currently only knows the following:
+
+Format | Description
+------ | -----------
+1      | R8G8B8A8
+2      | R8B8B8A8_SRGB
+
+(More image formats are expected in the future, including compressed formats.)
+
+
+
+Scenes ('SCN1')
+---------------
+Not yet implemented.
+
+<BRAINSTORMING 1>
+[4] [Subresource Count]
+[8] [Subresource Offset]
+[4] [Object Count]
+[8] [Object Offset]
+[8] [Payload Data Size]
+[?] [Payload]
+
+[Payload] (Sections below can be in any order)
+    [Subresources]
+        [For Each...]
+        [8] [Path Offset]
+        [4] [Flags]
+                [Bit 0] [IsInternal]
+        [8] [Data Size]
+        [8] [Data Offset]
+
+    [Objects]
+        [For Each...]
+        [8] [Name Offset]
+        [4] [Parent Index]
+        [4] [First Child Index]
+        [4] [Last Child Index]
+        [4] [Previous Sibling Index]
+        [4] [Next Sibling Index]
+        [4*3] [Relative Position (X, Y, Z)]
+        [4*4] [Relative Rotation (X, Y, Z, W)]
+        [4*3] [Relative Scale (X, Y, Z)]
+        [4] [Component Count]
+        [8] [Components Offset]
+
+    [Components]
+        [For Each...]
+        [4] [Component Type]
+        [8] [Component Data Size]
+        [8] [Component Data Offset]
+        
+    [Component Data]
+        [For Each...]
+        [?] [Component Data]
+            [Component Data (Scene)]
+                [4] [Subresource Index]
+            [Component Data (Mesh)]
+                [4] [Group Count]
+                [?] [Groups]
+                    [For Each...]
+                    [4] [Material Subresource Index]
+                    [4] [Primitive Type (Points, Lines, Triangles)]
+                    [4] [Vertex Format]
+                    [4] [Vertex Count]
+                    [8] [Vertex Data Offset]
+                    [4] [Index Format]
+                    [4] [Index Count]
+                    [8] [Index Data Offset]
+                [?] [Vertex Data]
+                [?] [Index Data]
+        [?] [0 Byte Padding for 32-bit Alignment]
+
+    [String Pool]
+        [For Each...]
+        [?] [String (Null Terminated)]
+        [?] [0 Byte Padding for 32-bit Alignment]
+        
+    [Subresource Data]
+        [For Each...]
+        [?] [Resource Data]
+            [For Each...]
+            [If IsInternal]
+                [?] [Actual File Data]
+            [Else]
+                [0] [Nothing]
+        [?] [0 Byte Padding for 32-bit Alignment]
+        
+</BRAINSTORMING 1>
+
+BRAINSTORMING
+- Need to think about components.
+[4 bytes] Subresource Count
+[8 bytes] Subresource Data Offset
+[4 bytes] Object Count
+[8 bytes] Object Data Offset
+[8 bytes] Total Data Size
+[<Total Data Size> bytes] Raw Data
+
+Scenes are designed for efficient loading. There is a single pool of raw data which can be
+allocated in one big chunk. Data is then referenced using a simple offset, which is alway
+an offet of <Raw Data> (not the beginning of the file).
+/BRAINSTORMING
+
+
+
+Particle Systems ('PTL1')
+-------------------------
+Not yet implemented.
+
+
+
+Archive/Package ('PAK1')
+------------------------
+Not yet implemented
