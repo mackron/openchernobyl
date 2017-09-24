@@ -30,8 +30,10 @@ struct ocGraphicsImage
 struct ocGraphicsMesh
 {
     GLuint objectGL;
-    ocGraphicsVertexFormat format;
+    ocGraphicsPrimitiveType primitiveType;
+    ocGraphicsVertexFormat vertexFormat;
     uint32_t vertexCount;
+    ocGraphicsIndexFormat indexFormat;
     uint32_t indexCount;
     GLuint vbo;
     GLuint ibo;

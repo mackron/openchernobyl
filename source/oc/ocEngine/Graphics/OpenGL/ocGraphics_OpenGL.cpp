@@ -10,8 +10,7 @@
 
 GLint ocToOpenGLImageInternalFormat(ocImageFormat format)
 {
-    switch (format)
-    {
+    switch (format) {
         case ocImageFormat_R8G8B8A8: return GL_RGBA;
         case ocImageFormat_SRGBA8:   return GL_SRGB_ALPHA;
         default: return GL_RGBA;
@@ -20,8 +19,7 @@ GLint ocToOpenGLImageInternalFormat(ocImageFormat format)
 
 GLint ocToOpenGLImageFormat(ocImageFormat format)
 {
-    switch (format)
-    {
+    switch (format) {
         case ocImageFormat_R8G8B8A8: return GL_RGBA;
         case ocImageFormat_SRGBA8:   return GL_RGBA;
         default: return GL_RGBA;
@@ -33,6 +31,25 @@ GLenum ocToOpenGLImageFormatType(ocImageFormat format)
     // Currently, all image formats are unsigned bytes.
     (void)format;
     return GL_UNSIGNED_BYTE;
+}
+
+GLenum ocToOpenGLPrimitiveType(ocGraphicsPrimitiveType primitiveType)
+{
+    switch (primitiveType) {
+        case ocGraphicsPrimitiveType_Point:    return GL_POINTS;
+        case ocGraphicsPrimitiveType_Line:     return GL_LINES;
+        case ocGraphicsPrimitiveType_Triangle: return GL_TRIANGLES;
+        default: return GL_TRIANGLES;
+    }
+}
+
+GLenum ocToOpenGLIndexFormat(ocGraphicsIndexFormat indexFormat)
+{
+    switch (indexFormat) {
+        case ocGraphicsIndexFormat_UInt16: return GL_UNSIGNED_SHORT;
+        case ocGraphicsIndexFormat_UInt32: return GL_UNSIGNED_INT;
+        default: return GL_UNSIGNED_INT;
+    }
 }
 
 OC_PRIVATE void ocGraphicsSetCurrentWindow(ocGraphicsContext* pGraphics, ocWindow* pWindow)
@@ -281,12 +298,14 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
         return OC_RESULT_OUT_OF_MEMORY;
     }
 
-    pMesh->format = pDesc->format;
+    pMesh->primitiveType = pDesc->primitiveType;
+    pMesh->vertexFormat = pDesc->vertexFormat;
     pMesh->vertexCount = pDesc->vertexCount;
+    pMesh->indexFormat = pDesc->indexFormat;
     pMesh->indexCount = pDesc->indexCount;
 
-    size_t vertexBufferSize = pMesh->vertexCount * ocGetVertexSizeFromFormat(pMesh->format);
-    size_t indexBufferSize = pMesh->indexCount * sizeof(uint32_t);
+    size_t vertexBufferSize = pMesh->vertexCount * ocGetVertexSizeFromFormat(pMesh->vertexFormat);
+    size_t indexBufferSize = pMesh->indexCount * ocGetIndexSizeFromFormat(pMesh->indexFormat);
 
     drgl &gl = pGraphics->gl;
 
@@ -400,12 +419,12 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
             gl.EnableClientState(GL_NORMAL_ARRAY);
 
             gl.BindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
-            gl.VertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->format), 0);
-            gl.TexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->format), (const GLvoid*)(sizeof(float)*(3)));
-            gl.NormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->format), (const GLvoid*)(sizeof(float)*(3+2)));
+            gl.VertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
+            gl.TexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
+            gl.NormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
 
             gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
-            gl.DrawElements(GL_TRIANGLES, pMesh->indexCount, GL_UNSIGNED_INT, 0);
+            gl.DrawElements(ocToOpenGLPrimitiveType(pMesh->primitiveType), pMesh->indexCount, ocToOpenGLIndexFormat(pMesh->indexFormat), 0);
         }
     }
 

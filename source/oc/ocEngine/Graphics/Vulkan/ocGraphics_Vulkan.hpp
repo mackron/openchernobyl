@@ -47,10 +47,12 @@ struct ocGraphicsImage
 
 struct ocGraphicsMesh
 {
-    ocGraphicsVertexFormat format;
+    ocGraphicsPrimitiveType primitiveType;
+    ocGraphicsVertexFormat vertexFormat;
     VkBuffer vertexBufferVK;
     VkDeviceSize vertexBufferOffset;
     VkDeviceMemory vertexBufferMemory;
+    ocGraphicsIndexFormat indexFormat;
     VkBuffer indexBufferVK;
     VkDeviceSize indexBufferOffset;
     VkDeviceMemory indexBufferMemory;

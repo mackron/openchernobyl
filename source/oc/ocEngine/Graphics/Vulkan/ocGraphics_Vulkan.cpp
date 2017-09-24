@@ -25,6 +25,25 @@ OC_PRIVATE VkFormat ocToVulkanImageFormat(ocImageFormat format)
     }
 }
 
+OC_PRIVATE VkPrimitiveTopology ocToVulkanPrimitiveType(ocGraphicsPrimitiveType primitiveType)
+{
+    switch (primitiveType) {
+        case ocGraphicsPrimitiveType_Point:    return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case ocGraphicsPrimitiveType_Line:     return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case ocGraphicsPrimitiveType_Triangle: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        default: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    }
+}
+
+OC_PRIVATE VkIndexType ocToVulkanIndexFormat(ocGraphicsIndexFormat indexFormat)
+{
+    switch (indexFormat) {
+        case ocGraphicsIndexFormat_UInt16: return VK_INDEX_TYPE_UINT16;
+        case ocGraphicsIndexFormat_UInt32: return VK_INDEX_TYPE_UINT32;
+        default: return VK_INDEX_TYPE_UINT32;
+    }
+}
+
 OC_PRIVATE VkPresentModeKHR ocGraphicsGetBestPresentMode(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, ocVSyncMode vsync)
 {
     VkPresentModeKHR supportedPresentModes[4 /*VK_PRESENT_MODE_RANGE_SIZE_KHR*/]; // TODO: Need to update dr_vulkan.h
@@ -215,7 +234,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     // TODO: Make this more robust? Is the first device always a good default?
     uint32_t vkPhysicalDeviceCount = 1;
     VkResult result = vkEnumeratePhysicalDevices(pGraphics->instance, &vkPhysicalDeviceCount, &pGraphics->physicalDevice);
-    if (result != VK_SUCCESS) {
+    if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
         return ocToResultFromVulkan(result);
     }
 
@@ -517,9 +536,9 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
     viewportStateInfo.pNext = NULL;
     viewportStateInfo.flags = 0;
     viewportStateInfo.viewportCount = 1;
-    viewportStateInfo.pViewports = NULL;    // <-- This pipeline uses dynamics viewports.
+    viewportStateInfo.pViewports = NULL;    // <-- This pipeline uses dynamic viewports.
     viewportStateInfo.scissorCount = 1;
-    viewportStateInfo.pScissors = NULL;     // <-- This pipeline uses dynamics scissor rectangles.
+    viewportStateInfo.pScissors = NULL;     // <-- This pipeline uses dynamic scissor rectangles.
 
 
     // Rasterization state.
@@ -1246,11 +1265,13 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
         return OC_RESULT_OUT_OF_MEMORY;
     }
 
-    pMesh->format = pDesc->format;
+    pMesh->primitiveType = pDesc->primitiveType;
+    pMesh->vertexFormat = pDesc->vertexFormat;
+    pMesh->indexFormat = pDesc->indexFormat;
     pMesh->indexCount = pDesc->indexCount;
 
-    size_t vertexBufferSize = pDesc->vertexCount * ocGetVertexSizeFromFormat(pDesc->format);
-    size_t indexBufferSize = pDesc->indexCount * sizeof(uint32_t);
+    size_t vertexBufferSize = pDesc->vertexCount * ocGetVertexSizeFromFormat(pDesc->vertexFormat);
+    size_t indexBufferSize = pDesc->indexCount * ocGetIndexSizeFromFormat(pDesc->indexFormat);
 
 
     // Buffer objects.
@@ -1289,7 +1310,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
 
     void* pVertexData;
     vkresult = vkMapMemory(pGraphics->device, pMesh->vertexBufferMemory, 0, VK_WHOLE_SIZE, 0, &pVertexData);
-    memcpy(pVertexData, pDesc->pVertices, vertexBufferSize);
+    ocCopyMemory(pVertexData, pDesc->pVertices, vertexBufferSize);
     vkUnmapMemory(pGraphics->device, pMesh->vertexBufferMemory);
 
 
@@ -1303,7 +1324,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
 
     void* pIndexData;
     vkresult = vkMapMemory(pGraphics->device, pMesh->indexBufferMemory, 0, VK_WHOLE_SIZE, 0, &pIndexData);
-    memcpy(pIndexData, pDesc->pIndices, indexBufferSize);
+    ocCopyMemory(pIndexData, pDesc->pIndices, indexBufferSize);
     vkUnmapMemory(pGraphics->device, pMesh->indexBufferMemory);
 
 
@@ -1466,7 +1487,7 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
                     vkCmdBindDescriptorSets(cmdbuf, VK_PIPELINE_BIND_POINT_GRAPHICS, pWorld->pGraphics->mainPipeline_Layout, 0, 1, &pWorld->pGraphics->mainPipeline_DescriptorSets[0], 0, NULL);
 
                     vkCmdBindVertexBuffers(cmdbuf, 0, 1, &pMesh->vertexBufferVK, &pMesh->vertexBufferOffset);
-                    vkCmdBindIndexBuffer(cmdbuf, pMesh->indexBufferVK, pMesh->indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                    vkCmdBindIndexBuffer(cmdbuf, pMesh->indexBufferVK, pMesh->indexBufferOffset, ocToVulkanIndexFormat(pMesh->indexFormat));
                     vkCmdDrawIndexed(cmdbuf, pMesh->indexCount, 1, 0, 0, 0);
                 }
             }

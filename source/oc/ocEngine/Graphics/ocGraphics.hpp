@@ -27,9 +27,22 @@ enum ocGraphicsVertexFormat
     ocGraphicsVertexFormat_P3T2N3T3B3       // <-- Normal mapping enabled
 };
 
-OC_INLINE size_t ocGetVertexSizeFromFormat(ocGraphicsVertexFormat format)
+enum ocGraphicsIndexFormat
 {
-    switch (format)
+    ocGraphicsIndexFormat_UInt16,
+    ocGraphicsIndexFormat_UInt32
+};
+
+enum ocGraphicsPrimitiveType
+{
+    ocGraphicsPrimitiveType_Point,
+    ocGraphicsPrimitiveType_Line,
+    ocGraphicsPrimitiveType_Triangle
+};
+
+OC_INLINE size_t ocGetVertexSizeFromFormat(ocGraphicsVertexFormat vertexFormat)
+{
+    switch (vertexFormat)
     {
         case ocGraphicsVertexFormat_P3T2N3:     return sizeof(float) * (3+2+3);
         case ocGraphicsVertexFormat_P3T2N3T3B3: return sizeof(float) * (3+2+3+3+3);
@@ -38,14 +51,27 @@ OC_INLINE size_t ocGetVertexSizeFromFormat(ocGraphicsVertexFormat format)
     return 0;
 }
 
+OC_INLINE size_t ocGetIndexSizeFromFormat(ocGraphicsIndexFormat indexFormat)
+{
+    switch (indexFormat)
+    {
+        case ocGraphicsIndexFormat_UInt16: return 2;
+        case ocGraphicsIndexFormat_UInt32: return 4;
+    }
+
+    return 0;
+}
+
 struct ocGraphicsMeshDesc
 {
-    ocGraphicsVertexFormat format;
-    float* pVertices;
+    ocGraphicsPrimitiveType primitiveType;
+    ocGraphicsVertexFormat vertexFormat;
     uint32_t vertexCount;
-    uint32_t* pIndices;
+    ocGraphicsIndexFormat indexFormat;
     uint32_t indexCount;
-
+    void* pVertices;
+    void* pIndices;
+    
     // TODO: Material information.
 };
 

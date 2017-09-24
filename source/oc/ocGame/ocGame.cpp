@@ -147,11 +147,14 @@ int ocInitAndRun(int argc, char** argv)
         };
 
         ocGraphicsMeshDesc desc;
-        desc.format = ocGraphicsVertexFormat_P3T2N3;
-        desc.pVertices = pVertices;
+        desc.primitiveType = ocGraphicsPrimitiveType_Triangle;
+        desc.vertexFormat = ocGraphicsVertexFormat_P3T2N3;
         desc.vertexCount = 3;
-        desc.pIndices = pIndices;
+        desc.pVertices = pVertices;
+        desc.indexFormat = ocGraphicsIndexFormat_UInt32;
         desc.indexCount = sizeof(pIndices) / sizeof(pIndices[0]);
+        desc.pIndices = pIndices;
+        
         result = ocGraphicsCreateMesh(&g_Game.engine.graphics, &desc, &g_Game.pMesh);
         if (result != OC_RESULT_SUCCESS) {
             return result;
