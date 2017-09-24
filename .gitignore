@@ -1,6 +1,6 @@
 build/
 !/build/oc_build/bin/glslangValidator.exe
-!/build/oc_build/bin/LICENSE_glslang.txt
 !/build/oc_build/bin/oc_build.bat
 !/build/oc_build/bin/dred.exe
+!build/oc_build/bin/mcpp-2.7.2/
 docs/private/
