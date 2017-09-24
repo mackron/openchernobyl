@@ -165,6 +165,7 @@ typedef uint32_t         ocUInt32;
 typedef int64_t          ocInt64;
 typedef uint64_t         ocUInt64;
 #endif
+typedef size_t           ocSizeT;
 typedef ocUInt8          ocBool8;
 typedef ocUInt32         ocBool32;
 #define OC_TRUE          1
@@ -178,18 +179,19 @@ typedef ocUInt32         ocBool32;
 #define OC_INLINE static inline
 #endif
 
-#define ocAssert(expression)    assert(expression)
-#define ocZeroMemory(p, sz)     memset((p), 0, (sz))
-#define ocZeroObject(p)         ocZeroMemory((p), sizeof(*(p)))
-#define ocMalloc(sz)            malloc(sz)
-#define ocCalloc(c, sz)         calloc(c, sz)
-#define ocRealloc(p, sz)        realloc(p, sz)
-#define ocMallocObject(type)    ((type*)ocMalloc(sizeof(type)))
-#define ocCallocObject(type)    ((type*)ocCalloc(1, sizeof(type)))
-#define ocFree(p)               free(p)
-#define ocCountOf(obj)          (sizeof(obj) / sizeof(obj[0]))
-#define ocIsBitSet(set, bit)    (((set) & (bit)) != 0)
-#define ocAlign(x, a)           ((((x) + (a) - 1) / (a)) * (a))
+#define ocAssert(expression)        assert(expression)
+#define ocCopyMemory(dst, src, sz)  memcpy(dst, src, sz)
+#define ocZeroMemory(p, sz)         memset((p), 0, (sz))
+#define ocZeroObject(p)             ocZeroMemory((p), sizeof(*(p)))
+#define ocMalloc(sz)                malloc(sz)
+#define ocCalloc(c, sz)             calloc(c, sz)
+#define ocRealloc(p, sz)            realloc(p, sz)
+#define ocMallocObject(type)        ((type*)ocMalloc(sizeof(type)))
+#define ocCallocObject(type)        ((type*)ocCalloc(1, sizeof(type)))
+#define ocFree(p)                   free(p)
+#define ocCountOf(obj)              (sizeof(obj) / sizeof(obj[0]))
+#define ocIsBitSet(set, bit)        (((set) & (bit)) != 0)
+#define ocAlign(x, a)               ((((x) + (a) - 1) / (a)) * (a))
 
 // ocOffsetPtr()
 template <typename T>
@@ -223,6 +225,7 @@ struct ocWorldObject;
 #include "ocCamera.hpp"
 #include "ocThreading.hpp"
 #include "ocFileSystem.hpp"
+#include "ocStreamReader.hpp"
 #include "ocLogger.hpp"
 #include "Graphics/ocGraphics.hpp"
 #include "Audio/ocAudio.hpp"

@@ -1,7 +1,5 @@
 // Copyright (C) 2017 David Reid. See included LICENSE file.
 
-#define OC_WORLD_OBJECT_FLAG_IN_WORLD     (1 << 0)
-
 struct ocWorldObject
 {
     ocWorld* pWorld;        // <-- Should never be null. Do _not_ use this to determine if the object is in the world - use ocWorldObjectIsInWorld().
@@ -9,8 +7,8 @@ struct ocWorldObject
     glm::quat rotation;     // <-- As above, except ocWorldObjectSetRotation()
     glm::vec4 scale;        // <-- As above, except ocWorldObjectSetScale()
     ocComponent* ppComponents[OC_MAX_COMPONENTS];
-    uint16_t componentCount;
-    uint16_t flags;
+    ocUInt16 componentCount;
+    ocBool32 isInWorld : 1;
 };
 
 // Initializes a world object. This does not add the object to the world - use ocWorldInsertObject() to add do this.

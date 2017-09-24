@@ -175,7 +175,7 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocFile* pFile, ocImageData* pData)
     // The payload is simple for single mipmap images. It's just 1 ocMipmapInfo object and then the raw image data.
     size_t mipmapInfoDataSize = sizeof(*pData->pMipmaps)*1;
     size_t imageDataSize = imageWidth*imageHeight*4;
-    pData->_pPayload = malloc(mipmapInfoDataSize + imageDataSize);
+    pData->_pPayload = ocMalloc(mipmapInfoDataSize + imageDataSize);
 
     pData->format = ocImageFormat_R8G8B8A8;
     pData->mipmapCount = 1;
@@ -245,7 +245,7 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
 void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData)
 {
     if (pLoader == NULL || pData == NULL) return;
-    free(pData->_pPayload);
+    ocFree(pData->_pPayload);
 }
 
 
@@ -256,13 +256,13 @@ void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-OC_PRIVATE ocResult ocLoadScene_OCD(ocFile* pFile, ocSceneData* pData)
+OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
 {
-    ocAssert(pFile != NULL);
+    ocAssert(pReader != NULL);
     ocAssert(pData != NULL);
 
     // TODO: Implement me.
-    (void)pFile;
+    (void)pReader;
     (void)pData;
     return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
 }
@@ -271,7 +271,7 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocFile* pFile, ocSceneData* pData)
 OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesToRead)
 {
     size_t bytesRead;
-    ocResult result = ocFileRead((ocFile*)userData, bufferOut, bytesToRead, &bytesRead);
+    ocResult result = ocStreamReaderRead((ocStreamReader*)userData, bufferOut, bytesToRead, &bytesRead);
     if (result != OC_RESULT_SUCCESS) {
         return 0;
     }
@@ -281,28 +281,31 @@ OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesTo
 
 OC_PRIVATE ocBool32 oc__drobj_seek_to_start(void* userData)
 {
-    return ocFileSeek((ocFile*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
+    return ocStreamReaderSeek((ocStreamReader*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
 }
 
-OC_PRIVATE ocResult ocLoadScene_OBJ(ocFile* pFile, ocSceneData* pData)
+OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
 {
-    ocAssert(pFile != NULL);
+    ocAssert(pReader != NULL);
     ocAssert(pData != NULL);
 
-    drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pFile);
+    drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pReader);
     if (obj == NULL) {
         return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
     }
 
     // The first thing to do is calculate the size of the raw data. 
+    
 
     drobj_delete(obj);
 
+
     // TODO: Implement me.
-    (void)pFile;
+    (void)pReader;
     (void)pData;
     return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
 }
+
 
 ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePath, ocSceneData* pData)
 {
@@ -318,32 +321,40 @@ ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePa
         return result;
     }
 
+    ocStreamReader reader;
+    result = ocStreamReaderInit(&file, &reader);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFileClose(&file);
+        return result;
+    }
+
     // We use a trial and error system for loading different file formats. If one fails, we just fall through to the
     // next sub-loader and try again. The exception is .ocd files which is the native file format for the engine. When
     // a file with this extension is specified, it will _not_ fall through to the next sub-loaders.
     if (drpath_extension_equal(filePath, "ocd")) {
-        result = ocLoadScene_OCD(&file, pData);
+        result = ocLoadScene_OCD(&reader, pData);
     } else {
         result = OC_RESULT_FAILED_TO_LOAD_RESOURCE;
 
         // OBJ.
         if (result != OC_RESULT_SUCCESS && drpath_extension_equal(filePath, "obj")) {
-            result = ocLoadScene_OBJ(&file, pData);
+            result = ocLoadScene_OBJ(&reader, pData);
         }
 
 #if 0
         // glTF
         if (result != OC_RESULT_SUCCESS) {
-            result = ocLoadScene_glTF(&file, pData);
+            result = ocLoadScene_glTF(&reader, pData);
         }
 
         // Assimp, maybe?
         if (result != OC_RESULT_SUCCESS) {
-            result = ocLoadScene_Assimp(&file, pData);
+            result = ocLoadScene_Assimp(&reader, pData);
         }
 #endif
     }
 
+    ocStreamReaderUninit(&reader);
     ocFileClose(&file);
     return result;
 }
@@ -351,6 +362,6 @@ ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePa
 void ocResourceLoaderUnloadScene(ocResourceLoader* pLoader, ocSceneData* pData)
 {
     if (pLoader == NULL || pData == NULL) return;
-    free(pData->_pPayload);
+    ocFree(pData->_pPayload);
 }
 

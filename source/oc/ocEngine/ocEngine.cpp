@@ -11,6 +11,7 @@
 #include "ocCamera.cpp"
 #include "ocThreading.cpp"
 #include "ocFileSystem.cpp"
+#include "ocStreamReader.cpp"
 #include "ocLogger.cpp"
 #include "Graphics/ocGraphics.cpp"
 #include "Audio/ocAudio.cpp"

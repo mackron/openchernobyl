@@ -99,7 +99,7 @@ union ocSceneOffsetPtr
 struct ocSceneObject
 {
     ocSceneObjectType type;
-    uint64_t dataOffset;    // The offset of the objects data relative to the raw data.
+    uint64_t dataOffset;    // The offset of the object's data relative to the raw data.
 
     // Hierarchy information. If any of these are -1 (~0) then it's considred NULL. For example, if parentIndex == ~0 it means
     // the object does not have a parent. Use OC_SCENE_OBJECT_NONE.
@@ -108,6 +108,18 @@ struct ocSceneObject
     uint32_t lastChildIndex;
     uint32_t prevSiblingIndex;
     uint32_t nextSiblingIndex;
+
+    // Transformation information.
+    float absolutePositionX;
+    float absolutePositionY;
+    float absolutePoyitionZ;
+    float absoluteRotationX;
+    float absoluteRotationY;
+    float absoluteRotationZ;
+    float absoluteRotationW;
+    float absoluteScaleX;
+    float absoluteScaleY;
+    float absoluteScaleZ;
 
     union
     {

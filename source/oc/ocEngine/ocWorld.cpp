@@ -107,7 +107,7 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
         }
     }
 
-    pObject->flags |= OC_WORLD_OBJECT_FLAG_IN_WORLD;
+    pObject->isInWorld = OC_TRUE;
 }
 
 void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
@@ -149,7 +149,7 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
         }
     }
 
-    pObject->flags &= ~OC_WORLD_OBJECT_FLAG_IN_WORLD;
+    pObject->isInWorld = OC_FALSE;
 }
 
 void ocWorldSetObjectPosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position)

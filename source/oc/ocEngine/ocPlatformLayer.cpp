@@ -681,12 +681,10 @@ double ocTimerTick(ocTimer* pTimer)
 #ifdef OC_WIN32
 int ocMainLoop_Win32(ocEngineContext* pEngine)
 {
-    for (;;)
-    {
+    for (;;) {
         // Handle window events.
         MSG msg;
-        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
-        {
+        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) {
                 return (int)msg.wParam;  // Received a quit message.
             }
