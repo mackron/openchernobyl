@@ -54,31 +54,16 @@
 //#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
 
 #ifndef DR_IMPLEMENTATION
-    #ifdef OC_USE_EXTERNAL_DR_LIBS
-        #include "../../../../../dr_libs/dr.h"
-    #else
-        #include "../../external/dr_libs/dr.h"
-    #endif
+    #include "../../external/dr_libs/dr.h"
 #endif
 
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../../dr_libs/dr_flac.h"
-    #include "../../../../../dr_libs/dr_wav.h"
-    #include "../../../../../dr_libs/dr_fs.h"
-    #include "../../../../../dr_libs/dr_obj.h"
-#else
-    #include "../../external/dr_libs/dr_flac.h"
-    #include "../../external/dr_libs/dr_wav.h"
-    #include "../../external/dr_libs/dr_fs.h"
-    #include "../../external/dr_libs/dr_obj.h"
-#endif
+#include "../../external/dr_libs/dr_flac.h"
+#include "../../external/dr_libs/dr_wav.h"
+#include "../../external/dr_libs/dr_fs.h"
+#include "../../external/dr_libs/dr_obj.h"
 
 #ifdef OC_ENABLE_PCX
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../../dr_libs/dr_pcx.h"
-#else
-    #include "../../external/dr_libs/dr_pcx.h"
-#endif
+#include "../../external/dr_libs/dr_pcx.h"
 #endif
 
 
@@ -93,11 +78,7 @@
     #ifdef OC_DEBUG
         #define DR_GL_ENABLE_ARB_debug_output
     #endif
-    #ifdef OC_USE_EXTERNAL_DR_LIBS
-        #include "../../../../dr_graphics/dr_gl.h"
-    #else
-        #include "../../external/dr_graphics/dr_gl.h"
-    #endif
+    #include "../../external/dr_graphics/dr_gl.h"
 #endif
 
 #ifdef OC_USE_VULKAN
@@ -107,19 +88,10 @@
     #ifdef OC_X11
         #define VK_USE_PLATFORM_XLIB_KHR
     #endif
-
-    #ifdef OC_USE_EXTERNAL_DR_LIBS
-        #include "../../../../dr_graphics/dr_vulkan.h"
-    #else
-        #include "../../external/dr_graphics/dr_vulkan.h"
-    #endif
+    #include "../../external/dr_graphics/dr_vulkan.h"
 #endif
 
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../mini_al/mini_al.h"
-#else
-    #include "../../external/mini_al/mini_al.h"
-#endif
+#include "../../external/mini_al/mini_al.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)

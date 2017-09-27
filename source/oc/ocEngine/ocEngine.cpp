@@ -85,62 +85,35 @@
 
 #ifndef DR_IMPLEMENTATION
     #define DR_IMPLEMENTATION
-    #ifdef OC_USE_EXTERNAL_DR_LIBS
-        #include "../../../../../dr_libs/dr.h"
-    #else
-        #include "../../external/dr_libs/dr.h"
-    #endif
+    #include "../../external/dr_libs/dr.h"
 #endif
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_WAV_IMPLEMENTATION
 #define DR_FS_IMPLEMENTATION
 #define DR_OBJ_IMPLEMENTATION
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../../dr_libs/dr_flac.h"
-    #include "../../../../../dr_libs/dr_wav.h"
-    #include "../../../../../dr_libs/dr_fs.h"
-    #include "../../../../../dr_libs/dr_obj.h"
-#else
-    #include "../../external/dr_libs/dr_flac.h"
-    #include "../../external/dr_libs/dr_wav.h"
-    #include "../../external/dr_libs/dr_fs.h"
-    #include "../../external/dr_libs/dr_obj.h"
-#endif
+#include "../../external/dr_libs/dr_flac.h"
+#include "../../external/dr_libs/dr_wav.h"
+#include "../../external/dr_libs/dr_fs.h"
+#include "../../external/dr_libs/dr_obj.h"
 
 #ifdef OC_ENABLE_PCX
 #define DR_PCX_IMPLEMENTATION
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../../dr_libs/dr_pcx.h"
-#else
-    #include "../../external/dr_libs/dr_pcx.h"
-#endif
+#include "../../external/dr_libs/dr_pcx.h"
 #endif
 
 #ifdef OC_USE_OPENGL
     #define DR_GL_IMPLEMENTATION
-    #ifdef OC_USE_EXTERNAL_DR_LIBS
-        #include "../../../../dr_graphics/dr_gl.h"
-    #else
-        #include "../../external/dr_graphics/dr_gl.h"
-    #endif
+    #include "../../external/dr_graphics/dr_gl.h"
 #endif
 
 #ifdef OC_USE_VULKAN
     #define DR_VULKAN_IMPLEMENTATION
-    #ifdef OC_USE_EXTERNAL_DR_LIBS
-        #include "../../../../dr_graphics/dr_vulkan.h"
-    #else
-        #include "../../external/dr_graphics/dr_vulkan.h"
-    #endif
+    #include "../../external/dr_graphics/dr_vulkan.h"
 #endif
 
 #define MAL_IMPLEMENTATION
-#ifdef OC_USE_EXTERNAL_DR_LIBS
-    #include "../../../../mini_al/mini_al.h"
-#else
-    #include "../../external/mini_al/mini_al.h"
-#endif
+#include "../../external/mini_al/mini_al.h"
 
 
 // Always define stb_vorbis last because it causes compilation errors otherwise.
