@@ -1,6 +1,6 @@
 // Copyright (C) 2017 David Reid. See included LICENSE file.
 
-oc_string ocMakeString(const char* str)
+ocString ocMakeString(const char* str)
 {
     if (str == NULL) return NULL;
     
@@ -14,7 +14,7 @@ oc_string ocMakeString(const char* str)
     return newStr;
 }
 
-oc_string ocMakeStringv(const char* format, va_list args)
+ocString ocMakeStringv(const char* format, va_list args)
 {
     if (format == NULL) format = "";
 
@@ -47,7 +47,7 @@ oc_string ocMakeStringv(const char* format, va_list args)
     return str;
 }
 
-oc_string ocMakeStringf(const char* format, ...)
+ocString ocMakeStringf(const char* format, ...)
 {
     if (format == NULL) format = "";
 
@@ -60,7 +60,7 @@ oc_string ocMakeStringf(const char* format, ...)
     return str;
 }
 
-oc_string ocAppendString(oc_string lstr, const char* rstr)
+ocString ocAppendString(ocString lstr, const char* rstr)
 {
     if (rstr == NULL) {
         rstr = "";
@@ -83,9 +83,9 @@ oc_string ocAppendString(oc_string lstr, const char* rstr)
     return str;
 }
 
-oc_string ocAppendStringv(oc_string lstr, const char* format, va_list args)
+ocString ocAppendStringv(ocString lstr, const char* format, va_list args)
 {
-    oc_string rstr = ocMakeStringv(format, args);
+    ocString rstr = ocMakeStringv(format, args);
     if (rstr == NULL) {
         return NULL;    // Probably out of memory.
     }
@@ -96,7 +96,7 @@ oc_string ocAppendStringv(oc_string lstr, const char* format, va_list args)
     return str;
 }
 
-oc_string ocAppendStringf(oc_string lstr, const char* format, ...)
+ocString ocAppendStringf(ocString lstr, const char* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -107,7 +107,7 @@ oc_string ocAppendStringf(oc_string lstr, const char* format, ...)
     return str;
 }
 
-void ocFreeString(oc_string str)
+void ocFreeString(ocString str)
 {
     ocFree(str);
 }

@@ -46,6 +46,8 @@
 #else
 #define OC_32BIT
 #endif
+#else
+#define OC_POSIX
 #endif
 
 #ifdef __linux__

@@ -176,5 +176,8 @@ double ocTimerTick(ocTimer* pTimer);
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// Executes a system command.
+int ocSystem(const char* cmd);
+
 // Runs the main loop. This is where ocStep() will be called from.
 int ocMainLoop(ocEngineContext* pEngine);

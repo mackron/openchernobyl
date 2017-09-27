@@ -196,7 +196,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
             e.type = OC_WINDOW_EVENT_SIZE;
             e.data.size.width  = LOWORD(lParam);
             e.data.size.height = HIWORD(lParam);
-            ocOnWindowEvent(pWindow->pEngine, e);
+            ocHandleWindowEvent(pWindow->pEngine, e);
         } break;
 
         case WM_MOVE:
@@ -204,7 +204,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
             e.type = OC_WINDOW_EVENT_MOVE;
             e.data.move.x = (int)(short)LOWORD(lParam);
             e.data.move.y = (int)(short)HIWORD(lParam);
-            ocOnWindowEvent(pWindow->pEngine, e);
+            ocHandleWindowEvent(pWindow->pEngine, e);
         } break;
 
         case WM_KEYDOWN:
@@ -218,7 +218,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
                 e.type = OC_WINDOW_EVENT_KEY_DOWN;
                 e.data.key_down.key = ocKeyFromWin32(wParam);
                 e.data.key_down.modifierState = modifierState;
-                ocOnWindowEvent(pWindow->pEngine, e);
+                ocHandleWindowEvent(pWindow->pEngine, e);
             }
         } break;
 
@@ -678,6 +678,11 @@ double ocTimerTick(ocTimer* pTimer)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+int ocSystem(const char* cmd)
+{
+    return system(cmd);
+}
+
 #ifdef OC_WIN32
 int ocMainLoop_Win32(ocEngineContext* pEngine)
 {
@@ -714,7 +719,7 @@ void ocHandleX11Event(XEvent* ex)
             e.type = OC_WINDOW_EVENT_SIZE;
             e.data.size.width = ex->xconfigure.width;
             e.data.size.height = ex->xconfigure.height;
-            ocOnWindowEvent(e.pWindow->pEngine, e);
+            ocHandleWindowEvent(e.pWindow->pEngine, e);
         } break;
 
 

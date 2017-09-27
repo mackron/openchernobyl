@@ -1,6 +1,6 @@
 // Copyright (C) 2017 David Reid. See included LICENSE file.
 
-ocResult ocEngineInit(int argc, char** argv, void* pUserData, ocEngineContext* pEngine)
+ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventProc onWindowEvent, void* pUserData, ocEngineContext* pEngine)
 {
     if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
 
@@ -18,6 +18,8 @@ ocResult ocEngineInit(int argc, char** argv, void* pUserData, ocEngineContext* p
     ocZeroObject(pEngine);
     pEngine->argc = argc;
     pEngine->argv = argv;
+    pEngine->onStep = onStep;
+    pEngine->onWindowEvent = onWindowEvent;
     pEngine->pUserData = pUserData;
 
     if (ocCmdLineIsSet(argc, argv, "--portable")) {
@@ -100,6 +102,19 @@ void ocEngineUninit(ocEngineContext* pEngine)
     ocGraphicsUninit(&pEngine->graphics);
     ocLoggerUninit(&pEngine->logger);
     ocFileSystemUninit(&pEngine->fs);
+}
+
+
+void ocStep(ocEngineContext* pEngine)
+{
+    if (pEngine == NULL || pEngine->onStep == NULL) return;
+    pEngine->onStep(pEngine);
+}
+
+void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
+{
+    if (pEngine == NULL || pEngine->onWindowEvent == NULL) return;
+    pEngine->onWindowEvent(pEngine, e);
 }
 
 

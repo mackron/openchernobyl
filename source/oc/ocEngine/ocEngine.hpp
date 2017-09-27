@@ -78,6 +78,16 @@
     #ifdef OC_DEBUG
         #define DR_GL_ENABLE_ARB_debug_output
     #endif
+    #define DR_GL_NO_DEFAULT_INCLUDES
+    #ifdef _WIN32
+    #include <GL/gl.h>
+    #include "../../external/GL/glext.h"
+    #include "../../external/GL/wglext.h"
+    #else
+    #include <GL/glx.h>
+    #include "../../external/GL/glxext.h"
+    #include "../../external/GL/glext.h"
+    #endif
     #include "../../external/dr_graphics/dr_gl.h"
 #endif
 
@@ -212,9 +222,5 @@ struct ocWorldObject;
 #include "ocWorld.hpp"
 #include "ocEngineContext.hpp"
 #include "ocStretchyBuffer.hpp"     // <-- stb_stretchy_buffer with a C++ fix. Remove this once the upstream version is fixed.
-
-// Applications need to implement these functions.
-void ocStep(ocEngineContext* pEngine);
-void ocOnWindowEvent(ocEngineContext* pEngine, ocWindowEvent e);
 
 #endif

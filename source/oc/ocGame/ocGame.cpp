@@ -28,13 +28,119 @@ OC_PRIVATE ocResult ocGame_RecreateWindowRT(ocVSyncMode vsyncMode)
     return OC_RESULT_SUCCESS;
 }
 
+OC_PRIVATE void ocGame_OnStep(ocEngineContext* pEngine)
+{
+    (void)pEngine;
+
+    double dt = ocTimerTick(&g_Game.timer);
+
+    //printf("Step: %f\n", dt);
+
+    // Simple animation test.
+    //ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, g_Game.pMeshObject->_position + glm::vec4(0.1f * dt, 0, 0, 0));
+    //ocGraphicsWorldSetObjectScale(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.5f, 0.5f, 0.5f));
+    //g_Game.pWindowRT->view = glm::translate(g_Game.pWindowRT->view, glm::vec3(0.1f * dt, 0, 0));
+
+
+    ocWorldStep(&g_Game.world, dt);
+    ocWorldDraw(&g_Game.world);
+
+    // Present last.
+    ocGraphicsPresent(&g_Game.engine.graphics, g_Game.pSwapchain);
+}
+
+OC_PRIVATE void ocGame_OnWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
+{
+    (void)pEngine;
+
+    // Don't care about any events before initialization is complete.
+    if ((g_Game.flags & OC_GAME_FLAG_IS_INITIALIZED) == 0) {
+        return;
+    }
+
+    switch (e.type)
+    {
+        case OC_WINDOW_EVENT_SIZE:
+        {
+            // The render target and swapchain for this window needs to be deleted and recreated.
+            ocGame_RecreateWindowRT(g_Game.pSwapchain->vsyncMode);
+        } break;
+
+
+        case OC_WINDOW_EVENT_MOUSE_MOVE:
+        {
+        } break;
+
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_DOWN:
+        {
+        } break;
+
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_UP:
+        {
+        } break;
+
+
+        case OC_WINDOW_EVENT_KEY_DOWN:
+        {
+            // TESTING
+
+            // V-Sync switching.
+            {
+                ocBool32 vsyncChanged = false;
+                ocVSyncMode vsyncMode = ocVSyncMode_Enabled;
+                if (e.data.key_down.key == 'Q') {
+                    vsyncChanged = true;
+                    vsyncMode = ocVSyncMode_Disabled;
+                } else if (e.data.key_down.key == 'W') {
+                    vsyncChanged = true;
+                    vsyncMode = ocVSyncMode_Enabled;
+                } else if (e.data.key_down.key == 'E') {
+                    vsyncChanged = true;
+                    vsyncMode = ocVSyncMode_Adaptive;
+                }
+
+                if (vsyncChanged) {
+                    ocGame_RecreateWindowRT(vsyncMode);
+                }
+            }
+
+            // MSAA
+            {
+                unsigned int msaa = 0;
+                if (e.data.key_down.key == '1') {
+                    msaa = 1;
+                } else if (e.data.key_down.key == '2') {
+                    msaa = 2;
+                } else if (e.data.key_down.key == '3') {
+                    msaa = 4;
+                } else if (e.data.key_down.key == '4') {
+                    msaa = 8;
+                }
+
+                if (msaa != 0) {
+                    // Changing MSAA requires us to completely uninitialize the graphics system and re-create it. Thanks to Vulkan for that one.
+                    // TODO: Come up with a solution for this one. May need to make it so that it can only be changed from the main menu.
+                }
+            }
+
+
+        } break;
+
+        case OC_WINDOW_EVENT_KEY_UP:
+        {
+        } break;
+
+        default: break;
+    }
+}
+
 int ocInitAndRun(int argc, char** argv)
 {
     // Clear the global data to 0 before doing anything.
     ocZeroObject(&g_Game);
 
     // Engine.
-    ocResult result = ocEngineInit(argc, argv, &g_Game, &g_Game.engine);
+    ocResult result = ocEngineInit(argc, argv, ocGame_OnStep, ocGame_OnWindowEvent, &g_Game, &g_Game.engine);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
@@ -205,112 +311,6 @@ done:
     ocWindowUninit(&g_Game.window);
     ocEngineUninit(&g_Game.engine);
     return result;
-}
-
-void ocStep(ocEngineContext* pEngine)
-{
-    (void)pEngine;
-
-    double dt = ocTimerTick(&g_Game.timer);
-
-    //printf("Step: %f\n", dt);
-
-    // Simple animation test.
-    //ocGraphicsWorldSetObjectPosition(&g_Game.world.graphicsWorld, g_Game.pMeshObject, g_Game.pMeshObject->_position + glm::vec4(0.1f * dt, 0, 0, 0));
-    //ocGraphicsWorldSetObjectScale(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.5f, 0.5f, 0.5f));
-    //g_Game.pWindowRT->view = glm::translate(g_Game.pWindowRT->view, glm::vec3(0.1f * dt, 0, 0));
-
-
-    ocWorldStep(&g_Game.world, dt);
-    ocWorldDraw(&g_Game.world);
-
-    // Present last.
-    ocGraphicsPresent(&g_Game.engine.graphics, g_Game.pSwapchain);
-}
-
-void ocOnWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
-{
-    (void)pEngine;
-
-    // Don't care about any events before initialization is complete.
-    if ((g_Game.flags & OC_GAME_FLAG_IS_INITIALIZED) == 0) {
-        return;
-    }
-
-    switch (e.type)
-    {
-        case OC_WINDOW_EVENT_SIZE:
-        {
-            // The render target and swapchain for this window needs to be deleted and recreated.
-            ocGame_RecreateWindowRT(g_Game.pSwapchain->vsyncMode);
-        } break;
-
-
-        case OC_WINDOW_EVENT_MOUSE_MOVE:
-        {
-        } break;
-
-        case OC_WINDOW_EVENT_MOUSE_BUTTON_DOWN:
-        {
-        } break;
-
-        case OC_WINDOW_EVENT_MOUSE_BUTTON_UP:
-        {
-        } break;
-
-
-        case OC_WINDOW_EVENT_KEY_DOWN:
-        {
-            // TESTING
-
-            // V-Sync switching.
-            {
-                ocBool32 vsyncChanged = false;
-                ocVSyncMode vsyncMode = ocVSyncMode_Enabled;
-                if (e.data.key_down.key == 'Q') {
-                    vsyncChanged = true;
-                    vsyncMode = ocVSyncMode_Disabled;
-                } else if (e.data.key_down.key == 'W') {
-                    vsyncChanged = true;
-                    vsyncMode = ocVSyncMode_Enabled;
-                } else if (e.data.key_down.key == 'E') {
-                    vsyncChanged = true;
-                    vsyncMode = ocVSyncMode_Adaptive;
-                }
-
-                if (vsyncChanged) {
-                    ocGame_RecreateWindowRT(vsyncMode);
-                }
-            }
-
-            // MSAA
-            {
-                unsigned int msaa = 0;
-                if (e.data.key_down.key == '1') {
-                    msaa = 1;
-                } else if (e.data.key_down.key == '2') {
-                    msaa = 2;
-                } else if (e.data.key_down.key == '3') {
-                    msaa = 4;
-                } else if (e.data.key_down.key == '4') {
-                    msaa = 8;
-                }
-
-                if (msaa != 0) {
-                    // Changing MSAA requires us to completely uninitialize the graphics system and re-create it. Thanks to Vulkan for that one.
-                    // TODO: Come up with a solution for this one. May need to make it so that it can only be changed from the main menu.
-                }
-            }
-
-
-        } break;
-
-        case OC_WINDOW_EVENT_KEY_UP:
-        {
-        } break;
-
-        default: break;
-    }
 }
 
 

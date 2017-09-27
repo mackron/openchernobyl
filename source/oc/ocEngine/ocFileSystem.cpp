@@ -206,3 +206,119 @@ void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
         drpath_append(pathOut, pathOutSize, "var/log");
     }
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// General File System APIs
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef OC_WIN32
+ocBool32 ocIsDirectory_Win32(const char* path)
+{
+    ocAssert(path != NULL);
+
+    DWORD attributes = GetFileAttributesA(path);
+    return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
+
+ocString ocGetCurrentDirectory_Win32()
+{
+    DWORD len = GetCurrentDirectoryA(0, NULL);
+    if (len == 0) {
+        return NULL;
+    }
+
+    char* pDir = (char*)ocMalloc(len);
+    if (pDir == NULL) {
+        return NULL;    // Out of memory.
+    }
+
+    len = GetCurrentDirectoryA(len, pDir);
+    if (len == 0) {
+        ocFree(pDir);
+        return NULL;
+    }
+
+    ocString result = ocMakeString(pDir);
+    ocFree(pDir);
+
+    return result;
+}
+
+ocResult ocSetCurrentDirectory_Win32(const char* path)
+{
+    if (SetCurrentDirectoryA(path) == 0) {
+        return OC_RESULT_UNKNOWN_ERROR;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+#endif
+
+#ifdef OC_POSIX
+ocBool32 ocIsDirectory_Posix(const char* path)
+{
+    ocAssert(path != NULL);
+
+    struct stat info;
+    if (stat(path, &info) != 0) {
+        return OC_FALSE;   // Likely the folder doesn't exist.
+    }
+
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
+ocString ocGetCurrentDirectory_Posix()
+{
+    char* pDirTemp = getcwd(NULL, 0);
+    if (pDir == NULL) {
+        return NULL;
+    }
+
+    ocString result = ocMakeString(pDirTemp);
+    free(pDirTemp);
+
+    return result;
+}
+
+ocResult ocSetCurrentDirectory_Posix(const char* path)
+{
+    if (chdir(path) != 0) {
+        return OC_RESULT_UNKNOWN_ERROR;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+#endif
+
+ocBool32 ocIsDirectory(const char* path)
+{
+#ifdef OC_WIN32
+    return ocIsDirectory_Win32(path);
+#endif
+#ifdef OC_POSIX
+    return ocIsDirectory_Posix(path);
+#endif
+}
+
+ocString ocGetCurrentDirectory()
+{
+#ifdef OC_WIN32
+    return ocGetCurrentDirectory_Win32();
+#endif
+#ifdef OC_POSIX
+    return ocGetCurrentDirectory_Posix();
+#endif
+}
+
+ocResult ocSetCurrentDirectory(const char* path)
+{
+#ifdef OC_WIN32
+    return ocSetCurrentDirectory_Win32(path);
+#endif
+#ifdef OC_POSIX
+    return ocSetCurrentDirectory_Posix(path);
+#endif
+}

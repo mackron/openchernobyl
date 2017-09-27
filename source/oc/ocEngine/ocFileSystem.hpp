@@ -106,3 +106,22 @@ ocResult ocFileWriteLine(ocFile* pFile, const char* str);
 
 // Retrieves the path of the directory that contains the log file.
 void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize);
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// General File System APIs
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Determines whether or not the given path refers to an actual directory.
+ocBool32 ocIsDirectory(const char* path);
+
+// Retrieves the current directory.
+//
+// The returned string must be freed with ocFreeString().
+ocString ocGetCurrentDirectory();
+
+// Sets the current directory of the main file system.
+ocResult ocSetCurrentDirectory(const char* path);

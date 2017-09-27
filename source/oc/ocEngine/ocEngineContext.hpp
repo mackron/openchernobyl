@@ -2,10 +2,15 @@
 
 #define OC_ENGINE_FLAG_PORTABLE     (1 << 0)
 
+typedef void (* ocStepProc)       (ocEngineContext* pEngine);
+typedef void (* ocWindowEventProc)(ocEngineContext* pEngine, ocWindowEvent e);
+
 struct ocEngineContext
 {
     int argc;
     char** argv;
+    ocStepProc onStep;
+    ocWindowEventProc onWindowEvent;
     void* pUserData;
 
     ocFileSystem fs;
@@ -20,10 +25,23 @@ struct ocEngineContext
 };
 
 // ocEngineInit
-ocResult ocEngineInit(int argc, char** argv, void* pUserData, ocEngineContext* pEngine);
+ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventProc onWindowEvent, void* pUserData, ocEngineContext* pEngine);
 
 // ocEngineUninit
 void ocEngineUninit(ocEngineContext* pEngine);
+
+
+// Steps the game.
+//
+// You should not normally need to call this directly - it will be called by the platform layer in the main loop.
+//
+// This is where the onStep callback that was passed into ocEngineInit() is called.
+void ocStep(ocEngineContext* pEngine);
+
+// Handles a window event. 
+//
+// You should not normally need to call this directly - it will be called by the platform layer in the main loop.
+void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e);
 
 
 // Whether or not we are running the portable version of the game.

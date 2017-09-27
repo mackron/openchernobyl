@@ -174,3 +174,21 @@ ocBool32 ocCmdLineIsSet(int argc, char** argv, const char* arg)
 
     return false;
 }
+
+const char* ocCmdLineGetValue(int argc, char** argv, const char* key)
+{
+    if (argv == NULL || key == NULL) return false;
+
+    // Naive at the moment.
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], key) == 0) {
+            if (i+1 < argc) {
+                return argv[i+1];
+            } else {
+                return NULL;
+            }
+        }
+    }
+
+    return NULL;
+}

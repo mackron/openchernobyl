@@ -355,26 +355,26 @@ OC_INLINE void ocTrim(char* str)
 
 
 
-typedef char* oc_string;
+typedef char* ocString;
 
 // Creates a newly allocated string. Free the string with oc_free_string().
-oc_string ocMakeString(const char* str);
+ocString ocMakeString(const char* str);
 
 // Creates a formatted string. Free the string with oc_free_string().
-oc_string ocMakeStringv(const char* format, va_list args);
-oc_string ocMakeStringf(const char* format, ...);
+ocString ocMakeStringv(const char* format, va_list args);
+ocString ocMakeStringf(const char* format, ...);
 
-// Appends a string to another oc_string.
+// Appends a string to another ocString.
 //
 // This free's "lstr". Use this API like so: "lstr = oc_append_string(lstr, rstr)". It works the same way as realloc().
 //
 // Use oc_make_stringf("%s%s", str1, str2) to append to C-style strings together. An optimized solution for this may be implemented in the future.
-oc_string ocAppendString(oc_string lstr, const char* rstr);
+ocString ocAppendString(ocString lstr, const char* rstr);
 
-// Appends a formatted string to another oc_string.
-oc_string ocAppendStringv(oc_string lstr, const char* format, va_list args);
-oc_string ocAppendStringf(oc_string lstr, const char* format, ...);
+// Appends a formatted string to another ocString.
+ocString ocAppendStringv(ocString lstr, const char* format, va_list args);
+ocString ocAppendStringf(ocString lstr, const char* format, ...);
 
 
 // Frees a string created by oc_make_string*()
-void ocFreeString(oc_string str);
+void ocFreeString(ocString str);
