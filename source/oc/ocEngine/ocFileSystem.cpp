@@ -322,3 +322,64 @@ ocResult ocSetCurrentDirectory(const char* path)
     return ocSetCurrentDirectory_Posix(path);
 #endif
 }
+
+ocResult ocCreateDirectory(const char* directoryPath)
+{
+    if (directoryPath == NULL) return OC_RESULT_INVALID_ARGS;
+
+#ifdef OC_WIN32
+    if (CreateDirectoryA(directoryPath, NULL) == 0) {
+        return OC_RESULT_UNKNOWN_ERROR;
+    }
+    return OC_RESULT_SUCCESS;
+#endif
+#ifdef OC_POSIX
+    if (mkdir(directoryPath, 0777) != 0) {
+        return OC_REUSLT_UNKNOWN_ERROR;
+    }
+    return OC_RESULT_SUCCESS;
+#endif
+}
+
+ocResult ocCreateDirectoryRecursive(const char* directoryPath)
+{
+    if (directoryPath == NULL || directoryPath[0] == '\0') {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    // All we need to do is iterate over every segment in the path and try creating the directory.
+    char runningPath[OC_MAX_PATH];
+    ocZeroMemory(runningPath, sizeof(runningPath));
+
+    size_t i = 0;
+    for (;;) {
+        if (i >= sizeof(runningPath)-1) {
+            return OC_RESULT_PATH_TOO_LONG;   // Path is too long.
+        }
+
+        if (directoryPath[0] == '\0' || directoryPath[0] == '/' || directoryPath[0] == '\\') {
+            if (runningPath[0] != '\0' && !(runningPath[1] == ':' && runningPath[2] == '\0')) {   // <-- If the running path is empty, it means we're trying to create the root directory.
+                if (!ocIsDirectory(runningPath)) {
+                    ocResult result = ocCreateDirectory(runningPath);
+                    if (result != OC_RESULT_SUCCESS) {
+                        return result;
+                    }
+                }
+            }
+
+            //printf("%s\n", runningPath);
+            runningPath[i++] = '/';
+            runningPath[i]   = '\0';
+
+            if (directoryPath[0] == '\0') {
+                break;
+            }
+        } else {
+            runningPath[i++] = directoryPath[0];
+        }
+
+        directoryPath += 1;
+    }
+
+    return OC_RESULT_SUCCESS;
+}

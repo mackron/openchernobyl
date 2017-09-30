@@ -125,3 +125,9 @@ ocString ocGetCurrentDirectory();
 
 // Sets the current directory of the main file system.
 ocResult ocSetCurrentDirectory(const char* path);
+
+// Creates a directory on the main file system.
+ocResult ocCreateDirectory(const char* directoryPath);
+
+// Recursively creates a directory on the main file system.
+ocResult ocCreateDirectoryRecursive(const char* directoryPath);
