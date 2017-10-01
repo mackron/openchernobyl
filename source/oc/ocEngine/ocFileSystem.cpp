@@ -347,6 +347,7 @@ ocResult ocCreateDirectoryRecursive(const char* directoryPath)
         return OC_RESULT_INVALID_ARGS;
     }
 
+    // TODO: Don't restrict this to OC_MAX_PATH.
     // All we need to do is iterate over every segment in the path and try creating the directory.
     char runningPath[OC_MAX_PATH];
     ocZeroMemory(runningPath, sizeof(runningPath));
@@ -382,4 +383,213 @@ ocResult ocCreateDirectoryRecursive(const char* directoryPath)
     }
 
     return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocResultFromERRNO(errno_t e)    // TODO: Move this API somewhere more generic.
+{
+    switch (e) {
+        case EACCES: return OC_RESULT_PERMISSION_DENIED;
+        case EEXIST: return OC_RESULT_ALREADY_EXISTS;
+        case EINVAL: return OC_RESULT_INVALID_ARGS;
+        case EMFILE: return OC_RESULT_TOO_MANY_OPEN_FILES;
+        case ENOENT: return OC_RESULT_DOES_NOT_EXIST;
+        case ENOMEM: return OC_RESULT_OUT_OF_MEMORY;
+        default: break;
+    }
+
+    return OC_RESULT_UNKNOWN_ERROR;
+}
+
+OC_PRIVATE ocResult ocFOpen(const char* filePath, const char* openMode, FILE** ppFileOut)
+{
+    FILE* pFile;
+#ifdef _MSC_VER
+    if (fopen_s(&pFile, filePath, openMode) != 0) {
+        goto on_error;
+    }
+#else
+    pFile = fopen(filePath, openMode);
+    if (pFile == NULL) {
+        goto on_error;
+    }
+#endif
+
+    if (ppFileOut) *ppFileOut = pFile;
+    return OC_RESULT_SUCCESS;
+
+on_error:
+    return ocResultFromERRNO(errno);
+}
+
+OC_PRIVATE ocResult ocFClose(FILE* pFile)
+{
+    fclose(pFile);
+    return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocFSeek(FILE* pFile, ocInt64 offset, int origin)
+{
+    // TODO: Proper 64-bit seek.
+    int result = fseek(pFile, (long)offset, origin);
+    if (result != 0) {
+        return ocResultFromERRNO(errno);
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocFTell(FILE* pFile, ocUInt64* pPosOut)
+{
+    // TODO: Proper 64-bit tell.
+    long result = ftell(pFile);
+    if (result == -1L) {
+        return ocResultFromERRNO(errno);
+    }
+
+    if (pPosOut) *pPosOut = result;
+    return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocFRead(FILE* pFile, size_t bytesToRead, void* pData, size_t* pBytesRead)
+{
+    if (pBytesRead) *pBytesRead = 0;
+
+    // TODO: Proper 64-bit read.
+    size_t bytesRead = fread(pData, 1, bytesToRead, pFile);
+    if (bytesRead != bytesToRead) {
+        if (feof(pFile)) {
+            if (pBytesRead) *pBytesRead = bytesRead;
+            return OC_RESULT_AT_END_OF_FILE;
+        } else {
+            return ocResultFromERRNO(errno);
+        }
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocFWrite(FILE* pFile, size_t bytesToWrite, const void* pData, size_t* pBytesWritten)
+{
+    if (pBytesWritten) *pBytesWritten = 0;
+
+    // TODO: Proper 64-bit write.
+    size_t bytesWritten = fwrite(pData, 1, bytesToWrite, pFile);
+    if (bytesWritten != bytesToWrite) {
+        return ocResultFromERRNO(errno);
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocOpenAndReadFileWithExtraData(const char* filePath, void** ppFileData, size_t* pFileSizeOut, size_t extraBytes)
+{
+    if (pFileSizeOut) *pFileSizeOut = 0;   // For safety.
+
+    if (filePath == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    FILE* pFile;
+    ocResult result = ocFOpen(filePath, "rb", &pFile);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    ocAssert(pFile != NULL);
+
+    result = ocFSeek(pFile, 0, SEEK_END);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFClose(pFile);
+        return result;
+    }
+
+    ocUInt64 fileSize;
+    result = ocFTell(pFile, &fileSize);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFClose(pFile);
+        return result;
+    }
+
+    result = ocFSeek(pFile, 0, SEEK_SET);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFClose(pFile);
+        return result;
+    }
+
+    if ((fileSize + extraBytes > SIZE_MAX) && (fileSize + extraBytes > fileSize)) {
+        ocFClose(pFile);
+        return OC_RESULT_TOO_LARGE;    // File is too big.
+    }
+
+    void* pFileData = ocMalloc((size_t)fileSize + extraBytes);      // <-- Safe cast due to the check above.
+    if (pFileData == NULL) {
+        ocFClose(pFile);
+        return OC_RESULT_OUT_OF_MEMORY;
+    }
+
+    result = ocFRead(pFile, (size_t)fileSize, pFileData, NULL);     // <-- Safe cast.
+    if (result != OC_RESULT_SUCCESS) {
+        ocFree(pFileData);
+        ocFClose(pFile);
+        return result;
+    }
+
+    ocFClose(pFile);
+
+    if (ppFileData) *ppFileData = pFileData;
+    if (pFileSizeOut) *pFileSizeOut = (size_t)fileSize;
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOpenAndReadFile(const char* filePath, void** ppFileData, size_t* pFileSize)
+{
+    return ocOpenAndReadFileWithExtraData(filePath, ppFileData, pFileSize, 0);
+}
+
+ocResult ocOpenAndReadTextFile(const char* filePath, char** ppFileData, size_t* pFileSize)
+{
+    char* pFileData;
+    ocResult result = ocOpenAndReadFileWithExtraData(filePath, (void**)&pFileData, pFileSize, 1);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    pFileData[*pFileSize] = '\0';
+
+    if (ppFileData) {
+        *ppFileData = pFileData;
+    } else {
+        ocFree(pFileData);
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOpenAndWriteFile(const char* filePath, const void* pFileData, size_t dataSize)
+{
+    FILE* pFile;
+    ocResult result = ocFOpen(filePath, "wb", &pFile);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    if (pFileData != NULL && dataSize > 0) {
+        result = ocFWrite(pFile, dataSize, pFileData, NULL);
+        if (result != OC_RESULT_SUCCESS) {
+            ocFClose(pFile);
+            return result;
+        }
+    }
+
+    ocFClose(pFile);
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOpenAndWriteTextFile(const char* filePath, const char* pFileData)
+{
+    if (pFileData == NULL) {
+        pFileData = "";
+    }
+
+    return ocOpenAndWriteFile(filePath, pFileData, strlen(pFileData));
 }

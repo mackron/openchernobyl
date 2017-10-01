@@ -131,3 +131,22 @@ ocResult ocCreateDirectory(const char* directoryPath);
 
 // Recursively creates a directory on the main file system.
 ocResult ocCreateDirectoryRecursive(const char* directoryPath);
+
+// High-level helper for loading the entire content of a file on the main file system into memory.
+//
+// Free the returned data with ocFree().
+ocResult ocOpenAndReadFile(const char* filePath, void** ppFileData, size_t* pFileSize);
+
+// High-level helper for loading the entire content of a text file on the main file system into memory.
+//
+// Free the returned data with ocFree().
+//
+// The difference between ocOpenAndReadTextFile() and ocOpenAndReadFile() is that the former will append
+// a null terminator to the output data.
+ocResult ocOpenAndReadTextFile(const char* filePath, char** ppFileData, size_t* pFileSize);
+
+// Creates a new file with the given data.
+ocResult ocOpenAndWriteFile(const char* filePath, const void* pFileData, size_t dataSize);
+
+// Creates a new file with the given string.
+ocResult ocOpenAndWriteTextFile(const char* filePath, const char* pFileData);

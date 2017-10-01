@@ -1,5 +1,14 @@
 // Copyright (C) 2017 David Reid. See included LICENSE file.
 
+#if !defined(_WIN32)
+#ifndef _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE
+#endif
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+#endif
+
 #include "ocEngine.hpp"
 
 #include "ocMisc.cpp"
