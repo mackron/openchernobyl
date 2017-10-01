@@ -18,6 +18,7 @@ typedef int ocResult;
 #define OC_RESULT_TOO_MANY_RENDER_TARGETS       -1025
 #define OC_RESULT_INVALID_FRAMEBUFFER           -1026
 #define OC_RESULT_SHADER_ERROR                  -1027
+#define OC_RESULT_FAILED_TO_COMPILE_SHADER      -1028
 
 // Audio
 #define OC_RESULT_FAILED_TO_INIT_AUDIO          -2048

@@ -2,9 +2,11 @@
 
 #include "../oc/ocEngine/ocEngine.cpp"
 
+#include "ocBuildUtils.hpp"
 #include "ocBuildShaders.hpp"
 #include "ocBuildPipelines.hpp"
 
+#include "ocBuildUtils.cpp"
 #include "ocBuildShaders.cpp"
 #include "ocBuildPipelines.cpp"
 
