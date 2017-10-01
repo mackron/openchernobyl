@@ -107,6 +107,33 @@ ocString ocAppendStringf(ocString lstr, const char* format, ...)
     return str;
 }
 
+ocString ocAppendStringLength(ocString lstr, const char* rstr, size_t rstrLen)
+{
+    if (rstr == NULL) {
+        rstr = "";
+    }
+
+    if (lstr == NULL) {
+        return ocMakeString(rstr);
+    }
+
+    size_t lstrLen = ocStringLength(lstr);
+    char* str = (char*)ocRealloc(lstr, lstrLen + rstrLen + 1);
+    if (str == NULL) {
+        return NULL;
+    }
+
+    oc_strncat_s(str, lstrLen + rstrLen + 1, rstr, rstrLen);
+    str[lstrLen + rstrLen] = '\0';
+
+    return str;
+}
+
+size_t ocStringLength(ocString str)
+{
+    return strlen(str);
+}
+
 void ocFreeString(ocString str)
 {
     ocFree(str);

@@ -355,7 +355,7 @@ ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWor
 
     // Shaders. Should probably make this part of the context...
     char* errorStr;
-    pWorld->testProgramGL = drglCreateSimpleProgramFromStrings(&gl, g_VertexShader_Test, g_FragmentShader_Test, &errorStr);
+    pWorld->testProgramGL = drglCreateSimpleProgramFromStrings(&gl, g_ocShader_Default_VERTEX, g_ocShader_Default_FRAGMENT, &errorStr);
     if (pWorld->testProgramGL == 0) {
         ocErrorf(pGraphics->pEngine, "%s\n", errorStr);
         drglFree(errorStr);
@@ -396,8 +396,8 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     gl.UseProgram(pWorld->testProgramGL);
 
     // Camera.
-    gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Projection"), 1, GL_FALSE, glm::value_ptr(pRT->projection));
-    gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "View"),       1, GL_FALSE, glm::value_ptr(pRT->view));
+    gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Camera.Projection"), 1, GL_FALSE, glm::value_ptr(pRT->projection));
+    gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Camera.View"),       1, GL_FALSE, glm::value_ptr(pRT->view));
 
     gl.ClearColor(0, 0, 1, 1);
     gl.ClearDepth(1);
@@ -411,17 +411,30 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
         if (pObject->type == ocGraphicsObjectType_Mesh) {
             ocGraphicsMesh* pMesh = pObject->data.mesh.pResource;   // <-- For ease of use.
 
-            gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Model"), 1, GL_FALSE, glm::value_ptr(pObject->_transform));
-            gl.Uniform1i(gl.GetUniformLocation(pWorld->testProgramGL, "Texture"), 0);
+            gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Object.Model"), 1, GL_FALSE, glm::value_ptr(pObject->_transform));
+            gl.Uniform1i(gl.GetUniformLocation(pWorld->testProgramGL, "Texture0"), 0);
 
-            gl.EnableClientState(GL_VERTEX_ARRAY);
-            gl.EnableClientState(GL_TEXTURE_COORD_ARRAY);
-            gl.EnableClientState(GL_NORMAL_ARRAY);
+            //gl.EnableClientState(GL_VERTEX_ARRAY);
+            //gl.EnableClientState(GL_TEXTURE_COORD_ARRAY);
+            //gl.EnableClientState(GL_NORMAL_ARRAY);
+
+            
+
+            GLint loc0 = gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Position");
+            GLint loc1 = gl.GetAttribLocation(pWorld->testProgramGL, "VERT_TexCoord");
+            //GLint loc2 = gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Normal");
+
+            gl.EnableVertexAttribArray(loc0);
+            gl.EnableVertexAttribArray(loc1);
 
             gl.BindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
-            gl.VertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
-            gl.TexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
-            gl.NormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
+            gl.VertexAttribPointer(gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Position"), 3, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
+            gl.VertexAttribPointer(gl.GetAttribLocation(pWorld->testProgramGL, "VERT_TexCoord"), 2, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
+            //gl.VertexAttribPointer(gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Normal"),   3, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
+
+            //gl.VertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
+            //gl.TexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
+            //gl.NormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
 
             gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
             gl.DrawElements(ocToOpenGLPrimitiveType(pMesh->primitiveType), pMesh->indexCount, ocToOpenGLIndexFormat(pMesh->indexFormat), 0);

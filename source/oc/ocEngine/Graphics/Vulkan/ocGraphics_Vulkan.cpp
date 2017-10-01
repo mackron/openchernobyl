@@ -475,12 +475,12 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
     VkResult vkresult = VK_SUCCESS;
 
     // Shaders.
-    vkresult = drvkCreateShaderModule(pGraphics->device, sizeof(g_VertexShader_Test), (const uint32_t*)g_VertexShader_Test, NULL, &pGraphics->mainPipeline_VS);
+    vkresult = drvkCreateShaderModule(pGraphics->device, sizeof(g_ocShader_Default_VERTEX), (const uint32_t*)g_ocShader_Default_VERTEX, NULL, &pGraphics->mainPipeline_VS);
     if (vkresult != VK_SUCCESS) {
         return ocToResultFromVulkan(vkresult);
     }
 
-    vkresult = drvkCreateShaderModule(pGraphics->device, sizeof(g_FragmentShader_Test), (const uint32_t*)g_FragmentShader_Test, NULL, &pGraphics->mainPipeline_FS);
+    vkresult = drvkCreateShaderModule(pGraphics->device, sizeof(g_ocShader_Default_FRAGMENT), (const uint32_t*)g_ocShader_Default_FRAGMENT, NULL, &pGraphics->mainPipeline_FS);
     if (vkresult != VK_SUCCESS) {
         vkDestroyShaderModule(pGraphics->device, pGraphics->mainPipeline_VS, NULL);
         return ocToResultFromVulkan(vkresult);

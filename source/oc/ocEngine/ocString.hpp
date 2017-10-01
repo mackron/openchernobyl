@@ -375,6 +375,13 @@ ocString ocAppendString(ocString lstr, const char* rstr);
 ocString ocAppendStringv(ocString lstr, const char* format, va_list args);
 ocString ocAppendStringf(ocString lstr, const char* format, ...);
 
+// Same as dtk_append_string(), except restricts it to a maximum number of characters and does not require the input
+// string to be null terminated.
+ocString ocAppendStringLength(ocString lstr, const char* rstr, size_t rstrLen);
+
+// Retrieves the length of the given string.
+size_t ocStringLength(ocString str);
+
 
 // Frees a string created by oc_make_string*()
 void ocFreeString(ocString str);
