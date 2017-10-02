@@ -79,3 +79,5 @@ template <typename T> ocResult ocStackTop(ocStack<T>* pStack, T* pItemOut)
     if (pItemOut) *pItemOut = pStack->pItems[pStack->count-1];
     return OC_RESULT_SUCCESS;
 }
+
+

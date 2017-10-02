@@ -1,5 +1,18 @@
 {
     "Name"           : "Default",
     "VertexShader"   : "ocShader_Default.vert",
-    "FragmentShader" : "ocShader_Default.frag"
+    "FragmentShader" : "ocShader_Default.frag",
+    "VertexFormats"  : [
+        "P3T2N3",
+        "P3T2N3T3B3"
+    ],
+    "Primitives"     : [
+        "Point",
+        "Line",
+        "Triangle"
+    ],
+    "InputGeometryTypes" : [
+        "WorldMesh"
+    ]
+    "SupportMSAA"    : true,
 }

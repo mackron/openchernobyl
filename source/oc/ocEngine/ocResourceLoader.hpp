@@ -65,7 +65,7 @@ void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData);
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define OC_SCENE_OBJECT_NONE    (~0)
+#define OC_SCENE_OBJECT_NONE    (~0UL)
 
 enum ocSceneSubresourceType
 {
