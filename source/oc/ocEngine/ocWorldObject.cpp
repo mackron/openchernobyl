@@ -30,7 +30,7 @@ void ocWorldObjectUninit(ocWorldObject* pObject)
 
 ocBool32 ocWorldObjectIsInWorld(ocWorldObject* pObject)
 {
-    if (pObject == NULL) return false;
+    if (pObject == NULL) return OC_FALSE;
     return pObject->isInWorld;
 }
 

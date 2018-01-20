@@ -48,10 +48,10 @@ ocResult ocOCDDataBlockWriteString(ocOCDDataBlock* pBlock, const char* pString, 
         return result;
     }
 
-    return ocOCDDAtaBlockWritePadding32(pBlock);
+    return ocOCDDataBlockWritePadding32(pBlock);
 }
 
-ocResult ocOCDDAtaBlockWritePadding32(ocOCDDataBlock* pBlock)
+ocResult ocOCDDataBlockWritePadding32(ocOCDDataBlock* pBlock)
 {
     ocUInt32 padding = 0;
     return ocOCDDataBlockWrite(pBlock, &padding, pBlock->dataSize & 0x3, NULL);
