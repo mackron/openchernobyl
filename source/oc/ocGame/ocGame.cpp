@@ -15,13 +15,13 @@ OC_PRIVATE ocResult ocGame_RecreateWindowRT(ocVSyncMode vsyncMode)
 
     ocResult result = ocGraphicsCreateSwapchain(&g_Game.engine.graphics, &g_Game.window, vsyncMode, &g_Game.pSwapchain);
     if (result != OC_RESULT_SUCCESS) {
-        ocErrorf(&g_Game.engine, "Window was resized, but there was an error (%d) recreating the swapchain.", result);
+        ocErrorf(&g_Game.engine, "Error (%d) recreating the swapchain.", result);
         return result;
     }
 
     result = ocGraphicsWorldCreateRTFromSwapchain(&g_Game.world.graphicsWorld, g_Game.pSwapchain, &g_Game.pWindowRT);
     if (result != OC_RESULT_SUCCESS) {
-        ocErrorf(&g_Game.engine, "Window was resized, but there was an error (%d) recreating the render target.", result);
+        ocErrorf(&g_Game.engine, "Error (%d) recreating the render target.", result);
         return result;
     }
 
