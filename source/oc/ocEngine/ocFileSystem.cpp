@@ -129,16 +129,22 @@ ocResult ocFileSeek(ocFile* pFile, int64_t bytesToSeek, ocSeekOrigin origin)
     return ocToResult(drfs_seek(pFile->pInternalFile, bytesToSeek, ocToDRFSSeekOrigin(origin)));
 }
 
-uint64_t ocFileTell(ocFile* pFile)
+ocResult ocFileTell(ocFile* pFile, uint64_t* pPos)
 {
-    if (pFile == NULL) return 0;
-    return drfs_tell(pFile->pInternalFile);
+    if (pFile == NULL || pPos == NULL) return OC_RESULT_INVALID_ARGS;
+
+    // Currently no error detection with dr_fs.
+    *pPos = drfs_tell(pFile->pInternalFile);
+    return OC_RESULT_SUCCESS;
 }
 
-uint64_t ocFileSize(ocFile* pFile)
+ocResult ocFileSize(ocFile* pFile, uint64_t* pSize)
 {
-    if (pFile == NULL) return 0;
-    return drfs_size(pFile->pInternalFile);
+    if (pFile == NULL) return OC_RESULT_INVALID_ARGS;
+
+    // Currently no error detection with dr_fs.
+    *pSize = drfs_size(pFile->pInternalFile);
+    return OC_RESULT_SUCCESS;
 }
 
 void ocFileFlush(ocFile* pFile)

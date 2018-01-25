@@ -6,7 +6,7 @@ The OCD file format is a monolithic file format for storing different types of d
 Open Chernobyl. OCD stands for Open Chernobyl Data. It is optimized for Open Chernobyl and is
 focused on simplicity and avoiding over-engineering.
 
-Everything is little-endian and aligned to 32-bits.
+Everything is little-endian and aligned to 64-bits.
 
 Header
 ------
@@ -35,7 +35,7 @@ Images ('IMG1')
 [24 * <Mipmap Count> bytes] Mipmap Data
 [8 bytes] Image Data Size (The total size of the image data including the entire mipmap chain. Does not include padding.)
 [<Image Data Size> bytes] Image Data
-[<Image Data Size> mod 4 bytes] Padding (for 32-bit alignment)
+[<Image Data Size> mod 8 bytes] Padding (for 64-bit alignment)
 
 The format of each <Mipmap Data> is:
 [8 bytes] Data Offset (Offset of <Image Data>)
@@ -60,12 +60,14 @@ Format | Description
 
 Scenes ('SCN1')
 ---------------
-Not yet implemented.
 
-<BRAINSTORMING 1>
+* Everything is 64-bit aligned
+  * All 64-bit variables should be on a 64-bit boundary
+* Data offsets are relative to the first byte of this section (immediately after the OCD header)
+
 [4] [Subresource Count]
-[8] [Subresource Offset]
 [4] [Object Count]
+[8] [Subresource Offset]
 [8] [Object Offset]
 [8] [Payload Data Size]
 [?] [Payload]
@@ -74,7 +76,7 @@ Not yet implemented.
     [Subresources]
         [For Each...]
         [8] [Path Offset]
-        [4] [Flags]
+        [8] [Flags]
                 [Bit 0] [IsInternal]
         [8] [Data Size]
         [8] [Data Offset]
@@ -96,6 +98,7 @@ Not yet implemented.
     [Components]
         [For Each...]
         [4] [Component Type]
+        [4] [0 Byte Padding]
         [8] [Component Data Size]
         [8] [Component Data Offset]
         
@@ -104,6 +107,7 @@ Not yet implemented.
         [?] [Component Data]
             [Component Data (Scene)]
                 [4] [Subresource Index]
+                [4] [0 Byte Padding]
             [Component Data (Mesh)]
                 [4] [Group Count]
                 [?] [Groups]
@@ -112,13 +116,15 @@ Not yet implemented.
                     [4] [Primitive Type (Points, Lines, Triangles)]
                     [4] [Vertex Format]
                     [4] [Vertex Count]
-                    [8] [Vertex Data Offset]
+                    [8] [Vertex Data Offset (Relative to this data block)]
                     [4] [Index Format]
                     [4] [Index Count]
-                    [8] [Index Data Offset]
+                    [8] [Index Data Offset (Relative to this data block)]
                 [?] [Vertex Data]
+                [?] [0 Byte Padding for 64-bit Alignment]
                 [?] [Index Data]
-        [?] [0 Byte Padding for 32-bit Alignment]
+                [?] [0 Byte Padding for 64-bit Alignment]
+        [?] [0 Byte Padding for 64-bit Alignment]
 
     [Subresource Data]
         [For Each...]
@@ -128,28 +134,15 @@ Not yet implemented.
                 [?] [Actual File Data]
             [Else]
                 [0] [Nothing]
-        [?] [0 Byte Padding for 32-bit Alignment]
+        [?] [0 Byte Padding for 64-bit Alignment]
     
     [String Pool]
         [For Each...]
         [?] [String (Null Terminated)]
-        [?] [0 Byte Padding for 32-bit Alignment]
+        [?] [0 Byte Padding for 64-bit Alignment]
         
 </BRAINSTORMING 1>
 
-BRAINSTORMING
-- Need to think about components.
-[4 bytes] Subresource Count
-[8 bytes] Subresource Data Offset
-[4 bytes] Object Count
-[8 bytes] Object Data Offset
-[8 bytes] Total Data Size
-[<Total Data Size> bytes] Raw Data
-
-Scenes are designed for efficient loading. There is a single pool of raw data which can be
-allocated in one big chunk. Data is then referenced using a simple offset, which is alway
-an offet of <Raw Data> (not the beginning of the file).
-/BRAINSTORMING
 
 
 

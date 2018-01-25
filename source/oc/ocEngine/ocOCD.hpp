@@ -6,6 +6,8 @@
 #define OC_OCD_TYPE_ID_IMAGE    0x31474d49 /*'IMG1' LE*/
 #define OC_OCD_TYPE_ID_SCENE    0x314e4353 /*'SCN1' LE*/
 
+#define OC_OCD_SCENE_SUBRESOURCE_FLAG_IS_INTERNAL   0x0000000000000001ULL
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -28,13 +30,18 @@ ocResult ocOCDDataBlockUninit(ocOCDDataBlock* pBlock);
 // Writes data to the data block, returning the offset of the new data within the block.
 ocResult ocOCDDataBlockWrite(ocOCDDataBlock* pBlock, const void* pData, ocSizeT dataSize, ocUInt64* pOffsetOut);
 
+template <typename T> ocResult ocOCDDataBlockWrite(ocOCDDataBlock* pBlock, T value, ocUInt64* pOffsetOut = NULL)
+{
+    return ocOCDDataBlockWrite(pBlock, &value, sizeof(value), pOffsetOut);
+}
+
 // Writes a null-terminated string to the data block.
 //
 // The data will be padded with zeros to make it 32-bit aligned.
 ocResult ocOCDDataBlockWriteString(ocOCDDataBlock* pBlock, const char* pString, ocUInt64* pOffsetOut);
 
-// Writes zero bytes until the buffer is 32-bit aligned.
-ocResult ocOCDDAtaBlockWritePadding32(ocOCDDataBlock* pBlock);
+// Writes zero bytes until the buffer is 64-bit aligned.
+ocResult ocOCDDataBlockWritePadding64(ocOCDDataBlock* pBlock);
 
 
 
@@ -48,7 +55,7 @@ ocResult ocOCDDAtaBlockWritePadding32(ocOCDDataBlock* pBlock);
 struct ocOCDSceneBuilderSubresource
 {
     ocUInt64 pathOffset;
-    ocUInt32 flags;
+    ocUInt64 flags;
     ocUInt64 dataSize;
     ocUInt64 dataOffset;
 };
@@ -71,13 +78,13 @@ struct ocOCDSceneBuilderObject
 struct ocOCDSceneBuilderComponent
 {
     ocUInt32 type;
+    ocUInt32 padding;
     ocUInt64 dataSize;
     ocUInt64 dataOffset;
 };
 
 struct ocOCDSceneBuilder
 {
-    ocStreamWriter* pWriter;
     ocStack<ocUInt32> objectStack;  // <-- Values are indices into the "objects" list below.
     
     ocStack<ocOCDSceneBuilderSubresource> subresources;
@@ -93,10 +100,18 @@ struct ocOCDSceneBuilder
 };
 
 // Initializes a scene builder.
-ocResult ocOCDSceneBuilderInit(ocStreamWriter* pWriter, ocOCDSceneBuilder* pBuilder);
+ocResult ocOCDSceneBuilderInit(ocOCDSceneBuilder* pBuilder);
 
 // Uninitializes a scene builder.
 ocResult ocOCDSceneBuilderUninit(ocOCDSceneBuilder* pBuilder);
+
+// Outputs the OCD file to the given writer.
+ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pWriter);
+
+// Adds a subresource by it's path.
+//
+// If a subresource with the same path already exists it is reused and pIndex receives the index of the existing subresource.
+ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char* path, ocUInt32* pIndex);
 
 // Starts a new object.
 //
@@ -109,7 +124,7 @@ ocResult ocOCDSceneBuilderEndObject(ocOCDSceneBuilder* pBuilder);
 // Adds a scene component to the current object.
 //
 // A scene component is used for objects that represent a model, etc. They will always be linked to either an internal or external resource.
-ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder);
+ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const char* path);
 
 // Adds a mesh component to the current object.
 ocResult ocOCDSceneBuilderAddMeshComponent(ocOCDSceneBuilder* pBuilder);

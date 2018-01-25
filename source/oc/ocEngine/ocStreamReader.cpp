@@ -75,7 +75,6 @@ OC_PRIVATE ocResult ocStreamReader_OnSeek_Memory(void* pUserData, ocInt64 bytesT
     ocStreamReader* pReader = (ocStreamReader*)pUserData;
     ocAssert(pReader != NULL);
 
-    // Don't do anything if we're at the end of the file.
     switch (origin)
     {
         case ocSeekOrigin_Current:

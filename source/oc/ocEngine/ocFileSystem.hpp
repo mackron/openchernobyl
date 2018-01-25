@@ -70,10 +70,10 @@ ocResult ocFileWrite(ocFile* pFile, const void* pData, size_t bytesToWrite, size
 ocResult ocFileSeek(ocFile* pFile, int64_t bytesToSeek, ocSeekOrigin origin);
 
 // Retrieves the current position of the file pointer.
-uint64_t ocFileTell(ocFile* pFile);
+ocResult ocFileTell(ocFile* pFile, uint64_t* pPos);
 
 // Retrieves the size of the given file.
-uint64_t ocFileSize(ocFile* pFile);
+ocResult ocFileSize(ocFile* pFile, uint64_t* pSize);
 
 // Flushes the given file.
 void ocFileFlush(ocFile* pFile);
