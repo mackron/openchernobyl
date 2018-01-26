@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 // Determines whether or not the given string is null or empty.
 OC_INLINE ocBool32 ocStringIsNullOrEmpty(const char* str)

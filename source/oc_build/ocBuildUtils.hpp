@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 // High level helper function for preprending data to a file.
 ocResult ocBuildPrependToFile(const char* filePath, const void* pData, size_t dataSize);

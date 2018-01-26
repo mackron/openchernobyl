@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 #define OC_LIGHT_COMPONENT(pComponent) ((ocLightComponent*)pComponent)
 struct ocLightComponent : public ocComponent

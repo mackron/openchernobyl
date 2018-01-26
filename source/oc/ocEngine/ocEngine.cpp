@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 #if !defined(_WIN32)
 #ifndef _LARGEFILE64_SOURCE

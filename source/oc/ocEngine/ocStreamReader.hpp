@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 typedef ocResult (* ocStreamReader_OnReadProc) (void* pUserData, void* pDataOut, ocSizeT bytesToRead, ocSizeT* pBytesRead);
 typedef ocResult (* ocStreamReader_OnSeekProc) (void* pUserData, ocInt64 bytesToSeek, ocSeekOrigin origin);

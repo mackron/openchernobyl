@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 ocResult ocGetMipmapCount(uint32_t baseWidth, uint32_t baseHeight, uint32_t* pCount)
 {

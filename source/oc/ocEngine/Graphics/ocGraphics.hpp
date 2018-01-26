@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 // Hardware support flags.
 #define OC_GRAPHICS_SUPPORT_FLAG_MSAA               (1 << 0)

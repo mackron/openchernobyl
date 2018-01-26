@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 OC_INLINE glm::mat4 ocMakeMat4(const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
 {

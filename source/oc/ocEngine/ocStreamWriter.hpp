@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 typedef ocResult (* ocStreamWriter_OnWriteProc) (void* pUserData, const void* pData, ocSizeT bytesToWrite, ocSizeT* pBytesWritten);
 typedef ocResult (* ocStreamWriter_OnSeekProc)  (void* pUserData, ocInt64 bytesToSeek, ocSeekOrigin origin);

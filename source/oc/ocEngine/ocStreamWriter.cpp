@@ -1,4 +1,4 @@
-// Copyright (C) 2017 David Reid. See included LICENSE file.
+// Copyright (C) 2018 David Reid. See included LICENSE file.
 
 OC_PRIVATE ocResult ocStreamWriter_OnWrite_File(void* pUserData, const void* pData, ocSizeT bytesToWrite, ocSizeT* pBytesWritten)
 {
