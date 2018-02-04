@@ -4,3 +4,4 @@ build/
 !/build/oc_build/bin/dred.exe
 !build/oc_build/bin/mcpp-2.7.2/
 docs/private/
+screenshots/
