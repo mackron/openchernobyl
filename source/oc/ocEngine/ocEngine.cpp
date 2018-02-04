@@ -22,12 +22,12 @@
 #include "ocFileSystem.cpp"
 #include "ocStreamReader.cpp"
 #include "ocStreamWriter.cpp"
-#include "ocOCD.cpp"
 #include "ocLogger.cpp"
 #include "Graphics/ocGraphics.cpp"
 #include "Audio/ocAudio.cpp"
 #include "Physics/ocPhysics.cpp"
 #include "Components/ocComponents.cpp"
+#include "ocOCD.cpp"
 #include "ocResourceLoader.cpp"
 #include "ocResourceLibrary.cpp"
 #include "ocWorldObject.cpp"
@@ -42,6 +42,7 @@
     #pragma warning(disable:4244)
     #pragma warning(disable:4100)
     #pragma warning(disable:4456)
+    #pragma warning(disable:4505)
 #endif
 #if defined(__GNUC__)
     #pragma GCC diagnostic push

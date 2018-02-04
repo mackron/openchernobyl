@@ -83,6 +83,18 @@ struct ocOCDSceneBuilderComponent
     ocUInt64 dataOffset;
 };
 
+struct ocOCDSceneBuilderMeshGroup
+{
+    ocUInt32 materialSubresourceIndex;
+    ocUInt32 primitiveType;
+    ocUInt32 vertexFormat;
+    ocUInt32 vertexCount;
+    ocUInt64 vertexDataOffset;
+    ocUInt32 indexFormat;
+    ocUInt32 indexCount;
+    ocUInt64 indexDataOffset;
+};
+
 struct ocOCDSceneBuilder
 {
     ocStack<ocUInt32> objectStack;  // <-- Values are indices into the "objects" list below.
@@ -97,6 +109,12 @@ struct ocOCDSceneBuilder
     ocOCDDataBlock componentDataBlock;
     ocOCDDataBlock subresourceDataBlock;
     ocOCDDataBlock stringDataBlock;
+
+    ocStack<ocOCDSceneBuilderMeshGroup> meshGroups;
+    ocOCDDataBlock meshGroupVertexDataBlock;
+    ocOCDDataBlock meshGroupIndexDataBlock;
+
+    ocBool32 isAddingMeshComponent;
 };
 
 // Initializes a scene builder.
@@ -121,10 +139,20 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
 // Ends an object.
 ocResult ocOCDSceneBuilderEndObject(ocOCDSceneBuilder* pBuilder);
 
+
 // Adds a scene component to the current object.
 //
 // A scene component is used for objects that represent a model, etc. They will always be linked to either an internal or external resource.
 ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const char* path);
 
-// Adds a mesh component to the current object.
-ocResult ocOCDSceneBuilderAddMeshComponent(ocOCDSceneBuilder* pBuilder);
+
+// Begins a mesh component.
+ocResult ocOCDSceneBuilderBeginMeshComponent(ocOCDSceneBuilder* pBuilder);
+
+// Ends a mesh component.
+ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder);
+
+// Adds a group to the current mesh component.
+ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocGraphicsIndexFormat indexFormat, ocUInt32 indexCount, void* pIndexData);
+ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocUInt32 indexCount, ocUInt32* pIndexData);
+ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocUInt32 indexCount, ocUInt16* pIndexData);

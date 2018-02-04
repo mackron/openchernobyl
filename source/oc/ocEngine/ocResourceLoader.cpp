@@ -266,10 +266,39 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
     ocAssert(pReader != NULL);
     ocAssert(pData != NULL);
 
-    // TODO: Implement me.
-    (void)pReader;
-    (void)pData;
-    return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+    // Loading an OCD file is very simple because the file format nicely maps to our data structures.
+    ocUInt64 fileSize;
+    ocResult result = ocStreamReaderSize(pReader, &fileSize);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    if (fileSize > SIZE_MAX) {
+        return OC_RESULT_TOO_LARGE; // OCD file is too big to fit into memory.
+    }
+
+    pData->pPayload = (ocUInt8*)ocMalloc((ocSizeT)fileSize);
+    if (pData->pPayload == NULL) {
+        return OC_RESULT_OUT_OF_MEMORY;
+    }
+
+    result = ocStreamReaderRead(pReader, pData->pPayload, (ocSizeT)fileSize, NULL);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
+    // Retrieve the subresource and object counts and offsets for convenience.
+    pData->subresourceCount = *(ocUInt32*)(pData->pPayload + 0);
+    pData->objectCount      = *(ocUInt32*)(pData->pPayload + 4);
+
+    ocUInt64 subresourcesOffset = *(ocUInt64*)(pData->pPayload + 8);
+    ocUInt64 objectsOffset      = *(ocUInt64*)(pData->pPayload + 16);
+
+    pData->pSubresources = (ocSceneSubresource*)(pData->pPayload + subresourcesOffset);
+    pData->pObjects      =      (ocSceneObject*)(pData->pPayload + objectsOffset);
+    
+    return OC_RESULT_SUCCESS;
 }
 
 
@@ -299,12 +328,68 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
         return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
     }
 
-    // The first thing to do is calculate the size of the raw data. 
-    // TODO: Implement me.
+    // We use a scene builder to convert OBJ to OCD.
+    ocOCDSceneBuilder builder;
+    ocResult result = ocOCDSceneBuilderInit(&builder);
+    if (result != OC_RESULT_SUCCESS) {
+        drobj_delete(obj);
+        return result;
+    }
 
+    result = ocOCDSceneBuilderBeginObject(&builder, "mesh", glm::vec3(0, 0, 0), glm::quat(1, 0, 0, 0), glm::vec3(1, 1, 1));
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+    {
+        // The object has a single mesh component, with a group for each material.
+        result = ocOCDSceneBuilderBeginMeshComponent(&builder);
+        if (result != OC_RESULT_SUCCESS) {
+            goto done;
+        }
+        {
+            for (ocUInt32 iMaterial = 0; iMaterial < obj->materialCount; ++iMaterial) {
+                drobj_material* pMaterial = &obj->pMaterials[iMaterial];
+                
+                ocUInt32 vertexCount;
+                float* pVertexData;
+                ocUInt32 indexCount;
+                ocUInt32* pIndexData;
+                drobj_interleave_p3t2n3_material(obj, iMaterial, &vertexCount, &pVertexData, &indexCount, &pIndexData);
+
+                // TODO: With the material, might want to first find the full library/name path.
+
+                result = ocOCDSceneBuilderMeshComponentAddGroup(&builder, pMaterial->name, ocGraphicsPrimitiveType_Triangle, ocGraphicsVertexFormat_P3T2N3, vertexCount, pVertexData, indexCount, pIndexData);
+                if (result != OC_RESULT_SUCCESS) {
+                    drobj_free(pVertexData);
+                    drobj_free(pIndexData);
+                    goto done;
+                }
+
+                drobj_free(pVertexData);
+                drobj_free(pIndexData);
+            }
+        }
+        result = ocOCDSceneBuilderEndMeshComponent(&builder);
+        if (result != OC_RESULT_SUCCESS) {
+            goto done;
+        }
+    }
+    result = ocOCDSceneBuilderEndObject(&builder);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    result = ocOCDSceneBuilderRender(&builder, pOCDWriter);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    result = OC_RESULT_SUCCESS;
+
+done:
+    ocOCDSceneBuilderUninit(&builder);
     drobj_delete(obj);
-
-    return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+    return result;
 }
 
 OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
@@ -410,6 +495,6 @@ ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePa
 void ocResourceLoaderUnloadScene(ocResourceLoader* pLoader, ocSceneData* pData)
 {
     if (pLoader == NULL || pData == NULL) return;
-    ocFree(pData->_pPayload);
+    ocFree(pData->pPayload);
 }
 

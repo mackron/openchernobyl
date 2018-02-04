@@ -111,6 +111,30 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
     return result;
 }
 
+OC_PRIVATE ocResult ocResourceLibraryLoad_Scene(ocResourceLibrary* pLibrary, const char* absolutePath, ocResource** ppResource)
+{
+    ocAssert(pLibrary != NULL);
+    ocAssert(absolutePath != NULL);
+    ocAssert(ppResource != NULL);
+
+    ocSceneData sceneData;
+    ocResult result = ocResourceLoaderLoadScene(pLibrary->pLoader, absolutePath, &sceneData);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    ocResource* pResource = ocAllocResource(ocResourceType_Scene, 0, absolutePath);
+    if (pResource == NULL) {
+        ocResourceLoaderUnloadScene(pLibrary->pLoader, &sceneData);
+        return OC_RESULT_OUT_OF_MEMORY;
+    }
+
+    pResource->scene = sceneData;
+
+    *ppResource = pResource;
+    return OC_RESULT_SUCCESS;
+}
+
 ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath, ocResource** ppResource)
 {
     if (ppResource == NULL) return OC_RESULT_INVALID_ARGS;
@@ -170,7 +194,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
         case ocResourceType_Scene:
         {
-            result = OC_RESULT_UNSUPPORTED_RESOURCE_TYPE;
+            result = ocResourceLibraryLoad_Scene(pLibrary, absolutePath, ppResource);
         } break;
 
         case ocResourceType_Unknown:
@@ -203,6 +227,7 @@ void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
 
         case ocResourceType_Scene:
         {
+            ocResourceLoaderUnloadScene(pLibrary->pLoader, &pResource->scene);
         } break;
 
         case ocResourceType_Unknown:

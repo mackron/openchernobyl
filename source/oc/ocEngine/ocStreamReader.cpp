@@ -16,6 +16,14 @@ OC_PRIVATE ocResult ocStreamReader_OnSeek_File(void* pUserData, ocInt64 bytesToS
     return ocFileSeek(pReader->pFile, bytesToSeek, origin);
 }
 
+OC_PRIVATE ocResult ocStreamReader_OnTell_File(void* pUserData, ocUInt64* pPos)
+{
+    ocStreamReader* pReader = (ocStreamReader*)pUserData;
+    ocAssert(pReader != NULL);
+
+    return ocFileTell(pReader->pFile, pPos);
+}
+
 OC_PRIVATE ocBool32 ocStreamReader_OnAtEnd_File(void* pUserData)
 {
     ocStreamReader* pReader = (ocStreamReader*)pUserData;
@@ -28,7 +36,7 @@ ocResult ocStreamReaderInit(ocFile* pFile, ocStreamReader* pReader)
 {
     if (pFile == NULL) return OC_RESULT_INVALID_ARGS;
 
-    ocResult result = ocStreamReaderInit(ocStreamReader_OnRead_File, ocStreamReader_OnSeek_File, ocStreamReader_OnAtEnd_File, (void*)pReader, pReader);
+    ocResult result = ocStreamReaderInit(ocStreamReader_OnRead_File, ocStreamReader_OnSeek_File, ocStreamReader_OnTell_File, ocStreamReader_OnAtEnd_File, (void*)pReader, pReader);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
@@ -124,6 +132,15 @@ OC_PRIVATE ocResult ocStreamReader_OnSeek_Memory(void* pUserData, ocInt64 bytesT
     return OC_RESULT_SUCCESS;
 }
 
+OC_PRIVATE ocResult ocStreamReader_OnTell_Memory(void* pUserData, ocUInt64* pPos)
+{
+    ocStreamReader* pReader = (ocStreamReader*)pUserData;
+    ocAssert(pReader != NULL);
+
+    *pPos = pReader->memory.currentPos;
+    return OC_RESULT_SUCCESS;
+}
+
 OC_PRIVATE ocBool32 ocStreamReader_OnAtEnd_Memory(void* pUserData)
 {
     ocStreamReader* pReader = (ocStreamReader*)pUserData;
@@ -136,7 +153,7 @@ ocResult ocStreamReaderInit(const void* pData, ocSizeT dataSize, ocStreamReader*
 {
     if (pData == NULL) return OC_RESULT_INVALID_ARGS;
 
-    ocResult result = ocStreamReaderInit(ocStreamReader_OnRead_Memory, ocStreamReader_OnSeek_Memory, ocStreamReader_OnAtEnd_Memory, (void*)pReader, pReader);
+    ocResult result = ocStreamReaderInit(ocStreamReader_OnRead_Memory, ocStreamReader_OnSeek_Memory, ocStreamReader_OnTell_Memory, ocStreamReader_OnAtEnd_Memory, (void*)pReader, pReader);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
@@ -148,13 +165,14 @@ ocResult ocStreamReaderInit(const void* pData, ocSizeT dataSize, ocStreamReader*
     return OC_RESULT_SUCCESS;
 }
 
-ocResult ocStreamReaderInit(ocStreamReader_OnReadProc onRead, ocStreamReader_OnSeekProc onSeek, ocStreamReader_OnAtEndProc onAtEnd, void* pUserData, ocStreamReader* pReader)
+ocResult ocStreamReaderInit(ocStreamReader_OnReadProc onRead, ocStreamReader_OnSeekProc onSeek, ocStreamReader_OnTellProc onTell, ocStreamReader_OnAtEndProc onAtEnd, void* pUserData, ocStreamReader* pReader)
 {
     if (pReader == NULL) return OC_RESULT_INVALID_ARGS;
 
     ocZeroObject(pReader);
     pReader->onRead    = onRead;
     pReader->onSeek    = onSeek;
+    pReader->onTell    = onTell;
     pReader->onAtEnd   = onAtEnd;
     pReader->pUserData = pUserData;
 
@@ -189,6 +207,48 @@ ocResult ocStreamReaderSeek(ocStreamReader* pReader, ocInt64 bytesToSeek, ocSeek
     }
 
     return pReader->onSeek(pReader->pUserData, bytesToSeek, origin);
+}
+
+ocResult ocStreamReaderTell(ocStreamReader* pReader, ocUInt64* pPos)
+{
+    if (pReader == NULL) return OC_RESULT_INVALID_ARGS;
+
+    if (pReader->onTell == NULL) {
+        return OC_RESULT_FEATURE_NOT_SUPPORTED;
+    }
+
+    return pReader->onTell(pReader->pUserData, pPos);
+}
+
+ocResult ocStreamReaderSize(ocStreamReader* pReader, ocUInt64* pSize)
+{
+    if (pSize) *pSize = 0;  // Safety.
+
+    ocUInt64 currentPos;
+    ocResult result = ocStreamReaderTell(pReader, &currentPos);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    result = ocStreamReaderSeek(pReader, 0, ocSeekOrigin_End);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    ocUInt64 streamSize;
+    result = ocStreamReaderTell(pReader, &streamSize);
+    if (result != OC_RESULT_SUCCESS) {
+        ocStreamReaderSeek(pReader, (ocInt64)currentPos, ocSeekOrigin_Start);   // Try putting the reader back to where it was.
+        return result;
+    }
+
+    result = ocStreamReaderSeek(pReader, (ocInt64)currentPos, ocSeekOrigin_Start);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    if (pSize) *pSize = streamSize;
+    return OC_RESULT_SUCCESS;
 }
 
 ocBool32 ocStreamReaderAtEnd(ocStreamReader* pReader)

@@ -294,6 +294,17 @@ int ocInitAndRun(int argc, char** argv)
     }
 
 
+    // TESTING (Scene Resources)
+    {
+        result = ocResourceLibraryLoad(&g_Game.engine.resourceLibrary, "cube.obj", &g_Game.pSceneResource);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+
+    }
+
+
 
     // Timer for the main simulation.
     ocTimerInit(&g_Game.timer);

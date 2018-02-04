@@ -4,7 +4,7 @@ struct ocResource
 {
     ocResourceType type;
     const char* pAbsolutePath;
-    uint32_t referenceCount;
+    ocUInt32 referenceCount;
 
     union
     {
@@ -12,6 +12,8 @@ struct ocResource
         {
             ocGraphicsImage* pGraphicsImage;
         } image;
+
+        ocSceneData scene;
     };
 
     // [Internal Use Only] A single allocation for dynamically sized data.

@@ -19,6 +19,7 @@ struct ocGame
 
     // TESTING
     ocResource* pImageResource;
+    ocResource* pSceneResource;
     ocGraphicsImage* pImage;
     ocGraphicsMesh* pMesh;
     ocGraphicsObject* pMeshObject;

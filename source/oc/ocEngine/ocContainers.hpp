@@ -40,7 +40,7 @@ template <typename T> ocResult ocStackPush(ocStack<T>* pStack, const T &item)
     if (pStack->capacity == pStack->count) {
         // Resize.
         size_t newCapacity = (pStack->capacity == 0) ? 4 : pStack->capacity*2;
-        T* pNewItems = (T*)ocRealloc(pStack->pItems, sizeof(T) * pStack->capacity);
+        T* pNewItems = (T*)ocRealloc(pStack->pItems, sizeof(T) * newCapacity);
         if (pNewItems == NULL) {
             return OC_RESULT_OUT_OF_MEMORY;
         }
@@ -80,4 +80,10 @@ template <typename T> ocResult ocStackTop(ocStack<T>* pStack, T* pItemOut)
     return OC_RESULT_SUCCESS;
 }
 
+template <typename T> ocResult ocStackClear(ocStack<T>* pStack)
+{
+    if (pStack == NULL) return OC_RESULT_INVALID_ARGS;
 
+    pStack->count = 0;
+    return OC_RESULT_SUCCESS;
+}

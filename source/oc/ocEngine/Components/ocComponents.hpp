@@ -1,6 +1,6 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
-typedef unsigned int ocComponentType;
+typedef ocUInt32 ocComponentType;
 #define OC_COMPONENT_TYPE_NONE              0
 #define OC_COMPONENT_TYPE_SCENE             1
 #define OC_COMPONENT_TYPE_MESH              2

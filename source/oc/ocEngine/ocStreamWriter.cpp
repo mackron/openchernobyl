@@ -53,9 +53,14 @@ OC_PRIVATE ocResult ocStreamWriter_OnWrite_Memory(void* pUserData, const void* p
     ocAssert(pWriter != NULL);
 
     // If there's not enough room, make room. We just use a simple doubling of the buffer size for each resize.
-    if (pWriter->memory.currentPos + bytesToWrite > pWriter->memory.bufferSize) {
+    ocSizeT minRequiredBufferSize = pWriter->memory.currentPos + bytesToWrite;
+    if (minRequiredBufferSize > pWriter->memory.bufferSize) {
         // Resize.
         ocSizeT newBufferSize = (pWriter->memory.bufferSize == 0) ? bytesToWrite : pWriter->memory.bufferSize*2;
+        if (newBufferSize < minRequiredBufferSize) {
+            newBufferSize = minRequiredBufferSize;
+        }
+
         ocUInt8* pNewBuffer = (ocUInt8*)ocRealloc(pWriter->memory.pBuffer, newBufferSize);
         if (pNewBuffer == NULL) {
             return OC_RESULT_OUT_OF_MEMORY;
@@ -65,14 +70,14 @@ OC_PRIVATE ocResult ocStreamWriter_OnWrite_Memory(void* pUserData, const void* p
         pWriter->memory.bufferSize = newBufferSize;
     }
 
-    ocCopyMemory(pWriter->memory.pBuffer + pWriter->memory.dataSize, pData, bytesToWrite);
+    ocCopyMemory(pWriter->memory.pBuffer + pWriter->memory.currentPos, pData, bytesToWrite);
     pWriter->memory.currentPos += bytesToWrite;
 
     if (pWriter->memory.dataSize  < pWriter->memory.currentPos) {
         pWriter->memory.dataSize += pWriter->memory.currentPos;
     }
     
-    *pBytesWritten = bytesToWrite;
+    if (pBytesWritten) *pBytesWritten = bytesToWrite;
 
     // Update the output variables after every write.
     *pWriter->memory.ppData = (void*)pWriter->memory.pBuffer;
@@ -164,6 +169,9 @@ ocResult ocStreamWriterInit(void** ppData, size_t* pDataSize, ocStreamWriter* pW
 
     pWriter->memory.ppData = ppData;
     pWriter->memory.pDataSize = pDataSize;
+
+    *ppData = NULL;
+    *pDataSize = 0;
 
     return OC_RESULT_SUCCESS;
 }

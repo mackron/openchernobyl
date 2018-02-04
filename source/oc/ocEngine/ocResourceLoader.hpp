@@ -65,102 +65,67 @@ void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData);
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define OC_SCENE_OBJECT_NONE    (~0UL)
+// NOTES:
+// - All offsets are relative to the main payload pointer.
+// - All structures need to map to the OCD format spec exactly because they are mapped to the original file data.
 
-enum ocSceneSubresourceType
-{
-    ocSceneSubresourceType_Unknown        = 0,
-    ocSceneSubresourceType_Scene          = 1,  // Scenes can be contained within scenes. For example, models are just minature scenes, and almost all scenes will include a number of models.
-    ocSceneSubresourceType_Material       = 2,
-    ocSceneSubresourceType_ParticleSystem = 3
-};
+#define OC_SCENE_OBJECT_NONE    (~0UL)
 
 struct ocSceneSubresource
 {
-    ocSceneSubresourceType type;
-    const char* pName; // This is an offset of ocSceneData::_pPayloadData.
-};
-
-enum ocSceneObjectType
-{
-    ocSceneObjectType_Unknown = 0,      // Used when the source asset has an object of a particular type that the engine does not support or doesn't care about.
-    ocSceneObjectType_Empty   = 1,      // Just an empty node used for hierarchy management.
-    ocSceneObjectType_Scene   = 2,      // Usually an object that references a model.
-    ocSceneObjectType_Mesh    = 2,      // A single independant polygonal mesh.
-    ocSceneObjectType_Light   = 3       // <-- Separate this based on the type of light (point, spot, directional, etc.)?
-};
-
-union ocSceneOffsetPtr
-{
-    uint64_t offset;
-    const void* ptr;
+    ocUInt64 pathOffset;
+    ocUInt64 flags;
+    ocUInt64 dataSize;
+    ocUInt64 dataOffset;
 };
 
 struct ocSceneObject
 {
-    ocSceneObjectType type;
-    uint64_t dataOffset;    // The offset of the object's data relative to the raw data.
+    ocUInt64 nameOffset;
 
     // Hierarchy information. If any of these are -1 (~0) then it's considred NULL. For example, if parentIndex == ~0 it means
     // the object does not have a parent. Use OC_SCENE_OBJECT_NONE.
-    uint32_t parentIndex;
-    uint32_t firstChildIndex;
-    uint32_t lastChildIndex;
-    uint32_t prevSiblingIndex;
-    uint32_t nextSiblingIndex;
+    ocUInt32 parentIndex;
+    ocUInt32 firstChildIndex;
+    ocUInt32 lastChildIndex;
+    ocUInt32 prevSiblingIndex;
+    ocUInt32 nextSiblingIndex;
 
     // Transformation information.
-    float absolutePositionX;
-    float absolutePositionY;
-    float absolutePoyitionZ;
-    float absoluteRotationX;
-    float absoluteRotationY;
-    float absoluteRotationZ;
-    float absoluteRotationW;
-    float absoluteScaleX;
-    float absoluteScaleY;
-    float absoluteScaleZ;
+    float relativePositionX;
+    float relativePositionY;
+    float relativePoyitionZ;
+    float relativeRotationX;
+    float relativeRotationY;
+    float relativeRotationZ;
+    float relativeRotationW;
+    float relativeScaleX;
+    float relativeScaleY;
+    float relativeScaleZ;
 
-    union
-    {
-        struct
-        {
-            uint32_t sceneSubresourceIndex;
-        } scene;
+    // Components.
+    ocUInt32 componentCount;
+    ocUInt64 componentsOffset;
+};
 
-        struct
-        {
-            uint32_t vertexCount;
-            ocSceneOffsetPtr pVertexData;
-            uint32_t indexCount;
-            ocSceneOffsetPtr pIndexData;
-            uint32_t materialSubresourceIndex;
-        } mesh;
-
-        struct
-        {
-            int unused;
-        } light;
-    };
+struct ocSceneObjectComponent
+{
+    ocUInt32 type;
+    ocUInt32 padding0;
+    ocUInt64 dataSize;
+    ocUInt64 dataOffset;
 };
 
 struct ocSceneData
 {
-    uint32_t subresourceCount;
-    ocSceneSubresource* pSubresources;  // An offset of _pPayload.
+    ocUInt32 subresourceCount;
+    ocSceneSubresource* pSubresources;  // An offset of pPayload.
 
-    uint32_t objectCount;
-    ocSceneObject* pObjects;            // An offset of _pPayload.
+    ocUInt32 objectCount;
+    ocSceneObject* pObjects;            // An offset of pPayload.
 
-    // [Internal Use Only] Dynamically allocated data as a single allocation.
-    //
-    // Format:
-    //     pSubresources
-    //     Subresource paths
-    //     pObjects
-    //     Object hierarchy
-    //     Raw data (mesh data, etc.)
-    void* _pPayload;
+    // Dynamically allocated data as a single allocation. This is the entire raw OCD file data verbatim.
+    ocUInt8* pPayload;
 };
 
 // Loads a scene.

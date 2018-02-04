@@ -69,6 +69,11 @@ ocResult ocOCDDataBlockWritePadding64(ocOCDDataBlock* pBlock)
 
 OC_PRIVATE ocResult ocStreamWriterWriteOCDDataBlock(ocStreamWriter* pWriter, const ocOCDDataBlock &block)
 {
+    // Write nothing if the block is empty, but return successfully. Any block is allowed.
+    if (block.dataSize == 0) {
+        return OC_RESULT_SUCCESS;
+    }
+
     return ocStreamWriterWrite(pWriter, block.pData, block.dataSize, NULL);
 }
 
@@ -90,6 +95,8 @@ ocResult ocOCDSceneBuilderInit(ocOCDSceneBuilder* pBuilder)
     ocOCDDataBlockInit(&pBuilder->subresourceDataBlock);
     ocOCDDataBlockInit(&pBuilder->stringDataBlock);
 
+    ocStackInit(&pBuilder->meshGroups);
+
     return OC_RESULT_SUCCESS;
 }
 
@@ -97,7 +104,20 @@ ocResult ocOCDSceneBuilderUninit(ocOCDSceneBuilder* pBuilder)
 {
     if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
 
+    ocStackUninit(&pBuilder->meshGroups);
+
+    ocOCDDataBlockUninit(&pBuilder->stringDataBlock);
+    ocOCDDataBlockUninit(&pBuilder->subresourceDataBlock);
+    ocOCDDataBlockUninit(&pBuilder->componentDataBlock);
+    ocOCDDataBlockUninit(&pBuilder->componentBlock);
+    ocOCDDataBlockUninit(&pBuilder->objectBlock);
+    ocOCDDataBlockUninit(&pBuilder->subresourceBlock);
+
+    ocStackUninit(&pBuilder->components);
+    ocStackUninit(&pBuilder->objects);
+    ocStackUninit(&pBuilder->subresources);
     ocStackUninit(&pBuilder->objectStack);
+
     return OC_RESULT_SUCCESS;
 }
 
@@ -110,7 +130,7 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     ocOCDDataBlock mainDataBlock;
     ocResult result = ocOCDDataBlockInit(&mainDataBlock);
     if (result != OC_RESULT_SUCCESS) {
-        return OC_RESULT_SUCCESS;
+        return result;
     }
 
     // OCD header.
@@ -509,15 +529,214 @@ ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const c
     return OC_RESULT_SUCCESS;
 }
 
-ocResult ocOCDSceneBuilderAddMeshComponent(ocOCDSceneBuilder* pBuilder)
+
+ocResult ocOCDSceneBuilderBeginMeshComponent(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_TRUE) return OC_RESULT_INVALID_ARGS;
 
     if (pBuilder->objectStack.count == 0) {
         return OC_RESULT_INVALID_OPERATION;
     }
 
-    // TODO: Do something.
+    ocStackClear(&pBuilder->meshGroups);
+
+    ocResult result = ocOCDDataBlockInit(&pBuilder->meshGroupVertexDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    result = ocOCDDataBlockInit(&pBuilder->meshGroupIndexDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
+    pBuilder->isAddingMeshComponent = OC_TRUE;
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
+{
+    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_FALSE) return OC_RESULT_INVALID_ARGS;
+
+    if (pBuilder->objectStack.count == 0) {
+        return OC_RESULT_INVALID_OPERATION;
+    }
+
+    ocResult result;
+
+    // We need the offset of this data block for later.
+    ocUInt64 componentDataOffset;
+    result = ocStreamWriterTell(&pBuilder->componentDataBlock, &componentDataOffset);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
+
+    // Before writing the vertex and index data, we need to make sure they are padded for alignment.
+    ocUInt64 vertexDataSize;
+    result = ocStreamWriterSize(&pBuilder->meshGroupVertexDataBlock, &vertexDataSize);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    result = ocOCDDataBlockWritePadding64(&pBuilder->meshGroupVertexDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    ocUInt64 vertexDataSizeWithPadding;
+    result = ocStreamWriterSize(&pBuilder->meshGroupVertexDataBlock, &vertexDataSizeWithPadding);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+
+    ocUInt64 indexDataSize;
+    result = ocStreamWriterSize(&pBuilder->meshGroupIndexDataBlock, &indexDataSize);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    result = ocOCDDataBlockWritePadding64(&pBuilder->meshGroupIndexDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    //ocUInt64 indexDataSizeWithPadding;
+    //result = ocStreamWriterSize(&pBuilder->meshGroupIndexDataBlock, &indexDataSizeWithPadding);
+    //if (result != OC_RESULT_SUCCESS) {
+    //    goto done;
+    //}
+
+
+
+    // Group count.
+    ocUInt32 groupCount = pBuilder->meshGroups.count;
+    result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, groupCount);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Padding.
+    result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, 0);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Vertex data size.
+    result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, vertexDataSize);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Vertex data offset. Vertex data is located past the groups.
+    ocUInt64 vertexDataOffset = 40 + (groupCount * sizeof(ocOCDSceneBuilderMeshGroup)); // 40 = size of the header section.
+    result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, vertexDataOffset);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Index data size.
+    result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, indexDataSize);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Index data offset. Index data is located after the vertex data.
+    ocUInt64 indexDataOffset = vertexDataOffset + vertexDataSizeWithPadding;
+    result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, indexDataOffset);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Groups.
+    for (ocUInt32 iGroup = 0; iGroup < groupCount; ++iGroup) {
+        result = ocOCDDataBlockWrite(&pBuilder->componentDataBlock, pBuilder->meshGroups.pItems[iGroup]);
+        if (result != OC_RESULT_SUCCESS) {
+            goto done;
+        }
+    }
+
+    // Vertex data.
+    result = ocStreamWriterWriteOCDDataBlock(&pBuilder->componentDataBlock, pBuilder->meshGroupVertexDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+    // Index data.
+    result = ocStreamWriterWriteOCDDataBlock(&pBuilder->componentDataBlock, pBuilder->meshGroupIndexDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        goto done;
+    }
+
+
+    ocUInt64 componentDataOffsetEnd;
+    result = ocStreamWriterTell(&pBuilder->componentDataBlock, &componentDataOffsetEnd);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
+    // Now just attach the component to the object.
+    ocOCDSceneBuilderComponent component;
+    ocZeroObject(&component);
+    component.type       = OC_COMPONENT_TYPE_MESH;
+    component.dataSize   = componentDataOffsetEnd - componentDataOffset;
+    component.dataOffset = componentDataOffset;
+    result = ocOCDSceneBuilder_AddComponent(pBuilder, component);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+done:
+    ocOCDDataBlockUninit(&pBuilder->meshGroupVertexDataBlock);
+    ocOCDDataBlockUninit(&pBuilder->meshGroupIndexDataBlock);
+    pBuilder->isAddingMeshComponent = OC_FALSE;
+    return result;
+}
+
+ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocGraphicsIndexFormat indexFormat, ocUInt32 indexCount, void* pIndexData)
+{
+    if (pBuilder == NULL || pVertexData == NULL || pIndexData == NULL) return OC_RESULT_INVALID_ARGS;
+
+    ocOCDSceneBuilderMeshGroup meshGroup;
+    ocResult result = ocOCDSceneBuilderAddSubresource(pBuilder, materialPath, &meshGroup.materialSubresourceIndex);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    meshGroup.primitiveType = (ocUInt32)primitiveType;
+    
+    meshGroup.vertexFormat = (ocUInt32)vertexFormat;
+    meshGroup.vertexCount = vertexCount;
+    result = ocOCDDataBlockWrite(&pBuilder->meshGroupVertexDataBlock, pVertexData, ocGetVertexSizeFromFormat((ocGraphicsVertexFormat)meshGroup.vertexFormat) * vertexCount, &meshGroup.vertexDataOffset);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    meshGroup.indexFormat = (ocUInt32)indexFormat;
+    meshGroup.indexCount = indexCount;
+    result = ocOCDDataBlockWrite(&pBuilder->meshGroupIndexDataBlock, pIndexData, ocGetIndexSizeFromFormat((ocGraphicsIndexFormat)meshGroup.indexFormat) * indexCount, &meshGroup.indexDataOffset);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    result = ocStackPush(&pBuilder->meshGroups, meshGroup);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
 
     return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocUInt32 indexCount, ocUInt32* pIndexData)
+{
+    return ocOCDSceneBuilderMeshComponentAddGroup(pBuilder, materialPath, primitiveType, vertexFormat, vertexCount, pVertexData, ocGraphicsIndexFormat_UInt32, indexCount, pIndexData);
+}
+
+ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocUInt32 indexCount, ocUInt16* pIndexData)
+{
+    return ocOCDSceneBuilderMeshComponentAddGroup(pBuilder, materialPath, primitiveType, vertexFormat, vertexCount, pVertexData, ocGraphicsIndexFormat_UInt16, indexCount, pIndexData);
 }

@@ -64,6 +64,7 @@ Scenes ('SCN1')
 * Everything is 64-bit aligned
   * All 64-bit variables should be on a 64-bit boundary
 * Data offsets are relative to the first byte of this section (immediately after the OCD header)
+* Hierarchy indices should be set to -1 for NULL.
 
 [4] [Subresource Count]
 [4] [Object Count]
@@ -110,16 +111,21 @@ Scenes ('SCN1')
                 [4] [0 Byte Padding]
             [Component Data (Mesh)]
                 [4] [Group Count]
+                [4] [0 Byte Padding]
+                [8] [Vertex Data Size]
+                [8] [Vertex Data Offset (Relative to this data block)]
+                [8] [Index Data Size]
+                [8] [Index Data Offset (Relative to this data block)]
                 [?] [Groups]
                     [For Each...]
                     [4] [Material Subresource Index]
                     [4] [Primitive Type (Points, Lines, Triangles)]
                     [4] [Vertex Format]
                     [4] [Vertex Count]
-                    [8] [Vertex Data Offset (Relative to this data block)]
+                    [8] [Vertex Data Offset (Relative to the vertex data)]
                     [4] [Index Format]
                     [4] [Index Count]
-                    [8] [Index Data Offset (Relative to this data block)]
+                    [8] [Index Data Offset (Relative to the index data)]
                 [?] [Vertex Data]
                 [?] [0 Byte Padding for 64-bit Alignment]
                 [?] [Index Data]
@@ -140,8 +146,6 @@ Scenes ('SCN1')
         [For Each...]
         [?] [String (Null Terminated)]
         [?] [0 Byte Padding for 64-bit Alignment]
-        
-</BRAINSTORMING 1>
 
 
 
