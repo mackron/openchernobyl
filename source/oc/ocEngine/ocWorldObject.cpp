@@ -26,12 +26,33 @@ void ocWorldObjectUninit(ocWorldObject* pObject)
 
     // Components need to be removed.
     ocWorldObjectRemoveAllComponents(pObject);
+
+    ocFreeString(pObject->name);
 }
 
 ocBool32 ocWorldObjectIsInWorld(ocWorldObject* pObject)
 {
     if (pObject == NULL) return OC_FALSE;
     return pObject->isInWorld;
+}
+
+
+ocResult ocWorldObjectSetName(ocWorldObject* pObject, const char* name)
+{
+    if (pObject == NULL) return OC_FALSE;
+    
+    pObject->name = ocSetString(pObject->name, name);
+    if (pObject->name == NULL) {
+        return OC_RESULT_OUT_OF_MEMORY;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+const char* ocWorldObjectGetName(ocWorldObject* pObject)
+{
+    if (pObject == NULL) return NULL;
+    return pObject->name;
 }
 
 

@@ -60,6 +60,29 @@ ocString ocMakeStringf(const char* format, ...)
     return str;
 }
 
+ocString ocSetString(ocString str, const char* newStr)
+{
+    if (newStr == NULL) newStr = "";
+
+    if (str == NULL) {
+        return ocMakeString(newStr);
+    } else {
+        // If there's enough room for the new string don't bother reallocating.
+        size_t oldStrCap = ocStringCapacity(str);
+        size_t newStrLen = strlen(newStr);
+
+        if (oldStrCap < newStrLen) {
+            str = (ocString)ocRealloc(str, newStrLen + 1);  // +1 for null terminator.
+            if (str == NULL) {
+                return NULL;    // Out of memory.
+            }
+        }
+
+        memcpy(str, newStr, newStrLen+1);   // +1 to include the null terminator.
+        return str;
+    }
+}
+
 ocString ocAppendString(ocString lstr, const char* rstr)
 {
     if (rstr == NULL) {
@@ -132,6 +155,13 @@ ocString ocAppendStringLength(ocString lstr, const char* rstr, size_t rstrLen)
 size_t ocStringLength(ocString str)
 {
     return strlen(str);
+}
+
+size_t ocStringCapacity(ocString str)
+{
+    // Currently we're not doing anything fancy with the memory management of strings, but this API is used right now
+    // so that future optimizations are easily enabled.
+    return ocStringLength(str);
 }
 
 void ocFreeString(ocString str)

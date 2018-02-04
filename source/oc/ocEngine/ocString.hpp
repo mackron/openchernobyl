@@ -364,6 +364,9 @@ ocString ocMakeString(const char* str);
 ocString ocMakeStringv(const char* format, va_list args);
 ocString ocMakeStringf(const char* format, ...);
 
+// Changes the value of a string.
+ocString ocSetString(ocString str, const char* newStr);
+
 // Appends a string to another ocString.
 //
 // This free's "lstr". Use this API like so: "lstr = oc_append_string(lstr, rstr)". It works the same way as realloc().
@@ -381,6 +384,10 @@ ocString ocAppendStringLength(ocString lstr, const char* rstr, size_t rstrLen);
 
 // Retrieves the length of the given string.
 size_t ocStringLength(ocString str);
+
+// Retrieves the capacity of the buffer containing the data of the given string, not including the null terminator. Add 1
+// to the returned value to get the size of the entire buffer.
+size_t ocStringCapacity(ocString str);
 
 
 // Frees a string created by oc_make_string*()

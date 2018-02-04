@@ -301,7 +301,84 @@ int ocInitAndRun(int argc, char** argv)
             return result;
         }
 
+        for (size_t iObject = 0; iObject < g_Game.pSceneResource->scene.objectCount; ++iObject) {
+            ocSceneObject* pSceneObject = &g_Game.pSceneResource->scene.pObjects[iObject];
 
+            ocWorldObject object;
+            result = ocWorldObjectInit(&g_Game.world, &object);
+            if (result != OC_RESULT_SUCCESS) {
+                return result;
+            }
+
+            // Name.
+            ocWorldObjectSetName(&object, (const char*)g_Game.pSceneResource->scene.pPayload + pSceneObject->nameOffset);
+
+            // Transform.
+            ocWorldObjectSetTransform(&object,
+                glm::vec3(pSceneObject->relativePositionX, pSceneObject->relativePositionY, pSceneObject->relativePositionZ),
+                glm::quat(pSceneObject->relativeRotationW, pSceneObject->relativeRotationX, pSceneObject->relativeRotationY, pSceneObject->relativeRotationZ),
+                glm::vec3(pSceneObject->relativeScaleX,    pSceneObject->relativeScaleY,    pSceneObject->relativeScaleZ));
+
+            // Components.
+            ocSceneObjectComponent* pSceneObjectComponents = (ocSceneObjectComponent*)(g_Game.pSceneResource->scene.pPayload + pSceneObject->componentsOffset);
+            for (ocUInt32 iComponent = 0; iComponent < pSceneObject->componentCount; ++iComponent) {
+                ocSceneObjectComponent* pSceneObjectComponent = &pSceneObjectComponents[iComponent];
+
+                ocUInt64 componentDataOffset = pSceneObjectComponent->dataOffset;
+                ocUInt8* pComponentData = g_Game.pSceneResource->scene.pPayload + componentDataOffset;
+                
+                switch (pSceneObjectComponent->type) {
+                    case OC_COMPONENT_TYPE_SCENE:
+                    {
+                    } break;
+
+                    case OC_COMPONENT_TYPE_MESH:
+                    {
+                        ocUInt32 groupCount       = *(ocUInt32*)(pComponentData + 0);
+                        //ocUInt32 padding          = *(ocUInt32*)(pComponentData + 4);
+                        //ocUInt64 vertexDataSize   = *(ocUInt64*)(pComponentData + 8);
+                        ocUInt64 vertexDataOffset = *(ocUInt64*)(pComponentData + 16);
+                        //ocUInt64 indexDataSize    = *(ocUInt64*)(pComponentData + 24);
+                        ocUInt64 indexDataOffset  = *(ocUInt64*)(pComponentData + 32);
+
+                        ocUInt8* pVertexData = pComponentData + vertexDataOffset;
+                        ocUInt8* pIndexData  = pComponentData + indexDataOffset;
+
+                        ocOCDSceneBuilderMeshGroup* pGroups = (ocOCDSceneBuilderMeshGroup*)(pComponentData + 40);
+                        for (ocUInt32 iGroup = 0; iGroup < groupCount; ++iGroup) {
+                            ocOCDSceneBuilderMeshGroup* pGroup = &pGroups[iGroup];
+
+                            ocGraphicsMeshDesc desc;
+                            desc.primitiveType = (ocGraphicsPrimitiveType)pGroup->primitiveType;
+                            desc.vertexFormat  = (ocGraphicsVertexFormat)pGroup->vertexFormat;
+                            desc.vertexCount   = pGroup->vertexCount;
+                            desc.pVertices     = pVertexData + pGroup->vertexDataOffset;
+                            desc.indexFormat   = (ocGraphicsIndexFormat)pGroup->indexFormat;
+                            desc.indexCount    = pGroup->indexCount;
+                            desc.pIndices      = pIndexData + pGroup->indexDataOffset;
+
+                            ocGraphicsMesh* pMesh;
+                            result = ocGraphicsCreateMesh(&g_Game.engine.graphics, &desc, &pMesh);
+                            if (result != OC_RESULT_SUCCESS) {
+                                return result;
+                            }
+
+                            ocComponent* pComponent = ocWorldObjectAddComponent(&object, OC_COMPONENT_TYPE_MESH);
+                            if (pComponent == NULL) {
+                                return OC_RESULT_UNKNOWN_ERROR;
+                            }
+
+                            result = ocComponentMeshSetMesh(OC_MESH_COMPONENT(pComponent), pMesh);
+                            if (result != OC_RESULT_SUCCESS) {
+                                return result;
+                            }
+                        }
+                    } break;
+                }
+            }
+
+            ocWorldInsertObject(&g_Game.world, &object);
+        }
     }
 
 

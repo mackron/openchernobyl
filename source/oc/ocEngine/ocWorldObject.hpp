@@ -3,6 +3,7 @@
 struct ocWorldObject
 {
     ocWorld* pWorld;        // <-- Should never be null. Do _not_ use this to determine if the object is in the world - use ocWorldObjectIsInWorld().
+    ocString name;          // <-- Does not need to be unique, and can be null.
     glm::vec4 position;     // <-- Don't set this directly to move the object. Use ocWorldObjectSetPosition().
     glm::quat rotation;     // <-- As above, except ocWorldObjectSetRotation()
     glm::vec4 scale;        // <-- As above, except ocWorldObjectSetScale()
@@ -21,6 +22,13 @@ void ocWorldObjectUninit(ocWorldObject* pObject);
 // A world object isn't inside the world until ocWorldInsertObject() is called. This function determines whether or not
 // the object is in the world or not.
 ocBool32 ocWorldObjectIsInWorld(ocWorldObject* pObject);
+
+
+// Sets the name of the object.
+ocResult ocWorldObjectSetName(ocWorldObject* pObject, const char* name);
+
+// Retrieves the name of the object.
+const char* ocWorldObjectGetName(ocWorldObject* pObject);
 
 
 // Creates and adds a new component to an object.

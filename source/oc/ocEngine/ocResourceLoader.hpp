@@ -94,7 +94,7 @@ struct ocSceneObject
     // Transformation information.
     float relativePositionX;
     float relativePositionY;
-    float relativePoyitionZ;
+    float relativePositionZ;
     float relativeRotationX;
     float relativeRotationY;
     float relativeRotationZ;

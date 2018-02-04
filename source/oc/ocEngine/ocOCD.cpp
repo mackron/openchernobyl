@@ -178,7 +178,15 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
         }
     }
 
+
     // Objects.
+    for (ocUInt32 iObject = 0; iObject < pBuilder->objects.count; ++iObject) {
+        result = ocOCDDataBlockWrite(&pBuilder->objectBlock, pBuilder->objects.pItems[iObject]);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
     ocUInt64 objectsOffset;
     result = ocStreamWriterTell(&mainDataBlock, &objectsOffset);
     if (result != OC_RESULT_SUCCESS) {
@@ -190,6 +198,7 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
             return result;
         }
     }
+
 
     // Components.
     ocUInt64 componentsOffset;
@@ -326,6 +335,14 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
         return result;
     }
 
+
+    // Add the subresource to the data block.
+    result = ocOCDDataBlockWrite(&pBuilder->subresourceBlock, newSubresource);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
     if (pIndex) *pIndex = pBuilder->subresources.count-1;
     return OC_RESULT_SUCCESS;
 }
@@ -377,7 +394,6 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
     if (object.prevSiblingIndex != OC_SCENE_OBJECT_NONE) {
         pBuilder->objects.pItems[object.prevSiblingIndex].nextSiblingIndex = newObjectIndex;
     }
-
 
 
     // Transformation.
@@ -471,6 +487,13 @@ OC_PRIVATE ocResult ocOCDSceneBuilder_AddComponent(ocOCDSceneBuilder* pBuilder, 
     // have each of it's components listed in a tightly packed group.
     if (object.componentCount == 1) {
         object.componentsOffset = componentOffset;
+    }
+
+
+    // The component needs to be added to the master list.
+    result = ocStackPush(&pBuilder->components, component);
+    if (result != OC_RESULT_SUCCESS) {
+        return OC_RESULT_SUCCESS;
     }
 
     return OC_RESULT_SUCCESS;

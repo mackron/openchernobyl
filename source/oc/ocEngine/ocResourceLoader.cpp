@@ -289,11 +289,11 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
 
 
     // Retrieve the subresource and object counts and offsets for convenience.
-    pData->subresourceCount = *(ocUInt32*)(pData->pPayload + 0);
-    pData->objectCount      = *(ocUInt32*)(pData->pPayload + 4);
+    pData->subresourceCount = *(ocUInt32*)(pData->pPayload + OC_OCD_HEADER_SIZE + 0);
+    pData->objectCount      = *(ocUInt32*)(pData->pPayload + OC_OCD_HEADER_SIZE + 4);
 
-    ocUInt64 subresourcesOffset = *(ocUInt64*)(pData->pPayload + 8);
-    ocUInt64 objectsOffset      = *(ocUInt64*)(pData->pPayload + 16);
+    ocUInt64 subresourcesOffset = *(ocUInt64*)(pData->pPayload + OC_OCD_HEADER_SIZE + 8);
+    ocUInt64 objectsOffset      = *(ocUInt64*)(pData->pPayload + OC_OCD_HEADER_SIZE + 16);
 
     pData->pSubresources = (ocSceneSubresource*)(pData->pPayload + subresourcesOffset);
     pData->pObjects      =      (ocSceneObject*)(pData->pPayload + objectsOffset);
