@@ -54,12 +54,12 @@
 //#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
 
 #ifndef DR_IMPLEMENTATION
-    #include "../../external/dr_libs/dr.h"
+    #include "../../external/dr_libs/old/dr.h"  // TODO: Remove this dependency
 #endif
 
 #include "../../external/dr_libs/dr_flac.h"
 #include "../../external/dr_libs/dr_wav.h"
-#include "../../external/dr_libs/dr_fs.h"
+#include "../../external/dr_libs/old/dr_fs.h"   // TODO: Replace with dr-soft/dr_fs/dr_fs.h
 #include "../../external/dr_libs/dr_obj.h"
 
 #ifdef OC_ENABLE_PCX

@@ -95,7 +95,7 @@
 
 #ifndef DR_IMPLEMENTATION
     #define DR_IMPLEMENTATION
-    #include "../../external/dr_libs/dr.h"
+    #include "../../external/dr_libs/old/dr.h"  // TODO: Remove this dependency.
 #endif
 
 #define DR_FLAC_IMPLEMENTATION
@@ -104,7 +104,7 @@
 #define DR_OBJ_IMPLEMENTATION
 #include "../../external/dr_libs/dr_flac.h"
 #include "../../external/dr_libs/dr_wav.h"
-#include "../../external/dr_libs/dr_fs.h"
+#include "../../external/dr_libs/old/dr_fs.h"   // TODO: Replace this with dr-soft/dr_fs/dr_fs.h
 #include "../../external/dr_libs/dr_obj.h"
 
 #ifdef OC_ENABLE_PCX
