@@ -107,7 +107,7 @@ OC_PRIVATE ocResult ocStreamReader_OnSeek_Memory(void* pUserData, ocInt64 bytesT
             if (bytesToSeek < 0) {
                 return OC_RESULT_INVALID_ARGS;  // Does not make sense to use a negative seek when seeking from the start.
             }
-            if (bytesToSeek > pReader->memory.dataSize) {
+            if (bytesToSeek > (ocInt64)pReader->memory.dataSize) {
                 return OC_RESULT_INVALID_ARGS;  // Seeking too far.
             }
 
@@ -121,7 +121,7 @@ OC_PRIVATE ocResult ocStreamReader_OnSeek_Memory(void* pUserData, ocInt64 bytesT
                 bytesToSeek = -bytesToSeek;
             }
 
-            if (bytesToSeek > pReader->memory.dataSize) {
+            if (bytesToSeek > (ocInt64)pReader->memory.dataSize) {
                 return OC_RESULT_INVALID_ARGS;  // Seeking too far.
             }
 

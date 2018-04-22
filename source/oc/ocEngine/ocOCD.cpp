@@ -310,7 +310,7 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
     if (pBuilder == NULL || path == NULL) return OC_RESULT_INVALID_ARGS;
 
     // Check if the subresource already exists. If so, reuse it.
-    for (ocSizeT iSubresource = 0; iSubresource < pBuilder->subresources.count; ++iSubresource) {
+    for (ocUInt32 iSubresource = 0; iSubresource < (ocUInt32)pBuilder->subresources.count; ++iSubresource) {
         ocOCDSceneBuilderSubresource* pSubresource = &pBuilder->subresources.pItems[iSubresource];
         if (!(pSubresource->flags & OC_OCD_SCENE_SUBRESOURCE_FLAG_IS_INTERNAL)) {
             const char* existingSubresourcePath = (const char*)ocOffsetPtr(pBuilder->stringDataBlock.pData, (ocSizeT)pSubresource->pathOffset);
@@ -343,7 +343,7 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
     }
 
 
-    if (pIndex) *pIndex = pBuilder->subresources.count-1;
+    if (pIndex) *pIndex = (ocUInt32)(pBuilder->subresources.count-1);
     return OC_RESULT_SUCCESS;
 }
 
@@ -383,7 +383,7 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
             pBuilder->objects.pItems[object.parentIndex].firstChildIndex = newObjectIndex;
         }
     } else {
-        for (ocUInt32 i = pBuilder->objects.count; i > 0; --i) {
+        for (ocUInt32 i = (ocUInt32)pBuilder->objects.count; i > 0; --i) {
             if (pBuilder->objects.pItems[i-1].parentIndex == OC_SCENE_OBJECT_NONE) {
                 object.prevSiblingIndex = i-1;
                 break;
@@ -636,7 +636,7 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
 
 
     // Group count.
-    ocUInt32 groupCount = pBuilder->meshGroups.count;
+    ocUInt32 groupCount = (ocUInt32)pBuilder->meshGroups.count;
     result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, groupCount);
     if (result != OC_RESULT_SUCCESS) {
         goto done;
