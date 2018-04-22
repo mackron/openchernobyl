@@ -2,10 +2,15 @@
 
 ocResult ocResourceLibraryInit(ocResourceLoader* pLoader, ocGraphicsContext* pGraphics, ocResourceLibrary* pLibrary)
 {
-    if (pLibrary == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLibrary == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
     ocZeroObject(pLibrary);
 
-    if (pLoader == NULL || pGraphics == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLoader == NULL || pGraphics == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
 
     pLibrary->pLoader = pLoader;
     pLibrary->pGraphics = pGraphics;
@@ -15,13 +20,17 @@ ocResult ocResourceLibraryInit(ocResourceLoader* pLoader, ocGraphicsContext* pGr
 
 void ocResourceLibraryUninit(ocResourceLibrary* pLibrary)
 {
-    if (pLibrary == NULL) return;
+    if (pLibrary == NULL) {
+        return;
+    }
 }
 
 
 OC_PRIVATE ocResource* ocAllocResource(ocResourceType type, size_t payloadSize, const char* absolutePath)
 {
-    if (absolutePath == NULL) return NULL;
+    if (absolutePath == NULL) {
+        return NULL;
+    }
 
     size_t pathLen = strlen(absolutePath);
     ocResource* pResource = (ocResource*)ocCalloc(1, sizeof(*pResource) + pathLen + payloadSize);
@@ -52,16 +61,16 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
     }
 
 
-    // TODO: This needs a clean up, particularly the mipmap generation stuff.
-    ocBool32 freeImageData = false;
-    ocSizeT imageDataSize = (ocSizeT)data.imageDataSize;
-    void* pImageData = data.pImageData;
-    uint32_t mipmapCount = data.mipmapCount;
+    // Generate mipmaps if necessary.
+    ocBool32 freeImageData = OC_FALSE;
+    ocSizeT imageDataSize  = (ocSizeT)data.imageDataSize;
+    void* pImageData       = data.pImageData;
+    ocUInt32 mipmapCount   = data.mipmapCount;
     ocMipmapInfo pMipmaps[32];
     if (mipmapCount == 1) {
         // Generate mipmaps.
-        uint32_t baseWidth = data.pMipmaps[0].width;
-        uint32_t baseHeight = data.pMipmaps[0].height;
+        ocUInt32 baseWidth  = data.pMipmaps[0].width;
+        ocUInt32 baseHeight = data.pMipmaps[0].height;
         ocGetMipmapCount(baseWidth, baseHeight, &mipmapCount);
         ocGetTotalMipmapDataSize(baseWidth, baseHeight, 4, sizeof(uintptr_t), &imageDataSize);
 
@@ -71,7 +80,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
             return OC_RESULT_OUT_OF_MEMORY;
         }
 
-        freeImageData = true;
+        freeImageData = OC_TRUE;
         ocGenerateMipmaps(baseWidth, baseHeight, 4, sizeof(uintptr_t), data.pImageData, pImageData, pMipmaps);
     } else {
         // Use pre-generated mipmaps.
@@ -80,22 +89,27 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
                 
 
     ocGraphicsImageDesc desc;
-    desc.usage = OC_GRAPHICS_IMAGE_USAGE_SHADER_INPUT;
-    desc.format = data.format;
-    desc.mipLevels = mipmapCount;
-    desc.pMipmaps = pMipmaps;
+    desc.usage         = OC_GRAPHICS_IMAGE_USAGE_SHADER_INPUT;
+    desc.format        = data.format;
+    desc.mipLevels     = mipmapCount;
+    desc.pMipmaps      = pMipmaps;
     desc.imageDataSize = imageDataSize;
-    desc.pImageData = pImageData;
+    desc.pImageData    = pImageData;
 
     ocGraphicsImage* pGraphicsImage;
     result = ocGraphicsCreateImage(pLibrary->pGraphics, &desc, &pGraphicsImage);
     if (result != OC_RESULT_SUCCESS) {
-        if (freeImageData) ocFree(pImageData);
+        if (freeImageData) {
+            ocFree(pImageData);
+        }
+
         ocResourceLoaderUnloadImage(pLibrary->pLoader, &data);
         return result;
     }
 
-    if (freeImageData) ocFree(pImageData);
+    if (freeImageData) {
+        ocFree(pImageData);
+    }
 
     ocResource* pResource = ocAllocResource(ocResourceType_Image, 0, absolutePath);
     if (pResource == NULL) {
@@ -137,10 +151,15 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Scene(ocResourceLibrary* pLibrary, con
 
 ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath, ocResource** ppResource)
 {
-    if (ppResource == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppResource == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
     *ppResource = NULL;
 
-    if (pLibrary == NULL || filePath == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLibrary == NULL || filePath == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
 
     // So this is how resources work in the engine... Each resource file (.png, .obj, etc.) is, optionally, associated with a corresponding
     // .ocd file. This .ocd file is located in the same location and named exactly the same, only with the ".ocd" extension appended to the
@@ -160,7 +179,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
     ocFileInfo fileInfoOCD;
     ocZeroObject(&fileInfoOCD);
-    ocBool32 hasOCD = false;
+    ocBool32 hasOCD = OC_FALSE;
     if (!drpath_extension_equal(filePath, "ocd")) {
         char filePathOCD[OC_MAX_PATH];
         if (drpath_copy_and_append_extension(filePathOCD, sizeof(filePathOCD), filePath, "ocd")) {
@@ -174,7 +193,8 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     }
 
     // TODO: Reference count and return early based on the absolute path in fileInfoSrc.
-
+    //   1) Check if a resource with the same name has already been loaded. If so, increment the reference count and return early.
+    //   2) If the resource has not already been loaded, add it to a list, sorted by absolute path.
     
 
     ocBool32 isOCDOutOfDate = (hasSrc && hasOCD) && (fileInfoSrc.lastModifiedTime > fileInfoOCD.lastModifiedTime);
@@ -215,7 +235,10 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
 void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
 {
-    if (pLibrary == NULL || pResource == NULL) return;
+    if (pLibrary == NULL || pResource == NULL) {
+        return;
+    }
+
     if (ocAtomicDecrement(&pResource->referenceCount) > 0) {
         return;
     }
@@ -241,7 +264,9 @@ void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
 
 ocResult ocResourceLibrarySyncOCD(ocResourceLibrary* pLibrary, const char* filePath)
 {
-    if (pLibrary == NULL || filePath == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLibrary == NULL || filePath == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
 
     // TODO: Implement me.
     return OC_RESULT_SUCCESS;
