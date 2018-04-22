@@ -7,27 +7,33 @@ enum ocImageFormat
     ocImageFormat_SRGBA8    = 2
 };
 
+ocUInt32 ocImageFormatComponentCount(ocImageFormat format);
+ocUInt32 ocImageFormatBytesPerPixel(ocImageFormat format);
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Mipmap Generation
 //
 ///////////////////////////////////////////////////////////////////////////////
+
+// This structure must map to the OCD file format.
 struct ocMipmapInfo
 {
-    size_t offset;
-    size_t dataSize;
-    uint32_t width;
-    uint32_t height;
+    ocUInt64 dataOffset;
+    ocUInt64 dataSize;
+    ocUInt32 width;
+    ocUInt32 height;
 };
 
 // Retrieves the total number of mipmap levels for the given base image.
-ocResult ocGetMipmapCount(uint32_t baseWidth, uint32_t baseHeight, uint32_t* pCount);
+ocResult ocGetMipmapCount(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32* pCount);
 
 // Retrieves the minimum required size of a monolithic buffer that can be used to store the data of every mipmap with a particular alignment.
-ocResult ocGetTotalMipmapDataSize(uint32_t baseWidth, uint32_t baseHeight, uint32_t components, uint32_t alignment, size_t* pSize);
+ocResult ocGetTotalMipmapDataSize(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 components, ocUInt32 alignment, ocSizeT* pSize);
 
 // Generates an individual mipmap. This is just a half-sized averaged version of the base image.
-ocResult ocGenerateMipmap(uint32_t baseWidth, uint32_t baseHeight, uint32_t components, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmap);
+ocResult ocGenerateMipmap(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 components, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmap);
 
 // Generates an entire chain of mipmaps, with each mipmap stored in a monolithic buffer.
-ocResult ocGenerateMipmaps(uint32_t baseWidth, uint32_t baseHeight, uint32_t components, uint32_t alignment, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmaps);
+ocResult ocGenerateMipmaps(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 components, ocUInt32 alignment, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmaps);

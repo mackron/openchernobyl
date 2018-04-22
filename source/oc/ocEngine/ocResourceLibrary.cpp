@@ -54,7 +54,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
 
     // TODO: This needs a clean up, particularly the mipmap generation stuff.
     ocBool32 freeImageData = false;
-    size_t imageDataSize = data.imageDataSize;
+    ocSizeT imageDataSize = (ocSizeT)data.imageDataSize;
     void* pImageData = data.pImageData;
     uint32_t mipmapCount = data.mipmapCount;
     ocMipmapInfo pMipmaps[32];
@@ -174,6 +174,8 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     }
 
     // TODO: Reference count and return early based on the absolute path in fileInfoSrc.
+
+    
 
     ocBool32 isOCDOutOfDate = (hasSrc && hasOCD) && (fileInfoSrc.lastModifiedTime > fileInfoOCD.lastModifiedTime);
 

@@ -176,14 +176,14 @@ typedef ocUInt32         ocBool32;
 #define ocAlign(x, a)               ((((x) + (a) - 1) / (a)) * (a))
 
 // ocOffsetPtr()
-template <typename T>
-T* ocOffsetPtr(T* p, size_t offset)
+template <typename T, typename U>
+T* ocOffsetPtr(T* p, U offset)
 {
     return reinterpret_cast<T*>(reinterpret_cast<char*>(p) + offset);
 }
 
-template <typename T>
-const T* ocOffsetPtr(const T* p, size_t offset)
+template <typename T, typename U>
+const T* ocOffsetPtr(const T* p, U offset)
 {
     return reinterpret_cast<const T*>(reinterpret_cast<const char*>(p) + offset);
 }

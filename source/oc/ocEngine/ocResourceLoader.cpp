@@ -1,5 +1,62 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
+OC_PRIVATE ocBool32 ocCheckOCDHeader(const void* pData, ocUInt64 dataSize, ocUInt32 expectedType)
+{
+    if (pData == NULL || dataSize < 8) {
+        return MAL_FALSE;
+    }
+
+    ocUInt32 fourcc = *(ocUInt32*)pData;
+    if (fourcc != OC_OCD_FOURCC) {
+        return MAL_FALSE;
+    }
+
+    ocUInt32 type = *((ocUInt32*)pData + 1);
+    if (type != expectedType) {
+        return MAL_FALSE;
+    }
+    
+    return MAL_TRUE;
+}
+
+// Free the returned pointer with ocFree().
+OC_PRIVATE ocResult ocMallocAndReadEntireStreamReader(ocStreamReader* pReader, void** ppDataOut, ocUInt64* pSizeOut)
+{
+    ocAssert(pReader != NULL);
+    ocAssert(pSizeOut != NULL);
+    ocAssert(ppDataOut != NULL);
+    ocAssert(pSizeOut != NULL);
+    
+    *ppDataOut = NULL;
+    *pSizeOut = 0;
+
+    ocUInt64 fileSize;
+    ocResult result = ocStreamReaderSize(pReader, &fileSize);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    if (fileSize > SIZE_MAX) {
+        return OC_RESULT_TOO_LARGE; // OCD file is too big to fit into memory.
+    }
+
+    void* pDataOut = (ocUInt8*)ocMalloc((ocSizeT)fileSize);
+    if (pDataOut == NULL) {
+        return OC_RESULT_OUT_OF_MEMORY;
+    }
+
+    result = ocStreamReaderRead(pReader, pDataOut, (ocSizeT)fileSize, NULL);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFree(pDataOut);
+        return result;
+    }
+
+    *ppDataOut = pDataOut;
+    *pSizeOut = fileSize;
+    return OC_RESULT_SUCCESS;
+}
+
+
 ocResult ocResourceLoaderInit(ocFileSystem* pFS, ocResourceLoader* pLoader)
 {
     if (pLoader == NULL || pFS == NULL) return OC_RESULT_INVALID_ARGS;
@@ -106,15 +163,81 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+OC_PRIVATE ocResult ocConvertToOCD_SimpleImage(ocImageFormat format, ocUInt32 width, ocUInt32 height, const void* pImageData, ocStreamWriter* pOCDWriter)
+{
+    ocAssert(pOCDWriter != NULL);
+
+    ocOCDImageBuilder builder;
+    ocResult result = ocOCDImageBuilderInit(format, width, height, pImageData, &builder);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    result = ocOCDImageBuilderRender(&builder, pOCDWriter);
+
+    ocOCDImageBuilderUninit(&builder);
+    return result;
+}
+
+
 OC_PRIVATE ocResult ocLoadImage_OCD(ocStreamReader* pReader, ocImageData* pData)
 {
     ocAssert(pReader != NULL);
     ocAssert(pData != NULL);
 
-    // TODO: Implement me.
-    (void)pReader;
-    (void)pData;
-    return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+    ocUInt64 fileSize;
+    ocResult result = ocMallocAndReadEntireStreamReader(pReader, (void**)&pData->pPayload, &fileSize);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    if (!ocCheckOCDHeader(pData->pPayload, fileSize, OC_OCD_TYPE_ID_IMAGE)) {
+        ocFree(pData->pPayload);
+        return OC_RESULT_CORRUPT_FILE;
+    }
+
+    pData->format        = (ocImageFormat)(*(ocUInt32*)(pData->pPayload + OC_OCD_HEADER_SIZE + 0));
+    pData->mipmapCount   =                 *(ocUInt32*)(pData->pPayload + OC_OCD_HEADER_SIZE + 4);
+    pData->pMipmaps      =              (ocMipmapInfo*)(pData->pPayload + OC_OCD_HEADER_SIZE + 8);
+    pData->imageDataSize =                 *(ocUInt64*)(pData->pPayload + OC_OCD_HEADER_SIZE + 8 + (sizeof(ocMipmapInfo)*pData->mipmapCount));
+    pData->pImageData    =                             (pData->pPayload + OC_OCD_HEADER_SIZE + 8 + (sizeof(ocMipmapInfo)*pData->mipmapCount) + 8);
+
+    return OC_RESULT_SUCCESS;
+}
+
+OC_PRIVATE ocResult ocLoadImage_Raw(ocImageFormat format, ocUInt32 width, ocUInt32 height, const void* pImageData, ocImageData* pData)
+{
+    // We convert the image data to an OCD file, and then load the image via the OCD loading pipeline. Inefficient, but keeps all image loading
+    // on the same code path.
+    void* pDataOCD;
+    ocSizeT dataSizeOCD;
+    ocStreamWriter writerOCD;
+    ocResult result = ocStreamWriterInit(&pDataOCD, &dataSizeOCD, &writerOCD);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    result = ocConvertToOCD_SimpleImage(format, width, height, pImageData, &writerOCD);
+    ocStreamWriterUninit(&writerOCD);   // <-- Don't need this anymore. Data will be in pDataOCD, which needs to be ocFree()'d by us.
+
+    if (result != OC_RESULT_SUCCESS) {
+        ocFree(pDataOCD);
+        return result;
+    }
+
+
+    ocStreamReader readerOCD;
+    result = ocStreamReaderInit(pDataOCD, dataSizeOCD, &readerOCD);
+    if (result != OC_RESULT_SUCCESS) {
+        ocFree(pDataOCD);
+        return result;
+    }
+
+    result = ocLoadImage_OCD(&readerOCD, pData);
+    
+    ocStreamReaderUninit(&readerOCD);
+    ocFree(pDataOCD);
+    return result;
 }
 
 
@@ -167,27 +290,10 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocStreamReader* pReader, ocImageData* pData)
         return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
     }
 
-    
-    // The payload is simple for single mipmap images. It's just 1 ocMipmapInfo object and then the raw image data.
-    size_t mipmapInfoDataSize = sizeof(*pData->pMipmaps)*1;
-    size_t imageDataSize = imageWidth*imageHeight*4;
-    pData->_pPayload = ocMalloc(mipmapInfoDataSize + imageDataSize);
-
-    pData->format = ocImageFormat_R8G8B8A8;
-    pData->mipmapCount = 1;
-    pData->pMipmaps = (ocMipmapInfo*)pData->_pPayload;
-    pData->imageDataSize = imageDataSize;
-    pData->pImageData = ocOffsetPtr(pData->_pPayload, mipmapInfoDataSize);
-    memcpy(pData->pImageData, pImageData, imageDataSize);
-
-    // Only one mipmap.
-    pData->pMipmaps[0].offset = 0;
-    pData->pMipmaps[0].dataSize = imageDataSize;
-    pData->pMipmaps[0].width = (uint32_t)imageWidth;
-    pData->pMipmaps[0].height = (uint32_t)imageHeight;
-
+    ocResult result = ocLoadImage_Raw(ocImageFormat_R8G8B8A8, imageWidth, imageHeight, pImageData, pData);
     stbi_image_free(pImageData);
-    return OC_RESULT_SUCCESS;
+
+    return result;
 }
 
 ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePath, ocImageData* pData)
@@ -250,7 +356,7 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
 void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData)
 {
     if (pLoader == NULL || pData == NULL) return;
-    ocFree(pData->_pPayload);
+    ocFree(pData->pPayload);
 }
 
 
@@ -268,23 +374,14 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
 
     // Loading an OCD file is very simple because the file format nicely maps to our data structures.
     ocUInt64 fileSize;
-    ocResult result = ocStreamReaderSize(pReader, &fileSize);
+    ocResult result = ocMallocAndReadEntireStreamReader(pReader, (void**)&pData->pPayload, &fileSize);
     if (result != OC_RESULT_SUCCESS) {
         return result;
     }
 
-    if (fileSize > SIZE_MAX) {
-        return OC_RESULT_TOO_LARGE; // OCD file is too big to fit into memory.
-    }
-
-    pData->pPayload = (ocUInt8*)ocMalloc((ocSizeT)fileSize);
-    if (pData->pPayload == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
-    }
-
-    result = ocStreamReaderRead(pReader, pData->pPayload, (ocSizeT)fileSize, NULL);
-    if (result != OC_RESULT_SUCCESS) {
-        return result;
+    if (!ocCheckOCDHeader(pData->pPayload, fileSize, OC_OCD_TYPE_ID_SCENE)) {
+        ocFree(pData->pPayload);
+        return OC_RESULT_CORRUPT_FILE;
     }
 
 

@@ -273,7 +273,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
     gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     for (uint32_t iMipmap = 0; iMipmap < pDesc->mipLevels; ++iMipmap) {
-        gl.TexImage2D(GL_TEXTURE_2D, iMipmap, internalFormat, (GLsizei)pDesc->pMipmaps[iMipmap].width, (GLsizei)pDesc->pMipmaps[iMipmap].height, 0, format, type, ocOffsetPtr(pDesc->pImageData, pDesc->pMipmaps[iMipmap].offset));
+        gl.TexImage2D(GL_TEXTURE_2D, iMipmap, internalFormat, (GLsizei)pDesc->pMipmaps[iMipmap].width, (GLsizei)pDesc->pMipmaps[iMipmap].height, 0, format, type, ocOffsetPtr(pDesc->pImageData, pDesc->pMipmaps[iMipmap].dataOffset));
     }
 
     *ppImage = pImage;

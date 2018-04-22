@@ -33,8 +33,8 @@ Images ('IMG1')
 [4 bytes] Image Format
 [4 bytes] Mipmap Count
 [24 * <Mipmap Count> bytes] Mipmap Data
-[8 bytes] Image Data Size (The total size of the image data including the entire mipmap chain. Does not include padding.)
-[<Image Data Size> bytes] Image Data
+[8 bytes] Image Data Size (The total size of the image data including the entire mipmap chain. Includes padding.)
+[<Image Data Size> bytes] Image Data (The data of each individual mipmap is padded and aligned to 64-bits)
 [<Image Data Size> mod 8 bytes] Padding (for 64-bit alignment)
 
 The format of each <Mipmap Data> is:

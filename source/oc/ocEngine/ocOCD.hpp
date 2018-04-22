@@ -47,6 +47,43 @@ ocResult ocOCDDataBlockWritePadding64(ocOCDDataBlock* pBlock);
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// ocOCDImageBuilder
+//
+///////////////////////////////////////////////////////////////////////////////
+
+struct ocOCDImageBuilder
+{
+    ocImageFormat format;
+    ocStack<ocMipmapInfo> mipmaps;
+    ocOCDDataBlock imageDataBlock;
+};
+
+// Initializes an image builder.
+ocResult ocOCDImageBuilderInit(ocImageFormat format, ocUInt32 width, ocUInt32 height, const void* pImageData, ocOCDImageBuilder* pBuilder);
+
+// Uninitializes an image builder.
+ocResult ocOCDImageBuilderUninit(ocOCDImageBuilder* pBuilder);
+
+// Outputs the OCD file to the given writer.
+ocResult ocOCDImageBuilderRender(ocOCDImageBuilder* pBuilder, ocStreamWriter* pWriter);
+
+// Adds the next mipmap.
+//
+// This function needs to be called in order from highlest level of detail mipmap (not including the base level that was used to
+// initialize the builder) to the lowest level of detail. You can also use ocOCDImageBuilderGenerateMimaps() to have the builder
+// automatically generate the mipmaps for you.
+//
+// You do not need to specify mipmaps other than the base level if you don't need it.
+//
+// This function will fail if you do not pass in the correct width or height.
+ocResult ocOCDImageBuilderAddNextMipmap(ocOCDImageBuilder* pBuilder, ocUInt32 width, ocUInt32 height, const void* pData);
+
+// Generates the entire mipmap chain.
+ocResult ocOCDImageBuilderGenerateMipmaps(ocOCDImageBuilder* pBuilder);
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //

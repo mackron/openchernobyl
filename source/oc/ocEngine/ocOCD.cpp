@@ -1,5 +1,17 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
+OC_PRIVATE ocResult ocStreamWriterWriteOCDDataBlock(ocStreamWriter* pWriter, const ocOCDDataBlock &block)
+{
+    // Write nothing if the block is empty, but return successfully. Any block is allowed.
+    if (block.dataSize == 0) {
+        return OC_RESULT_SUCCESS;
+    }
+
+    return ocStreamWriterWrite(pWriter, block.pData, block.dataSize, NULL);
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // ocOCDDataBlock
@@ -59,6 +71,159 @@ ocResult ocOCDDataBlockWritePadding64(ocOCDDataBlock* pBlock)
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// ocOCDImageBuilder
+//
+///////////////////////////////////////////////////////////////////////////////
+
+ocResult ocOCDImageBuilderInit(ocImageFormat format, ocUInt32 width, ocUInt32 height, const void* pImageData, ocOCDImageBuilder* pBuilder)
+{
+    if (format == 0 || width == 0 || height == 0 || pImageData == NULL || pBuilder == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    ocZeroObject(pBuilder);
+
+    pBuilder->format = format;
+    ocStackInit(&pBuilder->mipmaps);
+    ocOCDDataBlockInit(&pBuilder->imageDataBlock);
+
+    return ocOCDImageBuilderAddNextMipmap(pBuilder, width, height, pImageData);
+}
+
+ocResult ocOCDImageBuilderUninit(ocOCDImageBuilder* pBuilder)
+{
+    if (pBuilder == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    ocOCDDataBlockUninit(&pBuilder->imageDataBlock);
+    ocStackUninit(&pBuilder->mipmaps);
+
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOCDImageBuilderRender(ocOCDImageBuilder* pBuilder, ocStreamWriter* pWriter)
+{
+    if (pBuilder == NULL || pWriter == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    // OCD header.
+    ocStreamWriterWrite<ocUInt32>(pWriter, OC_OCD_FOURCC);
+    ocStreamWriterWrite<ocUInt32>(pWriter, OC_OCD_TYPE_ID_IMAGE);
+
+    // IMG1 data.
+    ocStreamWriterWrite<ocUInt32>(pWriter, pBuilder->format);
+    ocStreamWriterWrite<ocUInt32>(pWriter, pBuilder->mipmaps.count);
+
+    for (ocUInt32 iMipmap = 0; iMipmap < pBuilder->mipmaps.count; ++iMipmap) {
+        ocStreamWriterWrite<ocUInt64>(pWriter, pBuilder->mipmaps.pItems[iMipmap].dataOffset);
+        ocStreamWriterWrite<ocUInt64>(pWriter, pBuilder->mipmaps.pItems[iMipmap].dataSize);
+        ocStreamWriterWrite<ocUInt32>(pWriter, pBuilder->mipmaps.pItems[iMipmap].width);
+        ocStreamWriterWrite<ocUInt32>(pWriter, pBuilder->mipmaps.pItems[iMipmap].height);
+    }
+
+    ocStreamWriterWrite<ocUInt64>(pWriter, pBuilder->imageDataBlock.dataSize);
+    ocStreamWriterWriteOCDDataBlock(pWriter, pBuilder->imageDataBlock);
+
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOCDImageBuilderAddNextMipmap(ocOCDImageBuilder* pBuilder, ocUInt32 width, ocUInt32 height, const void* pData)
+{
+    if (pBuilder == NULL || width == 0 || height == 0 || pData == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    // If we're adding the base level we don't need to do any size validation.
+    if (pBuilder->mipmaps.count > 0) {
+        ocUInt32 expectedWidth  = ocMax(1, pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].width  >> 1);
+        ocUInt32 expectedHeight = ocMax(1, pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].height >> 1);
+        if (width != expectedWidth || height != expectedHeight) {
+            return OC_RESULT_INVALID_ARGS;
+        }
+    }
+
+    // If we get here it means the dimensions of the mipmap are correct. Now we just add the data to our data block.
+    ocMipmapInfo mipmap;
+    mipmap.width = width;
+    mipmap.height = height;
+    mipmap.dataSize = (ocUInt64)width * (ocUInt64)height * ocImageFormatBytesPerPixel(pBuilder->format);
+    if (mipmap.dataSize > SIZE_MAX) {
+        return OC_RESULT_INVALID_ARGS;  // Too big.
+    }
+
+    ocResult result = ocOCDDataBlockWrite(&pBuilder->imageDataBlock, pData, (ocSizeT)mipmap.dataSize, &mipmap.dataOffset);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    // Padding.
+    result = ocOCDDataBlockWritePadding64(&pBuilder->imageDataBlock);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+
+    // Add the mipmap to the main list last.
+    result = ocStackPush(&pBuilder->mipmaps, mipmap);
+    if (result != OC_RESULT_SUCCESS) {
+        return result;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocOCDImageBuilderGenerateMipmaps(ocOCDImageBuilder* pBuilder)
+{
+    if (pBuilder == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    // Need at least one prior mipmap.
+    if (pBuilder->mipmaps.count == 0) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+    for (;;) {
+        ocUInt32 prevWidth  = pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].width;
+        ocUInt32 prevHeight = pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].height;
+        if (prevWidth == 1 && prevHeight == 1) {
+            break;
+        }
+
+        void* pPrevData = ocOffsetPtr(pBuilder->imageDataBlock.pData, (ocSizeT)pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].dataOffset);
+
+        ocUInt32 nextWidth  = ocMax(1, prevWidth  >> 1);
+        ocUInt32 nextHeight = ocMax(1, prevHeight >> 1);
+        void* pNextData = ocMalloc(nextWidth * nextHeight * ocImageFormatBytesPerPixel(pBuilder->format));
+        if (pNextData == NULL) {
+            return OC_RESULT_OUT_OF_MEMORY;
+        }
+
+        ocMipmapInfo mipmapInfo;
+        ocResult result = ocGenerateMipmap(prevWidth, prevHeight, ocImageFormatComponentCount(pBuilder->format), pPrevData, pNextData, &mipmapInfo);
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+
+        ocAssert(nextWidth  == mipmapInfo.width);
+        ocAssert(nextHeight == mipmapInfo.height);
+        
+        result = ocOCDImageBuilderAddNextMipmap(pBuilder, nextWidth, nextHeight, pNextData);
+        ocFree(pNextData);
+        
+        if (result != OC_RESULT_SUCCESS) {
+            return result;
+        }
+    }
+
+    return OC_RESULT_SUCCESS;
+}
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,19 +232,11 @@ ocResult ocOCDDataBlockWritePadding64(ocOCDDataBlock* pBlock)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-OC_PRIVATE ocResult ocStreamWriterWriteOCDDataBlock(ocStreamWriter* pWriter, const ocOCDDataBlock &block)
-{
-    // Write nothing if the block is empty, but return successfully. Any block is allowed.
-    if (block.dataSize == 0) {
-        return OC_RESULT_SUCCESS;
-    }
-
-    return ocStreamWriterWrite(pWriter, block.pData, block.dataSize, NULL);
-}
-
 ocResult ocOCDSceneBuilderInit(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
 
     ocZeroObject(pBuilder);
 

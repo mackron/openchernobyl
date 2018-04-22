@@ -37,17 +37,13 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
 struct ocImageData
 {
     ocImageFormat format;
-    uint32_t mipmapCount;
-    ocMipmapInfo* pMipmaps;
-    size_t imageDataSize;
-    void* pImageData;
+    ocUInt32 mipmapCount;
+    ocMipmapInfo* pMipmaps; // An offset of pPayload.
+    ocUInt64 imageDataSize;
+    ocUInt8* pImageData;    // An offset of pPayload.
 
-    // [Internal Use Only] Dynamically allocated data as a single allocation.
-    //
-    // Format:
-    //   sizeof(ocMipmapInfo) * mipmapCount
-    //   Raw image data of imageDataSize bytes
-    void* _pPayload;
+    // [Internal Use Only] Dynamically allocated data as a single allocation. This is the entire raw OCD file data verbatim.
+    ocUInt8* pPayload;
 };
 
 // Loads an image.

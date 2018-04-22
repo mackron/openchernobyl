@@ -28,11 +28,41 @@ OC_PRIVATE ocResult ocGame_RecreateWindowRT(ocVSyncMode vsyncMode)
     return OC_RESULT_SUCCESS;
 }
 
+OC_PRIVATE void ocGame_DoInput(ocEngineContext* pEngine)
+{
+    (void)pEngine;
+
+
+}
+
+OC_PRIVATE void ocGame_DoUpdate(ocEngineContext* pEngine, double dt)
+{
+    (void)pEngine;
+
+    ocWorldStep(&g_Game.world, dt);
+}
+
+OC_PRIVATE void ocGame_DoRender(ocEngineContext* pEngine)
+{
+    (void)pEngine;
+
+    ocWorldDraw(&g_Game.world);
+}
+
 OC_PRIVATE void ocGame_OnStep(ocEngineContext* pEngine)
 {
     (void)pEngine;
 
     double dt = ocTimerTick(&g_Game.timer);
+
+    // Input
+    ocGame_DoInput(pEngine);
+
+    // Update
+    ocGame_DoUpdate(pEngine, dt);
+
+    // Render
+    ocGame_DoRender(pEngine);
 
     //printf("Step: %f\n", dt);
 
@@ -41,9 +71,6 @@ OC_PRIVATE void ocGame_OnStep(ocEngineContext* pEngine)
     //ocGraphicsWorldSetObjectScale(&g_Game.world.graphicsWorld, g_Game.pMeshObject, glm::vec3(0.5f, 0.5f, 0.5f));
     //g_Game.pWindowRT->view = glm::translate(g_Game.pWindowRT->view, glm::vec3(0.1f * dt, 0, 0));
 
-
-    ocWorldStep(&g_Game.world, dt);
-    ocWorldDraw(&g_Game.world);
 
     // Present last.
     ocGraphicsPresent(&g_Game.engine.graphics, g_Game.pSwapchain);
