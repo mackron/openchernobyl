@@ -47,7 +47,12 @@ ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
         return ocToResultFromMAL(resultMAL);
     }
 
-    mal_device_config deviceConfig = mal_device_config_init_playback(mal_format_f32, 2, 44100, ocOnSendSamplesMAL);
+    mal_device_config deviceConfig = mal_device_config_init_playback(
+        mal_format_f32,
+        0,  // <-- Prefer device's native channel count.
+        48000,
+        ocOnSendSamplesMAL
+    );
 
     resultMAL = mal_device_init(&pAudio->internalContext, mal_device_type_playback, NULL, &deviceConfig, pAudio, &pAudio->playbackDevice);
     if (resultMAL != MAL_SUCCESS) {

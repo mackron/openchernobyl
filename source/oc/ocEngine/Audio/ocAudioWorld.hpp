@@ -10,3 +10,6 @@ ocResult ocAudioWorldInit(ocAudioContext* pAudio, ocAudioWorld* pWorld);
 
 //
 void ocAudioWorldUninit(ocAudioWorld* pWorld);
+
+//
+void ocAudioWorldStep(ocAudioWorld* pWorld, double dt);

@@ -16,3 +16,10 @@ void ocAudioWorldUninit(ocAudioWorld* pWorld)
 {
     if (pWorld == NULL) return;
 }
+
+void ocAudioWorldStep(ocAudioWorld* pWorld, double dt)
+{
+    if (pWorld == NULL) return;
+
+    (void)dt;
+}
