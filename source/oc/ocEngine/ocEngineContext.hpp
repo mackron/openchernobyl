@@ -17,6 +17,7 @@ struct ocEngineContext
     ocLogger logger;
     ocGraphicsContext graphics;
     ocAudioContext audio;
+    ocInputState input;
     ocComponentAllocator componentAllocator;
     ocResourceLoader resourceLoader;
     ocResourceLibrary resourceLibrary;
@@ -78,4 +79,16 @@ ocComponent* ocCreateComponent(ocEngineContext* pEngine, ocComponentType type, o
 // Deletes a component.
 void ocDeleteComponent(ocEngineContext* pEngine, ocComponent* pComponent);
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Input
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void ocGetMouseRelativePosition(const ocEngineContext* pEngine, float* pRelativePosX, float* pRelativePosY);
+void ocGetMouseAbsolutePosition(const ocEngineContext* pEngine, float* pAbsolutePosX, float* pAbsolutePosY);
+ocBool32 ocIsMouseButtonDown(const ocEngineContext* pEngine, ocMouseButton button);
+ocBool32 ocIsMouseButtonUp(const ocEngineContext* pEngine, ocMouseButton button);
+ocBool32 ocWasMouseButtonPressed(const ocEngineContext* pEngine, ocMouseButton button);
+ocBool32 ocWasMouseButtonReleased(const ocEngineContext* pEngine, ocMouseButton button);
 

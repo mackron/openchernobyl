@@ -147,6 +147,8 @@ typedef uint32_t         ocUInt32;
 typedef int64_t          ocInt64;
 typedef uint64_t         ocUInt64;
 #endif
+typedef float            ocFloat32;
+typedef double           ocFloat64;
 typedef size_t           ocSizeT;
 typedef ocUInt8          ocBool8;
 typedef ocUInt32         ocBool32;
@@ -213,6 +215,7 @@ struct ocWorldObject;
 #include "ocLogger.hpp"
 #include "Graphics/ocGraphics.hpp"
 #include "Audio/ocAudio.hpp"
+#include "Input/ocInput.hpp"
 #include "Physics/ocPhysics.hpp"
 #include "Components/ocComponents.hpp"
 #include "ocOCD.hpp"

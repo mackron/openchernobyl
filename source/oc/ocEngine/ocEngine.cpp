@@ -25,6 +25,7 @@
 #include "ocLogger.cpp"
 #include "Graphics/ocGraphics.cpp"
 #include "Audio/ocAudio.cpp"
+#include "Input/ocInput.cpp"
 #include "Physics/ocPhysics.cpp"
 #include "Components/ocComponents.cpp"
 #include "ocOCD.cpp"

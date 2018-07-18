@@ -207,6 +207,15 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
             ocHandleWindowEvent(pWindow->pEngine, e);
         } break;
 
+        case WM_MOUSEMOVE:
+        {
+            e.type = OC_WINDOW_EVENT_MOUSE_MOVE;
+            e.data.mouse_move.modifierState = ocGetModifierKeyState_Win32();
+            e.data.mouse_move.mousePosX = (int)(short)LOWORD(lParam);
+            e.data.mouse_move.mousePosY = (int)(short)HIWORD(lParam);
+            ocHandleWindowEvent(pWindow->pEngine, e);
+        } break;
+
         case WM_KEYDOWN:
         {
             if (!ocIsWin32MouseButtonKeyCode(wParam)) {

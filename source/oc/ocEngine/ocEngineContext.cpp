@@ -51,22 +51,28 @@ ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventPro
         goto on_error3;
     }
 
+    // Input.
+    result = ocInputInit(&pEngine->input);
+    if (result != OC_RESULT_SUCCESS) {
+        goto on_error4;
+    }
+
     // Component allocator.
     result = ocComponentAllocatorInit(pEngine, &pEngine->componentAllocator);
     if (result != OC_RESULT_SUCCESS) {
-        goto on_error4;
+        goto on_error5;
     }
 
     // Resource loader.
     result = ocResourceLoaderInit(&pEngine->fs, &pEngine->resourceLoader);
     if (result != OC_RESULT_SUCCESS) {
-        goto on_error5;
+        goto on_error6;
     }
 
     // Resource library.
     result = ocResourceLibraryInit(&pEngine->resourceLoader, &pEngine->graphics, &pEngine->resourceLibrary);
     if (result != OC_RESULT_SUCCESS) {
-        goto on_error6;
+        goto on_error7;
     }
 
 
@@ -74,15 +80,16 @@ ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventPro
     // initialized due to the coupling of X11 and OpenGL.
     result = ocPlatformLayerInit(props);
     if (result != OC_RESULT_SUCCESS) {
-        goto on_error7;
+        goto on_error8;
     }
 
 
     return OC_RESULT_SUCCESS;
 
-on_error7: ocResourceLibraryUninit(&pEngine->resourceLibrary);
-on_error6: ocResourceLoaderUninit(&pEngine->resourceLoader);
-on_error5: ocComponentAllocatorUninit(&pEngine->componentAllocator);
+on_error8: ocResourceLibraryUninit(&pEngine->resourceLibrary);
+on_error7: ocResourceLoaderUninit(&pEngine->resourceLoader);
+on_error6: ocComponentAllocatorUninit(&pEngine->componentAllocator);
+on_error5: ocInputUninit(&pEngine->input);
 on_error4: ocAudioUninit(&pEngine->audio);
 on_error3: ocGraphicsUninit(&pEngine->graphics);
 on_error2: ocLoggerUninit(&pEngine->logger);
@@ -98,6 +105,7 @@ void ocEngineUninit(ocEngineContext* pEngine)
     ocResourceLibraryUninit(&pEngine->resourceLibrary);
     ocResourceLoaderUninit(&pEngine->resourceLoader);
     ocComponentAllocatorUninit(&pEngine->componentAllocator);
+    ocInputUninit(&pEngine->input);
     ocAudioUninit(&pEngine->audio);
     ocGraphicsUninit(&pEngine->graphics);
     ocLoggerUninit(&pEngine->logger);
@@ -109,12 +117,35 @@ void ocStep(ocEngineContext* pEngine)
 {
     if (pEngine == NULL || pEngine->onStep == NULL) return;
     pEngine->onStep(pEngine);
+
+    // Prepare the input state for the next frame.
+    ocInputMakeCurrentStatePrevious(&pEngine->input);
 }
 
 void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
 {
     if (pEngine == NULL || pEngine->onWindowEvent == NULL) return;
     pEngine->onWindowEvent(pEngine, e);
+
+    switch (e.type)
+    {
+        case OC_WINDOW_EVENT_MOUSE_MOVE:
+        {
+            ocMouseStateSetAbsolutePosition(&pEngine->input.mouseState[0], (float)e.data.mouse_move.mousePosX, (float)e.data.mouse_move.mousePosY);
+        } break;
+
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_DOWN:
+        {
+            ocMouseStateSetButtonDown(&pEngine->input.mouseState[0], e.data.mouse_button_down.mouseButton);
+        } break;
+
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_UP:
+        {
+            ocMouseStateSetButtonUp(&pEngine->input.mouseState[0], e.data.mouse_button_up.mouseButton);
+        } break;
+
+        default: break;
+    }
 }
 
 
@@ -215,4 +246,40 @@ void ocDeleteComponent(ocEngineContext* pEngine, ocComponent* pComponent)
 {
     if (pEngine == NULL || pComponent == NULL) return;
     return ocComponentAllocatorDeleteComponent(&pEngine->componentAllocator, pComponent);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Input
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void ocGetMouseRelativePosition(const ocEngineContext* pEngine, float* pRelativePosX, float* pRelativePosY)
+{
+    ocMouseStateGetRelativePosition(&pEngine->input.mouseState[0], pRelativePosX, pRelativePosY);
+}
+
+void ocGetMouseAbsolutePosition(const ocEngineContext* pEngine, float* pAbsolutePosX, float* pAbsolutePosY)
+{
+    ocMouseStateGetAbsolutePosition(&pEngine->input.mouseState[0], pAbsolutePosX, pAbsolutePosY);
+}
+
+ocBool32 ocIsMouseButtonDown(const ocEngineContext* pEngine, ocMouseButton button)
+{
+    return ocMouseStateIsButtonDown(&pEngine->input.mouseState[0], button);
+}
+
+ocBool32 ocIsMouseButtonUp(const ocEngineContext* pEngine, ocMouseButton button)
+{
+    return ocMouseStateIsButtonUp(&pEngine->input.mouseState[0], button);
+}
+
+ocBool32 ocWasMouseButtonPressed(const ocEngineContext* pEngine, ocMouseButton button)
+{
+    return ocMouseStateWasButtonPressed(&pEngine->input.mouseState[0], button);
+}
+
+ocBool32 ocWasMouseButtonReleased(const ocEngineContext* pEngine, ocMouseButton button)
+{
+    return ocMouseStateWasButtonReleased(&pEngine->input.mouseState[0], button);
 }
