@@ -6,7 +6,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef unsigned int ocWindowEventType;
+typedef ocUInt32 ocWindowEventType;
 #define OC_WINDOW_EVENT_SIZE                    1
 #define OC_WINDOW_EVENT_MOVE                    2
 #define OC_WINDOW_EVENT_MOUSE_MOVE              3
@@ -17,7 +17,7 @@ typedef unsigned int ocWindowEventType;
 #define OC_WINDOW_EVENT_PRINTABLE_KEY_DOWN      8
 #define OC_WINDOW_EVENT_KEY_UP                  9
 
-typedef unsigned int ocModifierState;
+typedef ocUInt32 ocModifierState;
 #define OC_MODIFIER_STATE_CTRL_DOWN             (1U << 0U)
 #define OC_MODIFIER_STATE_SHIFT_DOWN            (1U << 1U)
 #define OC_MODIFIER_STATE_ALT_DOWN              (1U << 2U)
@@ -28,7 +28,16 @@ typedef unsigned int ocModifierState;
 #define OC_MODIFIER_STATE_MB5_DOWN              (1U << 7U)
 #define OC_MODIFIER_STATE_AUTO_REPEATED         (1U << 31U)
 
-typedef uint32_t ocKey;
+typedef ocUInt32 ocMouseButton;
+#define OC_MOUSE_BUTTON_LEFT        1
+#define OC_MOUSE_BUTTON_RIGHT       2
+#define OC_MOUSE_BUTTON_MIDDLE      4
+#define OC_MOUSE_BUTTON_4           8
+#define OC_MOUSE_BUTTON_5           16
+#define OC_MOUSE_BUTTON_6           32
+#define OC_MOUSE_BUTTON_7           64
+
+typedef ocUInt32 ocKey;
 #define OC_KEY_BACKSPACE              0xff08
 #define OC_KEY_SHIFT                  0xff10
 #define OC_KEY_ESCAPE                 0xff1b
@@ -94,28 +103,28 @@ struct ocWindowEvent
     {
         struct
         {
-            unsigned int width;
-            unsigned int height;
+            ocUInt32 width;
+            ocUInt32 height;
         } size;
 
         struct
         {
-            int x;
-            int y;
+            ocInt32 x;
+            ocInt32 y;
         } move;
 
         struct
         {
-            int mousePosX;
-            int mousePosY;
+            ocInt32 mousePosX;
+            ocInt32 mousePosY;
             ocModifierState modifierState;
         } mouse_move;
 
         struct
         {
-            int mousePosX;
-            int mousePosY;
-            int mouseButton;
+            ocInt32 mousePosX;
+            ocInt32 mousePosY;
+            ocMouseButton mouseButton;
             ocModifierState modifierState;
         } mouse_button_down, mouse_button_up, mouse_button_dblclick;
 
@@ -127,7 +136,7 @@ struct ocWindowEvent
 
         struct
         {
-            uint32_t utf32;
+            ocUInt32 utf32;
             ocModifierState modifierState;
         } printable_key_down;
 
@@ -157,7 +166,7 @@ void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY);
 
 typedef struct
 {
-    int64_t counter;
+    ocInt64 counter;
 } ocTimer;
 
 // Initializes a high-resolution timer.

@@ -1,14 +1,6 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
-#define OC_MOUSE_BUTTON_LEFT        1
-#define OC_MOUSE_BUTTON_RIGHT       2
-#define OC_MOUSE_BUTTON_MIDDLE      4
-#define OC_MOUSE_BUTTON_4           8
-#define OC_MOUSE_BUTTON_5           16
-
 #define OC_MAX_MOUSE_BUTTON_COUNT   16
-
-typedef ocUInt32 ocMouseButton;
 
 struct ocMouseState
 {
