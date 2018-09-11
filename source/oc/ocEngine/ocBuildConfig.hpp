@@ -1,5 +1,8 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
+#define OC_STRINGIFY(x)         #x
+#define OC_XSTRINGIFY(x)        OC_STRINGIFY(x)
+
 ///////////////////////////////////////////////////////////////////////////////
 // Application Configuration
 
@@ -25,7 +28,7 @@
 #define OC_VERSION_REVISION     0
 #endif
 #ifndef OC_VERSION_STRING
-#define OC_VERSION_STRING       "1.0.0"
+#define OC_VERSION_STRING       OC_XSTRINGIFY(OC_VERSION_MAJOR) "." OC_XSTRINGIFY(OC_VERSION_MINOR) "." OC_XSTRINGIFY(OC_VERSION_REVISION)
 #endif
 
 #ifndef OC_CONFIG_NAME
