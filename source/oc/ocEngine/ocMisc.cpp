@@ -28,8 +28,7 @@ const char* ocNextToken(const char* tokens, char* tokenOut, size_t tokenOutSize)
     const char* strBeg = tokens;
     const char* strEnd = strBeg;
 
-    if (strEnd[0] == '\"')
-    {
+    if (strEnd[0] == '\"') {
         // It's double-quoted - loop until the next unescaped quote character.
 
         // Skip past the first double-quote character.
@@ -38,14 +37,11 @@ const char* ocNextToken(const char* tokens, char* tokenOut, size_t tokenOutSize)
 
         // Keep looping until the next unescaped double-quote character.
         char prevChar = '\0';
-        while (strEnd[0] != '\0' && (strEnd[0] != '\"' || prevChar == '\\'))
-        {
+        while (strEnd[0] != '\0' && (strEnd[0] != '\"' || prevChar == '\\')) {
             prevChar = strEnd[0];
             strEnd += 1;
         }
-    }
-    else
-    {
+    } else {
         // It's not double-quoted - just loop until the first whitespace.
         while (strEnd[0] != '\0' && (strEnd[0] != ' ' && strEnd[0] != '\t' && strEnd[0] != '\n' && strEnd[0] != '\v' && strEnd[0] != '\f' && strEnd[0] != '\r')) {
             strEnd += 1;
@@ -57,8 +53,7 @@ const char* ocNextToken(const char* tokens, char* tokenOut, size_t tokenOutSize)
     // ensure we don't include the escape character.
     //assert(strEnd >= strBeg);
 
-    while (tokenOutSize > 1 && strBeg < strEnd)
-    {
+    while (tokenOutSize > 1 && strBeg < strEnd) {
         if (strBeg[0] == '\\' && strBeg[1] == '\"' && strBeg < strEnd) {
             strBeg += 1;
         }
