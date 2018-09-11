@@ -116,7 +116,7 @@ ocResult ocOCDImageBuilderRender(ocOCDImageBuilder* pBuilder, ocStreamWriter* pW
 
     // IMG1 data.
     ocStreamWriterWrite<ocUInt32>(pWriter, pBuilder->format);
-    ocStreamWriterWrite<ocUInt32>(pWriter, pBuilder->mipmaps.count);
+    ocStreamWriterWrite<ocUInt32>(pWriter, (ocUInt32)pBuilder->mipmaps.count);
 
     for (ocUInt32 iMipmap = 0; iMipmap < pBuilder->mipmaps.count; ++iMipmap) {
         ocStreamWriterWrite<ocUInt64>(pWriter, pBuilder->mipmaps.pItems[iMipmap].dataOffset);
