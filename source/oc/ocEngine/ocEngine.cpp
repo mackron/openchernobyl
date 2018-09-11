@@ -80,17 +80,6 @@
     #pragma warning(pop)
 #endif
 
-#if defined(_MSC_VER)
-    #pragma warning(push)
-    #pragma warning(disable:4244)
-    #pragma warning(disable:4100)
-#endif
-#define STB_DXT_IMPLEMENTATION
-#include "../../external/stb/stb_dxt.h"
-#if defined(_MSC_VER)
-    #pragma warning(pop)
-#endif
-
 #define STB_PERLIN_IMPLEMENTATION
 #include "../../external/stb/stb_perlin.h"
 

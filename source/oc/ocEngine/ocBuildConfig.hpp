@@ -1,8 +1,5 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
-#define OC_STRINGIFY(x)         #x
-#define OC_XSTRINGIFY(x)        OC_STRINGIFY(x)
-
 ///////////////////////////////////////////////////////////////////////////////
 // Application Configuration
 

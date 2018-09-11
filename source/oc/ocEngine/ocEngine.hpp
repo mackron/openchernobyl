@@ -16,6 +16,9 @@
 #ifndef OC_ENGINE_HPP
 #define OC_ENGINE_HPP
 
+#define OC_STRINGIFY(x)         #x
+#define OC_XSTRINGIFY(x)        OC_STRINGIFY(x)
+
 // Put the build config at the top in order to gain access to platform detection.
 #include "ocBuildConfig.hpp"
 
@@ -48,7 +51,6 @@
 #define STB_VORBIS_NO_STDIO
 #include "../../external/stb/stb_image.h"
 #include "../../external/stb/stb_image_write.h"
-#include "../../external/stb/stb_dxt.h"
 #include "../../external/stb/stb_vorbis.c"
 
 //#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
