@@ -144,6 +144,11 @@ void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
             ocMouseStateSetButtonUp(&pEngine->input.mouseState[0], e.data.mouse_button_up.mouseButton);
         } break;
 
+        case OC_WINDOW_EVENT_MOUSE_BUTTON_DBLCLICK:
+        {
+            ocMouseStateSetButtonDoubleClicked(&pEngine->input.mouseState[0], e.data.mouse_button_dblclick.mouseButton);
+        } break;
+
         default: break;
     }
 }
