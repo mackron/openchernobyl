@@ -70,7 +70,6 @@
 
 
 #ifdef OC_USE_OPENGL
-    //#define DR_GL_VERSION 300
     #define DR_GL_VERSION 210
     #define DR_GL_ENABLE_EXT_framebuffer_blit
     #define DR_GL_ENABLE_EXT_framebuffer_multisample
