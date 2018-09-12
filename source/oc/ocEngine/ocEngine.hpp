@@ -201,6 +201,8 @@ struct ocWorldObject;
 // Open Chernobyl headers.
 #include "ocResultCodes.hpp"
 #include "ocMisc.hpp"
+#include "ocLimits.hpp"
+#include "ocRect.hpp"
 #include "ocContainers.hpp"
 #include "ocString.hpp"
 #include "ocImageUtils.hpp"

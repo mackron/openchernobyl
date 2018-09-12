@@ -12,6 +12,7 @@
 #include "ocEngine.hpp"
 
 #include "ocMisc.cpp"
+#include "ocRect.cpp"
 #include "ocString.cpp"
 #include "ocImageUtils.cpp"
 #include "ocCommandLine.cpp"
