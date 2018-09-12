@@ -8,10 +8,13 @@ struct ocMouseState
     float absolutePosY;
     float absolutePosXPrev;
     float absolutePosYPrev;
+    float pinnedPosX;
+    float pinnedPosY;
     ocUInt16 mouseButtonDownState;          // 1 bit per mouse button. When set it means the button is down. When unset it means the button is released.
     ocUInt16 mouseButtonDownStatePrev;
     ocUInt16 mouseButtonDoubleClickState;   // As above, except for double click.
     ocUInt16 mouseButtonDoubleClickStatePrev;
+    ocBool32 isPinned : 1;
 };
 
 ocResult ocMouseStateInit(ocMouseState* pState);
@@ -30,3 +33,5 @@ void ocMouseStateSetAbsolutePosition(ocMouseState* pState, float absolutePosX, f
 void ocMouseStateSetButtonDown(ocMouseState* pState, ocMouseButton button);
 void ocMouseStateSetButtonUp(ocMouseState* pState, ocMouseButton button);
 void ocMouseStateSetButtonDoubleClicked(ocMouseState* pState, ocMouseButton button);
+ocResult ocMouseStatePin(ocMouseState* pState, float absolutePosX, float absolutePosY);
+ocResult ocMouseStateUnpin(ocMouseState* pState);

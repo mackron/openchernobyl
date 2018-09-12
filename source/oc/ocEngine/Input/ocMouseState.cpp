@@ -118,8 +118,15 @@ void ocMouseStateMakeCurrentStatePrevious(ocMouseState* pState)
         return;
     }
 
-    pState->absolutePosXPrev = pState->absolutePosX;
-    pState->absolutePosYPrev = pState->absolutePosY;
+    // When the mouse is pinned, the previous position is always the pinned position.
+    if (pState->isPinned) {
+        pState->absolutePosXPrev = pState->pinnedPosX;
+        pState->absolutePosYPrev = pState->pinnedPosY;
+    } else {
+        pState->absolutePosXPrev = pState->absolutePosX;
+        pState->absolutePosYPrev = pState->absolutePosY;
+    }
+    
     pState->mouseButtonDownStatePrev = pState->mouseButtonDownState;
     pState->mouseButtonDoubleClickStatePrev = pState->mouseButtonDoubleClickState;
 
@@ -162,4 +169,37 @@ void ocMouseStateSetButtonDoubleClicked(ocMouseState* pState, ocMouseButton butt
     }
 
     pState->mouseButtonDoubleClickState |= button;
+}
+
+ocResult ocMouseStatePin(ocMouseState* pState, float absolutePosX, float absolutePosY)
+{
+    if (pState == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    pState->pinnedPosX = absolutePosX;
+    pState->pinnedPosY = absolutePosY;
+    pState->isPinned = OC_TRUE;
+
+    // Also want to set the current and previous mouse position to the new pinned position. Otherwise we'll end up with huge jumps
+    // in the next relative position.
+    pState->absolutePosX = absolutePosX;
+    pState->absolutePosY = absolutePosY;
+    pState->absolutePosXPrev = absolutePosX;
+    pState->absolutePosYPrev = absolutePosY;
+
+    return OC_SUCCESS;
+}
+
+ocResult ocMouseStateUnpin(ocMouseState* pState)
+{
+    if (pState == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    pState->pinnedPosX = 0;
+    pState->pinnedPosY = 0;
+    pState->isPinned = OC_FALSE;
+
+    return OC_SUCCESS;
 }

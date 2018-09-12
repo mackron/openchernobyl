@@ -295,7 +295,7 @@ void ocWindowShow_Win32(ocWindow* pWindow)
 }
 
 
-void ocWindowGetSize_Win32(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
+void ocWindowGetSize_Win32(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
 {
     assert(pWindow != NULL);
 
@@ -326,6 +326,62 @@ void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int s
     SetWindowPos(pWindow->hWnd, NULL, 0, 0, scaledSizeX, scaledSizeY, SWP_NOZORDER | SWP_NOMOVE);
 }
 
+void ocWindowToScreen_Win32(const ocWindow* pWindow, ocInt32* pPosX, ocInt32* pPosY)
+{
+    ocAssert(pWindow != NULL);
+
+    POINT pt;
+    pt.x = (pPosX != NULL) ? *pPosX : 0;
+    pt.y = (pPosY != NULL) ? *pPosY : 0;
+    ClientToScreen(pWindow->hWnd, &pt);
+
+    if (pPosX) *pPosX = pt.x;
+    if (pPosY) *pPosY = pt.y;
+}
+
+void ocScreenToWindow_Win32(const ocWindow* pWindow, ocInt32* pPosX, ocInt32* pPosY)
+{
+    ocAssert(pWindow != NULL);
+
+    POINT pt;
+    pt.x = (pPosX != NULL) ? *pPosX : 0;
+    pt.y = (pPosY != NULL) ? *pPosY : 0;
+    ScreenToClient(pWindow->hWnd, &pt);
+
+    if (pPosX) *pPosX = pt.x;
+    if (pPosY) *pPosY = pt.y;
+}
+
+void ocWindowSetPosition_Win32(ocWindow* pWindow, ocInt32 posX, ocInt32 posY)
+{
+    ocAssert(pWindow != NULL);
+
+    if (!SetWindowPos(pWindow->hWnd, NULL, posX, posY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE)) {
+        return;
+    }
+}
+
+void ocWindowMoveToCenterOfScreen_Win32(ocWindow* pWindow)
+{
+    ocAssert(pWindow != NULL);
+
+    MONITORINFO mi;
+    ZeroMemory(&mi, sizeof(mi));
+    mi.cbSize = sizeof(MONITORINFO);
+    if (!GetMonitorInfoA(MonitorFromWindow(pWindow->hWnd, MONITOR_DEFAULTTONEAREST), &mi)) {
+        return;
+    }
+
+    LONG screenSizeX = mi.rcMonitor.right - mi.rcMonitor.left;
+    LONG screenSizeY = mi.rcMonitor.bottom - mi.rcMonitor.top;
+
+    ocUInt32 windowSizeX;
+    ocUInt32 windowSizeY;
+    ocWindowGetSize(pWindow, &windowSizeX, &windowSizeY);
+
+    ocWindowSetPosition(pWindow, (screenSizeX - windowSizeX)/2, (screenSizeY - windowSizeY)/2);
+}
+
 ocResult ocWindowCaptureMouse_Win32(ocWindow* pWindow)
 {
     ocAssert(pWindow != NULL);
@@ -339,6 +395,38 @@ ocResult ocWindowReleaseMouse_Win32(ocWindow* pWindow)
     ocAssert(pWindow != NULL);
 
     if (!ReleaseCapture()) {
+        return OC_ERROR;
+    }
+
+    return OC_SUCCESS;
+}
+
+ocResult ocConstrainSystemCursorToScreen_Win32(ocRectI rect)
+{
+    RECT win32Rect;
+    win32Rect.left = rect.left;
+    win32Rect.top = rect.top;
+    win32Rect.right = rect.right;
+    win32Rect.bottom = rect.bottom;
+    if (!ClipCursor(&win32Rect)) {
+        return OC_ERROR;
+    }
+
+    return OC_SUCCESS;
+}
+
+ocResult ocUnconstrainSystemCursor_Win32()
+{
+    if (!ClipCursor(NULL)) {
+        return OC_ERROR;
+    }
+
+    return OC_SUCCESS;
+}
+
+ocResult ocSetSystemCursorScreenPosition_Win32(ocInt32 screenPosX, ocInt32 screenPosY)
+{
+    if (!SetCursorPos((int)screenPosX, (int)screenPosY)) {
         return OC_ERROR;
     }
 
@@ -490,7 +578,7 @@ void ocWindowShow_X11(ocWindow* pWindow)
 }
 
 
-void ocWindowGetSize_X11(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
+void ocWindowGetSize_X11(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
 {
     if (pSizeX != NULL) *pSizeX = 0;
     if (pSizeY != NULL) *pSizeY = 0;
@@ -563,6 +651,37 @@ void ocHideSystemCursor()
 }
 
 
+ocResult ocConstrainSystemCursorToScreen(ocRectI rect)
+{
+#ifdef OC_WIN32
+    return ocConstrainSystemCursorToScreen_Win32(rect);
+#endif
+#ifdef OC_X11
+    return ocConstrainSystemCursorToScreen_X11(rect);
+#endif
+}
+
+ocResult ocUnconstrainSystemCursor()
+{
+#ifdef OC_WIN32
+    return ocUnconstrainSystemCursor_Win32();
+#endif
+#ifdef OC_X11
+    return ocUnconstrainSystemCursor_X11();
+#endif
+}
+
+ocResult ocSetSystemCursorScreenPosition(ocInt32 screenPosX, ocInt32 screenPosY)
+{
+#ifdef OC_WIN32
+    return ocSetSystemCursorScreenPosition_Win32(screenPosX, screenPosY);
+#endif
+#ifdef OC_X11
+    return ocSetSystemCursorScreenPosition_X11(screenPosX, screenPosY);
+#endif
+}
+
+
 ocBool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
     if (pWindow == NULL) return false;
@@ -603,7 +722,7 @@ void ocWindowShow(ocWindow* pWindow)
 }
 
 
-void ocWindowGetSize(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
+void ocWindowGetSize(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
 {
     if (pWindow == NULL) return;
 
@@ -628,6 +747,64 @@ void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY)
 #endif
 #ifdef OC_X11
     ocWindowSetSize_X11(pWindow, sizeX, sizeY);
+#endif
+}
+
+
+void ocWindowToScreen(const ocWindow* pWindow, ocInt32* pPosX, ocInt32* pPosY)
+{
+    if (pWindow == NULL) {
+        return;
+    }
+
+#ifdef OC_WIN32
+    ocWindowToScreen_Win32(pWindow, pPosX, pPosY);
+#endif
+#ifdef OC_X11
+    ocWindowToScreen_X11(pWindow, pPosX, pPosY);
+#endif
+}
+
+void ocScreenToWindow(const ocWindow* pWindow, ocInt32* pPosX, ocInt32* pPosY)
+{
+    if (pWindow == NULL) {
+        return;
+    }
+
+#ifdef OC_WIN32
+    ocScreenToWindow_Win32(pWindow, pPosX, pPosY);
+#endif
+#ifdef OC_X11
+    ocScreenToWindow_X11(pWindow, pPosX, pPosY);
+#endif
+}
+
+
+void ocWindowSetPosition(ocWindow* pWindow, ocInt32 posX, ocInt32 posY)
+{
+    if (pWindow == NULL) {
+        return;
+    }
+
+#ifdef OC_WIN32
+    ocWindowSetPosition_Win32(pWindow, posX, posY);
+#endif
+#ifdef OC_X11
+    ocWindowSetPosition_X11(pWindow, posX, posY);
+#endif
+}
+
+void ocWindowMoveToCenterOfScreen(ocWindow* pWindow)
+{
+    if (pWindow == NULL) {
+        return;
+    }
+
+#ifdef OC_WIN32
+    ocWindowMoveToCenterOfScreen_Win32(pWindow);
+#endif
+#ifdef OC_X11
+    ocWindowMoveToCenterOfScreen_X11(pWindow);
 #endif
 }
 
@@ -737,7 +914,6 @@ void ocTimerInit(ocTimer* pTimer)
 #ifdef OC_WIN32
     ocTimerInit_Win32(pTimer);
 #endif
-
 #ifdef OC_X11
     ocTimerInit_Linux(pTimer);
 #endif
@@ -752,7 +928,6 @@ double ocTimerTick(ocTimer* pTimer)
 #ifdef OC_WIN32
     return ocTimerTick_Win32(pTimer);
 #endif
-
 #ifdef OC_X11
     return ocTimerTick_Linux(pTimer);
 #endif
@@ -784,10 +959,10 @@ int ocMainLoop_Win32(ocEngineContext* pEngine)
 
             TranslateMessage(&msg);
             DispatchMessageA(&msg);
+        } else {
+            // We'll get here if there's no more events in the queue. Here is where we draw.
+            ocStep(pEngine);
         }
-
-        // After handling the next event in the queue we let the game know it should do the next frame.
-        ocStep(pEngine);
     }
 }
 #endif  // Win32
@@ -852,9 +1027,9 @@ int ocMainLoop_X11(ocEngineContext* pEngine)
             };
 
             ocHandleX11Event(&x11Event);
+        } else {
+            ocStep(pEngine);
         }
-
-        ocStep(pEngine);
     }
 }
 #endif  // X11
@@ -864,7 +1039,6 @@ int ocMainLoop(ocEngineContext* pEngine)
 #ifdef OC_WIN32
     return ocMainLoop_Win32(pEngine);
 #endif
-
 #ifdef OC_X11
     return ocMainLoop_X11(pEngine);
 #endif

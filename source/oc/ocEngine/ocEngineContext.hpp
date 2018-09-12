@@ -91,5 +91,10 @@ ocBool32 ocIsMouseButtonDown(const ocEngineContext* pEngine, ocMouseButton butto
 ocBool32 ocIsMouseButtonUp(const ocEngineContext* pEngine, ocMouseButton button);
 ocBool32 ocWasMouseButtonPressed(const ocEngineContext* pEngine, ocMouseButton button);
 ocBool32 ocWasMouseButtonReleased(const ocEngineContext* pEngine, ocMouseButton button);
-void ocShowCursor(const ocEngineContext* pEngine);
-void ocHideCursor(const ocEngineContext* pEngine);
+ocResult ocPinMouseToWindowPosition(ocEngineContext* pEngine, const ocWindow* pWindow, float absolutePosX, float absolutePosY);
+ocResult ocPinMouseToCenterOfWindow(ocEngineContext* pEngine, const ocWindow* pWindow);
+ocResult ocUnpinMouse(ocEngineContext* pEngine);
+void ocShowCursor(ocEngineContext* pEngine);
+void ocHideCursor(ocEngineContext* pEngine);
+ocResult ocConstrainCursorToScreen(ocEngineContext* pEngine, ocRectI rect);
+ocResult ocUnconstrainCursor(ocEngineContext* pEngine);

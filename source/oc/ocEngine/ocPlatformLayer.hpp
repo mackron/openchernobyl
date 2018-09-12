@@ -87,6 +87,16 @@ void ocShowSystemCursor();
 void ocHideSystemCursor();
 
 
+// Constrains the system cursor to the given rectangle in screen coordinates.
+ocResult ocConstrainSystemCursorToScreen(ocRectI rect);
+
+// Unconstrains the system cursor from a previous call to ocConstrainSystemCursorToScreen().
+ocResult ocUnconstrainSystemCursor();
+
+// Sets the position of the system cursor without posting a mouse move event.
+ocResult ocSetSystemCursorScreenPosition(ocInt32 screenPosX, ocInt32 screenPosY);
+
+
 struct ocWindow
 {
     ocEngineContext* pEngine;
@@ -160,8 +170,13 @@ ocBool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsign
 void ocWindowUninit(ocWindow* pWindow);
 void ocWindowShow(ocWindow* pWindow);
 
-void ocWindowGetSize(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY);
+void ocWindowGetSize(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY);
 void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY);
+void ocWindowToScreen(const ocWindow* pWindow, ocInt32* pPosX, ocInt32* pPosY);
+void ocScreenToWindow(const ocWindow* pWindow, ocInt32* pPosX, ocInt32* pPosY);
+
+void ocWindowSetPosition(ocWindow* pWindow, ocInt32 posX, ocInt32 posY);
+void ocWindowMoveToCenterOfScreen(ocWindow* pWindow);
 
 ocResult ocWindowCaptureMouse(ocWindow* pWindow);
 ocResult ocWindowReleaseMouse(ocWindow* pWindow);

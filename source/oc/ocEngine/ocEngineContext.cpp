@@ -1,5 +1,7 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
+OC_PRIVATE void ocMakeCurrentInputStatePrevious(ocEngineContext* pEngine);
+
 ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventProc onWindowEvent, void* pUserData, ocEngineContext* pEngine)
 {
     if (pEngine == NULL) {
@@ -126,7 +128,7 @@ void ocStep(ocEngineContext* pEngine)
     pEngine->onStep(pEngine);
 
     // Prepare the input state for the next frame.
-    ocInputMakeCurrentStatePrevious(&pEngine->input);
+    ocMakeCurrentInputStatePrevious(pEngine);
 }
 
 void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
@@ -166,7 +168,10 @@ void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
 
 ocBool32 ocIsPortable(ocEngineContext* pEngine)
 {
-    if (pEngine == NULL) return false;
+    if (pEngine == NULL) {
+        return false;
+    }
+
     return (pEngine->flags & OC_ENGINE_FLAG_PORTABLE) != 0;
 }
 
@@ -278,6 +283,19 @@ void ocDeleteComponent(ocEngineContext* pEngine, ocComponent* pComponent)
 // Input
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+OC_PRIVATE void ocMakeCurrentInputStatePrevious(ocEngineContext* pEngine)
+{
+    ocAssert(pEngine != NULL);
+
+    // The first thing to do is move the cursor back to it's pinned position if applicable. It's important that we do this without
+    // the operating system posting an event.
+    if (pEngine->input.isSystemCursorPinned) {
+        ocSetSystemCursorScreenPosition(pEngine->input.systemCursorPinnedScreenPosX, pEngine->input.systemCursorPinnedScreenPosY);
+    }
+
+    ocInputMakeCurrentStatePrevious(&pEngine->input);
+}
+
 void ocGetMouseRelativePosition(const ocEngineContext* pEngine, float* pRelativePosX, float* pRelativePosY)
 {
     if (pEngine == NULL) {
@@ -332,14 +350,76 @@ ocBool32 ocWasMouseButtonReleased(const ocEngineContext* pEngine, ocMouseButton 
     return ocMouseStateWasButtonReleased(&pEngine->input.mouseState[0], button);
 }
 
-void ocShowCursor(const ocEngineContext* pEngine)
+ocResult ocPinMouseToWindowPosition(ocEngineContext* pEngine, const ocWindow* pWindow, float absolutePosX, float absolutePosY)
+{
+    if (pEngine == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    // The window is used to calculate the pinned position in screen coordinates, which is used when moving the system
+    // cursor back to the pinned position.
+    ocInt32 screenPosX = (ocInt32)absolutePosX;
+    ocInt32 screenPosY = (ocInt32)absolutePosY;
+    if (pWindow != NULL) {
+        ocWindowToScreen(pWindow, &screenPosX, &screenPosY);
+    }
+
+    pEngine->input.systemCursorPinnedScreenPosX = screenPosX;
+    pEngine->input.systemCursorPinnedScreenPosY = screenPosY;
+    pEngine->input.isSystemCursorPinned = OC_TRUE;
+
+    return ocMouseStatePin(&pEngine->input.mouseState[0], absolutePosX, absolutePosY);
+}
+
+ocResult ocPinMouseToCenterOfWindow(ocEngineContext* pEngine, const ocWindow* pWindow)
+{
+    if (pEngine == NULL || pWindow == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    ocUInt32 sizeX;
+    ocUInt32 sizeY;
+    ocWindowGetSize(pWindow, &sizeX, &sizeY);
+
+    ocFloat32 absolutePosX = (ocFloat32)sizeX/2;
+    ocFloat32 absolutePosY = (ocFloat32)sizeY/2;
+
+    return ocPinMouseToWindowPosition(pEngine, pWindow, absolutePosX, absolutePosY);
+}
+
+ocResult ocUnpinMouse(ocEngineContext* pEngine)
+{
+    if (pEngine == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    pEngine->input.systemCursorPinnedScreenPosX = 0;
+    pEngine->input.systemCursorPinnedScreenPosY = 0;
+    pEngine->input.isSystemCursorPinned = OC_FALSE;
+
+    return ocMouseStateUnpin(&pEngine->input.mouseState[0]);
+}
+
+void ocShowCursor(ocEngineContext* pEngine)
 {
     (void)pEngine;
     ocShowSystemCursor();
 }
 
-void ocHideCursor(const ocEngineContext* pEngine)
+void ocHideCursor(ocEngineContext* pEngine)
 {
     (void)pEngine;
     ocHideSystemCursor();
+}
+
+ocResult ocConstrainCursorToScreen(ocEngineContext* pEngine, ocRectI rect)
+{
+    (void)pEngine;
+    return ocConstrainSystemCursorToScreen(rect);
+}
+
+ocResult ocUnconstrainCursor(ocEngineContext* pEngine)
+{
+    (void)pEngine;
+    return ocUnconstrainSystemCursor();
 }

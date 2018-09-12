@@ -32,7 +32,11 @@ OC_PRIVATE void ocGame_DoInput(ocEngineContext* pEngine)
 {
     (void)pEngine;
 
+    float mousePosX;
+    float mousePosY;
+    ocGetMouseRelativePosition(pEngine, &mousePosX, &mousePosY);
 
+    ocLogf(pEngine, "Mouse Pos: %d %d", (ocInt32)mousePosX, (ocInt32)mousePosY);
 }
 
 OC_PRIVATE void ocGame_DoUpdate(ocEngineContext* pEngine, double dt)
@@ -185,6 +189,10 @@ int ocInitAndRun(int argc, char** argv)
     }
 
     ocWindowShow(&g_Game.window);
+    ocWindowMoveToCenterOfScreen(&g_Game.window);
+
+    // TESTING.
+    ocPinMouseToCenterOfWindow(&g_Game.engine, &g_Game.window);
 
 
     // World.

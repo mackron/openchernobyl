@@ -7,6 +7,10 @@
 struct ocInputState
 {
     ocMouseState mouseState[OC_MAX_MOUSE_COUNT];
+
+    ocInt32 systemCursorPinnedScreenPosX;
+    ocInt32 systemCursorPinnedScreenPosY;
+    ocBool32 isSystemCursorPinned;
 };
 
 ocResult ocInputInit(ocInputState* pState);
