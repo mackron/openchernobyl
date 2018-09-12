@@ -6,16 +6,16 @@ ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventPro
         return OC_INVALID_ARGS;
     }
 
-    #if defined(OC_USE_OPENGL) && defined(OC_X11)
+#if defined(OC_USE_OPENGL) && defined(OC_X11)
     uintptr_t props[] = {
         OC_PLATFORM_LAYER_PROP_XDISPLAY, (uintptr_t)pEngine->graphics.gl.pDisplay,
         OC_PLATFORM_LAYER_PROP_XVISUALINFO, (uintptr_t)pEngine->graphics.gl.pFBVisualInfo,
         OC_PLATFORM_LAYER_PROP_XCOLORMAP, pEngine->graphics.gl.colormap,
         0, 0
     };
-    #else
+#else
     uintptr_t* props = NULL;
-    #endif
+#endif
 
     ocZeroObject(pEngine);
     pEngine->argc = argc;
