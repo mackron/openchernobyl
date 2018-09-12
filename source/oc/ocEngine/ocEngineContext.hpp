@@ -91,4 +91,5 @@ ocBool32 ocIsMouseButtonDown(const ocEngineContext* pEngine, ocMouseButton butto
 ocBool32 ocIsMouseButtonUp(const ocEngineContext* pEngine, ocMouseButton button);
 ocBool32 ocWasMouseButtonPressed(const ocEngineContext* pEngine, ocMouseButton button);
 ocBool32 ocWasMouseButtonReleased(const ocEngineContext* pEngine, ocMouseButton button);
-
+void ocShowCursor(const ocEngineContext* pEngine);
+void ocHideCursor(const ocEngineContext* pEngine);

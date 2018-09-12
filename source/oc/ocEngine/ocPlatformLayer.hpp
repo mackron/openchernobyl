@@ -80,6 +80,13 @@ ocResult ocPlatformLayerInit(uintptr_t props[]);
 void ocPlatformLayerUninit();
 
 
+// Shows the system cursor.
+void ocShowSystemCursor();
+
+// Hides the system cursor.
+void ocHideSystemCursor();
+
+
 struct ocWindow
 {
     ocEngineContext* pEngine;
@@ -155,6 +162,9 @@ void ocWindowShow(ocWindow* pWindow);
 
 void ocWindowGetSize(ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY);
 void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY);
+
+ocResult ocWindowCaptureMouse(ocWindow* pWindow);
+ocResult ocWindowReleaseMouse(ocWindow* pWindow);
 
 
 

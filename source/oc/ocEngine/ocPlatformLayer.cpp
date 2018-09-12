@@ -33,6 +33,18 @@ void ocPlatformLayerUninit_Win32()
     UnregisterClassA(g_OCWndClassName, GetModuleHandleA(NULL));
 }
 
+
+void ocShowSystemCursor_Win32()
+{
+    while (::ShowCursor(TRUE) < 0);
+}
+
+void ocHideSystemCursor_Win32()
+{
+    while (::ShowCursor(FALSE) >= 0);
+}
+
+
 ocBool32 ocIsWin32MouseButtonKeyCode(WPARAM wParam)
 {
     return wParam == VK_LBUTTON || wParam == VK_RBUTTON || wParam == VK_MBUTTON || wParam == VK_XBUTTON1 || wParam == VK_XBUTTON2;
@@ -313,6 +325,25 @@ void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int s
     int scaledSizeY = sizeY + windowFrameY;
     SetWindowPos(pWindow->hWnd, NULL, 0, 0, scaledSizeX, scaledSizeY, SWP_NOZORDER | SWP_NOMOVE);
 }
+
+ocResult ocWindowCaptureMouse_Win32(ocWindow* pWindow)
+{
+    ocAssert(pWindow != NULL);
+
+    SetCapture(pWindow->hWnd);
+    return OC_RESULT_SUCCESS;
+}
+
+ocResult ocWindowReleaseMouse_Win32(ocWindow* pWindow)
+{
+    ocAssert(pWindow != NULL);
+
+    if (!ReleaseCapture()) {
+        return OC_RESULT_UNKNOWN_ERROR;
+    }
+
+    return OC_RESULT_SUCCESS;
+}
 #endif  // Win32
 
 
@@ -490,7 +521,6 @@ ocResult ocPlatformLayerInit(uintptr_t props[])
 #ifdef OC_WIN32
     return ocPlatformLayerInit_Win32(props);
 #endif
-
 #ifdef OC_X11
     return ocPlatformLayerInit_X11(props);
 #endif
@@ -506,9 +536,29 @@ void ocPlatformLayerUninit()
 #ifdef OC_WIN32
     return ocPlatformLayerUninit_Win32();
 #endif
-
 #ifdef OC_X11
     return ocPlatformLayerUninit_X11();
+#endif
+}
+
+
+void ocShowSystemCursor()
+{
+#ifdef OC_WIN32
+    ocShowSystemCursor_Win32();
+#endif
+#ifdef OC_X11
+    ocShowSystemCursor_X11();
+#endif
+}
+
+void ocHideSystemCursor()
+{
+#ifdef OC_WIN32
+    ocHideSystemCursor_Win32();
+#endif
+#ifdef OC_X11
+    ocHideSystemCursor_X11();
 #endif
 }
 
@@ -578,6 +628,35 @@ void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY)
 #endif
 #ifdef OC_X11
     ocWindowSetSize_X11(pWindow, sizeX, sizeY);
+#endif
+}
+
+
+ocResult ocWindowCaptureMouse(ocWindow* pWindow)
+{
+    if (pWindow == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+#ifdef OC_WIN32
+    return ocWindowCaptureMouse_Win32(pWindow);
+#endif
+#ifdef OC_X11
+    return ocWindowCaptureMouse_X11(pWindow);
+#endif
+}
+
+ocResult ocWindowReleaseMouse(ocWindow* pWindow)
+{
+    if (pWindow == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
+#ifdef OC_WIN32
+    return ocWindowReleaseMouse_Win32(pWindow);
+#endif
+#ifdef OC_X11
+    return ocWindowReleaseMouse_X11(pWindow);
 #endif
 }
 

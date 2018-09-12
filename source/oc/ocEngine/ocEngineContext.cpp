@@ -2,7 +2,9 @@
 
 ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventProc onWindowEvent, void* pUserData, ocEngineContext* pEngine)
 {
-    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pEngine == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
 
     #if defined(OC_USE_OPENGL) && defined(OC_X11)
     uintptr_t props[] = {
@@ -99,7 +101,9 @@ on_error1: ocFileSystemUninit(&pEngine->fs);
 
 void ocEngineUninit(ocEngineContext* pEngine)
 {
-    if (pEngine == NULL) return;
+    if (pEngine == NULL) {
+        return;
+    }
 
     ocPlatformLayerUninit();
     ocResourceLibraryUninit(&pEngine->resourceLibrary);
@@ -115,7 +119,10 @@ void ocEngineUninit(ocEngineContext* pEngine)
 
 void ocStep(ocEngineContext* pEngine)
 {
-    if (pEngine == NULL || pEngine->onStep == NULL) return;
+    if (pEngine == NULL || pEngine->onStep == NULL) {
+        return;
+    }
+
     pEngine->onStep(pEngine);
 
     // Prepare the input state for the next frame.
@@ -124,7 +131,10 @@ void ocStep(ocEngineContext* pEngine)
 
 void ocHandleWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
 {
-    if (pEngine == NULL || pEngine->onWindowEvent == NULL) return;
+    if (pEngine == NULL || pEngine->onWindowEvent == NULL) {
+        return;
+    }
+
     pEngine->onWindowEvent(pEngine, e);
 
     switch (e.type)
@@ -237,19 +247,28 @@ void ocErrorf(ocEngineContext* pEngine, const char* format, ...)
 
 ocResult ocRegisterComponent(ocEngineContext* pEngine, ocComponentType type, ocCreateComponentProc onCreate, ocDeleteComponentProc onDelete, void* pUserData)
 {
-    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pEngine == NULL) {
+        return OC_RESULT_INVALID_ARGS;
+    }
+
     return ocComponentAllocatorRegister(&pEngine->componentAllocator, type, onCreate, onDelete, pUserData);
 }
 
 ocComponent* ocCreateComponent(ocEngineContext* pEngine, ocComponentType type, ocWorldObject* pObject)
 {
-    if (pEngine == NULL) return NULL;
+    if (pEngine == NULL) {
+        return NULL;
+    }
+
     return ocComponentAllocatorCreateComponent(&pEngine->componentAllocator, type, pObject);
 }
 
 void ocDeleteComponent(ocEngineContext* pEngine, ocComponent* pComponent)
 {
-    if (pEngine == NULL || pComponent == NULL) return;
+    if (pEngine == NULL || pComponent == NULL) {
+        return;
+    }
+
     return ocComponentAllocatorDeleteComponent(&pEngine->componentAllocator, pComponent);
 }
 
@@ -261,30 +280,66 @@ void ocDeleteComponent(ocEngineContext* pEngine, ocComponent* pComponent)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ocGetMouseRelativePosition(const ocEngineContext* pEngine, float* pRelativePosX, float* pRelativePosY)
 {
+    if (pEngine == NULL) {
+        return;
+    }
+
     ocMouseStateGetRelativePosition(&pEngine->input.mouseState[0], pRelativePosX, pRelativePosY);
 }
 
 void ocGetMouseAbsolutePosition(const ocEngineContext* pEngine, float* pAbsolutePosX, float* pAbsolutePosY)
 {
+    if (pEngine == NULL) {
+        return;
+    }
+
     ocMouseStateGetAbsolutePosition(&pEngine->input.mouseState[0], pAbsolutePosX, pAbsolutePosY);
 }
 
 ocBool32 ocIsMouseButtonDown(const ocEngineContext* pEngine, ocMouseButton button)
 {
+    if (pEngine == NULL) {
+        return OC_FALSE;
+    }
+
     return ocMouseStateIsButtonDown(&pEngine->input.mouseState[0], button);
 }
 
 ocBool32 ocIsMouseButtonUp(const ocEngineContext* pEngine, ocMouseButton button)
 {
+    if (pEngine == NULL) {
+        return OC_FALSE;
+    }
+
     return ocMouseStateIsButtonUp(&pEngine->input.mouseState[0], button);
 }
 
 ocBool32 ocWasMouseButtonPressed(const ocEngineContext* pEngine, ocMouseButton button)
 {
+    if (pEngine == NULL) {
+        return OC_FALSE;
+    }
+
     return ocMouseStateWasButtonPressed(&pEngine->input.mouseState[0], button);
 }
 
 ocBool32 ocWasMouseButtonReleased(const ocEngineContext* pEngine, ocMouseButton button)
 {
+    if (pEngine == NULL) {
+        return OC_FALSE;
+    }
+
     return ocMouseStateWasButtonReleased(&pEngine->input.mouseState[0], button);
+}
+
+void ocShowCursor(const ocEngineContext* pEngine)
+{
+    (void)pEngine;
+    ocShowSystemCursor();
+}
+
+void ocHideCursor(const ocEngineContext* pEngine)
+{
+    (void)pEngine;
+    ocHideSystemCursor();
 }
