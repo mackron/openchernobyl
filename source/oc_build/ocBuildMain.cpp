@@ -14,7 +14,7 @@
 
 int ocBuildGraphics(int argc, char** argv)
 {
-    ocResult result = OC_RESULT_SUCCESS;
+    ocResult result = OC_SUCCESS;
 
     const char* pFileHeaderText = 
         "// Copyright (C) 2018 David Reid. See included LICENSE file.\n"
@@ -23,25 +23,25 @@ int ocBuildGraphics(int argc, char** argv)
         "\n";
 
     result = ocOpenAndWriteTextFile(OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/ocGraphics_OpenGL_Autogen.cpp", pFileHeaderText);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return -1;
     }
 
     result = ocOpenAndWriteTextFile(OC_BUILD_INTERMEDIATE_DIRECTORY "/vulkan/ocGraphics_Vulkan_Autogen.cpp", pFileHeaderText);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return -2;
     }
 
 
     // Compile shaders first.
     result = ocBuildCompileShaders(argc, argv);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return -3;
     }
 
     // Pipelines come after shaders since they depend on them.
     result = ocBuildCompilePipelines(argc, argv);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return -4;
     }
 
@@ -50,7 +50,7 @@ int ocBuildGraphics(int argc, char** argv)
 
 int ocBuildGraphicsPost(int argc, char** argv)
 {
-    ocResult result = OC_RESULT_SUCCESS;
+    ocResult result = OC_SUCCESS;
 
     // Copy the final generated files over to the main source tree.
     if (!dr_copy_file(OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/ocGraphics_OpenGL_Autogen.cpp", "source/oc/ocEngine/Graphics/OpenGL/ocGraphics_OpenGL_Autogen.cpp", OC_FALSE)) {

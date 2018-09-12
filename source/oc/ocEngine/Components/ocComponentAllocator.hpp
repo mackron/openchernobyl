@@ -26,7 +26,7 @@ void ocComponentAllocatorUninit(ocComponentAllocator* pAllocator);
 
 // Registers an allocator for a specific type of component.
 //
-// This will return OC_RESULT_INVALID_ARGS if an allocator for the specified type has already been registered.
+// This will return OC_INVALID_ARGS if an allocator for the specified type has already been registered.
 ocResult ocComponentAllocatorRegister(ocComponentAllocator* pAllocator, ocComponentType type, ocCreateComponentProc onCreate, ocDeleteComponentProc onDelete, void* pUserData);
 
 

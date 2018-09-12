@@ -13,7 +13,7 @@ OC_INLINE btVector3 ocToBulletVector3(const glm::vec3 &v)
 
 ocResult ocDynamicsWorldInit(ocDynamicsWorld* pWorld)
 {
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
 
     ocZeroObject(pWorld);
     pWorld->pBroadphase = new btDbvtBroadphase;
@@ -22,7 +22,7 @@ ocResult ocDynamicsWorldInit(ocDynamicsWorld* pWorld)
     pWorld->pSolver = new btSequentialImpulseConstraintSolver;
     pWorld->pInternalWorld = new btDiscreteDynamicsWorld(pWorld->pCollisionDispatcher, pWorld->pBroadphase, pWorld->pSolver, pWorld->pCollisionConfiguration);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocDynamicsWorldUninit(ocDynamicsWorld* pWorld)

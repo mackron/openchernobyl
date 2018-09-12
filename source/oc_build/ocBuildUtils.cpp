@@ -2,20 +2,22 @@
 
 ocResult ocBuildPrependToFile(const char* filePath, const void* pData, size_t dataSize)
 {
-    if (filePath == NULL || pData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (filePath == NULL || pData == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     // Just open and read all of the data and then write it back to a new file.
     void* pOriginalData;
     size_t originalDataSize;
     ocResult result = ocOpenAndReadFile(filePath, &pOriginalData, &originalDataSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     FILE* pFileOut = dr_fopen(filePath, "wb");
     if (pFileOut == NULL) {
         ocFree(pOriginalData);
-        return OC_RESULT_UNKNOWN_ERROR;
+        return OC_ERROR;
     }
 
     fwrite(pData, 1, dataSize, pFileOut);
@@ -23,7 +25,7 @@ ocResult ocBuildPrependToFile(const char* filePath, const void* pData, size_t da
     fclose(pFileOut);
 
     ocFree(pOriginalData);
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocBuildPrependStringToFile(const char* filePath, const char* text)
@@ -34,20 +36,22 @@ ocResult ocBuildPrependStringToFile(const char* filePath, const char* text)
 
 ocResult ocBuildAppendToFile(const char* filePath, const void* pData, size_t dataSize)
 {
-    if (filePath == NULL || pData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (filePath == NULL || pData == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     // Just open and read all of the data and then write it back to a new file.
     void* pOriginalData;
     size_t originalDataSize;
     ocResult result = ocOpenAndReadFile(filePath, &pOriginalData, &originalDataSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     FILE* pFileOut = dr_fopen(filePath, "wb");
     if (pFileOut == NULL) {
         ocFree(pOriginalData);
-        return OC_RESULT_UNKNOWN_ERROR;
+        return OC_ERROR;
     }
 
     fwrite(pOriginalData, 1, originalDataSize, pFileOut);
@@ -55,7 +59,7 @@ ocResult ocBuildAppendToFile(const char* filePath, const void* pData, size_t dat
     fclose(pFileOut);
 
     ocFree(pOriginalData);
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocBuildAppendStringToFile(const char* filePath, const char* text)

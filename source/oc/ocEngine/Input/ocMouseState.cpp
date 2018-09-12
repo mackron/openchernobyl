@@ -3,11 +3,11 @@
 ocResult ocMouseStateInit(ocMouseState* pState)
 {
     if (pState == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     ocZeroObject(pState);
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocMouseStateGetRelativePosition(const ocMouseState* pState, float* pRelativePosX, float* pRelativePosY)

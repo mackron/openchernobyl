@@ -26,21 +26,21 @@ ocUInt32 ocImageFormatBytesPerPixel(ocImageFormat format)
 
 ocResult ocGetMipmapCount(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32* pCount)
 {
-    if (pCount == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pCount == NULL) return OC_INVALID_ARGS;
     *pCount = 0;
 
-    if (baseWidth == 0 || baseHeight == 0) return OC_RESULT_INVALID_ARGS;
+    if (baseWidth == 0 || baseHeight == 0) return OC_INVALID_ARGS;
 
     *pCount = 1 + (unsigned int)log2f((float)ocMax(baseWidth, baseHeight));
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGetTotalMipmapDataSize(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 components, ocUInt32 alignment, ocSizeT* pSize)
 {
-    if (pSize == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pSize == NULL) return OC_INVALID_ARGS;
     *pSize = 0;
 
-    if (baseWidth == 0 || baseHeight == 0 || components == 0) return OC_RESULT_INVALID_ARGS;
+    if (baseWidth == 0 || baseHeight == 0 || components == 0) return OC_INVALID_ARGS;
     if (alignment == 0) alignment = 1;
 
     ocSizeT totalSize = 0;
@@ -63,12 +63,12 @@ ocResult ocGetTotalMipmapDataSize(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUIn
     }
 
     *pSize = totalSize;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGenerateMipmap(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 components, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmap)
 {
-    if (baseWidth == 0 || baseHeight == 0 || components == 0 || pBaseData == NULL || pDataOut == NULL) return OC_RESULT_INVALID_ARGS;
+    if (baseWidth == 0 || baseHeight == 0 || components == 0 || pBaseData == NULL || pDataOut == NULL) return OC_INVALID_ARGS;
 
     // TODO: Optimized branch for 4 components.
 
@@ -99,12 +99,12 @@ ocResult ocGenerateMipmap(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 comp
         pMipmap->dataOffset = 0;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGenerateMipmaps(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 components, ocUInt32 alignment, const void* pBaseData, void* pDataOut, ocMipmapInfo* pMipmaps)
 {
-    if (baseWidth == 0 || baseHeight == 0 || components == 0 || pBaseData == NULL || pDataOut == NULL) return OC_RESULT_INVALID_ARGS;
+    if (baseWidth == 0 || baseHeight == 0 || components == 0 || pBaseData == NULL || pDataOut == NULL) return OC_INVALID_ARGS;
     if (alignment == 0) alignment = 1;
 
     ocSizeT runningOffset = 0;
@@ -148,5 +148,5 @@ ocResult ocGenerateMipmaps(ocUInt32 baseWidth, ocUInt32 baseHeight, ocUInt32 com
         iMipmap += 1;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }

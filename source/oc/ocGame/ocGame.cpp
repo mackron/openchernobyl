@@ -14,18 +14,18 @@ OC_PRIVATE ocResult ocGame_RecreateWindowRT(ocVSyncMode vsyncMode)
 
 
     ocResult result = ocGraphicsCreateSwapchain(&g_Game.engine.graphics, &g_Game.window, vsyncMode, &g_Game.pSwapchain);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocErrorf(&g_Game.engine, "Error (%d) recreating the swapchain.", result);
         return result;
     }
 
     result = ocGraphicsWorldCreateRTFromSwapchain(&g_Game.world.graphicsWorld, g_Game.pSwapchain, &g_Game.pWindowRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocErrorf(&g_Game.engine, "Error (%d) recreating the render target.", result);
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE void ocGame_DoInput(ocEngineContext* pEngine)
@@ -168,7 +168,7 @@ int ocInitAndRun(int argc, char** argv)
 
     // Engine.
     ocResult result = ocEngineInit(argc, argv, ocGame_OnStep, ocGame_OnWindowEvent, &g_Game, &g_Game.engine);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -180,7 +180,7 @@ int ocInitAndRun(int argc, char** argv)
 
     // Swapchain.
     result = ocGraphicsCreateSwapchain(&g_Game.engine.graphics, &g_Game.window, ocVSyncMode_Enabled, &g_Game.pSwapchain);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
@@ -189,13 +189,13 @@ int ocInitAndRun(int argc, char** argv)
 
     // World.
     result = ocWorldInit(&g_Game.engine, &g_Game.world);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Render target for the main window.
     result = ocWorldCreateRTFromSwapchain(&g_Game.world, g_Game.pSwapchain, &g_Game.pWindowRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
@@ -228,7 +228,7 @@ int ocInitAndRun(int argc, char** argv)
         desc.imageDataSize = sizeof(data);
         desc.pImageData = data;
         result = ocGraphicsCreateImage(&g_Game.engine.graphics, &desc, &g_Game.pImage);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -238,7 +238,7 @@ int ocInitAndRun(int argc, char** argv)
 #if 0
         ocImageData data;
         result = ocResourceLoaderLoadImage(&g_Game.engine.resourceLoader, "happy_smiley_face.png", &data);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -250,7 +250,7 @@ int ocInitAndRun(int argc, char** argv)
         desc.imageDataSize = data.imageDataSize;
         desc.pImageData = data.pImageData;
         result = ocGraphicsCreateImage(&g_Game.engine.graphics, &desc, &g_Game.pImage);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -258,7 +258,7 @@ int ocInitAndRun(int argc, char** argv)
 #endif
 
         result = ocResourceLibraryLoad(&g_Game.engine.resourceLibrary, "happy_smiley_face.png", &g_Game.pImageResource);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -289,13 +289,13 @@ int ocInitAndRun(int argc, char** argv)
         desc.pIndices = pIndices;
         
         result = ocGraphicsCreateMesh(&g_Game.engine.graphics, &desc, &g_Game.pMesh);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
 #if 0
         result = ocGraphicsWorldCreateMeshObject(&g_Game.world.graphicsWorld, g_Game.pMesh, &g_Game.pMeshObject);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -305,7 +305,7 @@ int ocInitAndRun(int argc, char** argv)
 
         // Object Test.
         result = ocWorldObjectInit(&g_Game.world, &g_Game.object);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -324,7 +324,7 @@ int ocInitAndRun(int argc, char** argv)
     // TESTING (Scene Resources)
     {
         result = ocResourceLibraryLoad(&g_Game.engine.resourceLibrary, "cube.obj", &g_Game.pSceneResource);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -333,7 +333,7 @@ int ocInitAndRun(int argc, char** argv)
 
             ocWorldObject object;
             result = ocWorldObjectInit(&g_Game.world, &object);
-            if (result != OC_RESULT_SUCCESS) {
+            if (result != OC_SUCCESS) {
                 return result;
             }
 
@@ -386,17 +386,17 @@ int ocInitAndRun(int argc, char** argv)
 
                             ocGraphicsMesh* pMesh;
                             result = ocGraphicsCreateMesh(&g_Game.engine.graphics, &desc, &pMesh);
-                            if (result != OC_RESULT_SUCCESS) {
+                            if (result != OC_SUCCESS) {
                                 return result;
                             }
 
                             ocComponent* pComponent = ocWorldObjectAddComponent(&object, OC_COMPONENT_TYPE_MESH);
                             if (pComponent == NULL) {
-                                return OC_RESULT_UNKNOWN_ERROR;
+                                return OC_ERROR;
                             }
 
                             result = ocComponentMeshSetMesh(OC_MESH_COMPONENT(pComponent), pMesh);
-                            if (result != OC_RESULT_SUCCESS) {
+                            if (result != OC_SUCCESS) {
                                 return result;
                             }
                         }

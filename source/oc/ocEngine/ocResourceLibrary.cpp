@@ -3,19 +3,19 @@
 ocResult ocResourceLibraryInit(ocResourceLoader* pLoader, ocGraphicsContext* pGraphics, ocResourceLibrary* pLibrary)
 {
     if (pLibrary == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     ocZeroObject(pLibrary);
 
     if (pLoader == NULL || pGraphics == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     pLibrary->pLoader = pLoader;
     pLibrary->pGraphics = pGraphics;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocResourceLibraryUninit(ocResourceLibrary* pLibrary)
@@ -56,7 +56,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
 
     ocImageData data;
     ocResult result = ocResourceLoaderLoadImage(pLibrary->pLoader, absolutePath, &data);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -77,7 +77,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
         pImageData = ocMalloc(imageDataSize);
         if (pImageData == NULL) {
             ocResourceLoaderUnloadImage(pLibrary->pLoader, &data);
-            return OC_RESULT_OUT_OF_MEMORY;
+            return OC_OUT_OF_MEMORY;
         }
 
         freeImageData = OC_TRUE;
@@ -98,7 +98,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
 
     ocGraphicsImage* pGraphicsImage;
     result = ocGraphicsCreateImage(pLibrary->pGraphics, &desc, &pGraphicsImage);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         if (freeImageData) {
             ocFree(pImageData);
         }
@@ -114,7 +114,7 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Image(ocResourceLibrary* pLibrary, con
     ocResource* pResource = ocAllocResource(ocResourceType_Image, 0, absolutePath);
     if (pResource == NULL) {
         ocResourceLoaderUnloadImage(pLibrary->pLoader, &data);
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     pResource->image.pGraphicsImage = pGraphicsImage;
@@ -133,32 +133,32 @@ OC_PRIVATE ocResult ocResourceLibraryLoad_Scene(ocResourceLibrary* pLibrary, con
 
     ocSceneData sceneData;
     ocResult result = ocResourceLoaderLoadScene(pLibrary->pLoader, absolutePath, &sceneData);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     ocResource* pResource = ocAllocResource(ocResourceType_Scene, 0, absolutePath);
     if (pResource == NULL) {
         ocResourceLoaderUnloadScene(pLibrary->pLoader, &sceneData);
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     pResource->scene = sceneData;
 
     *ppResource = pResource;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath, ocResource** ppResource)
 {
     if (ppResource == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     *ppResource = NULL;
 
     if (pLibrary == NULL || filePath == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     // So this is how resources work in the engine... Each resource file (.png, .obj, etc.) is, optionally, associated with a corresponding
@@ -175,7 +175,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
 
     // If it's an .ocd file just load it directly without looking at the original source asset.
     ocFileInfo fileInfoSrc;
-    ocBool32 hasSrc = ocGetFileInfo(pLibrary->pLoader->pFS, filePath, &fileInfoSrc) == OC_RESULT_SUCCESS;
+    ocBool32 hasSrc = ocGetFileInfo(pLibrary->pLoader->pFS, filePath, &fileInfoSrc) == OC_SUCCESS;
 
     ocFileInfo fileInfoOCD;
     ocZeroObject(&fileInfoOCD);
@@ -183,11 +183,11 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     if (!drpath_extension_equal(filePath, "ocd")) {
         char filePathOCD[OC_MAX_PATH];
         if (drpath_copy_and_append_extension(filePathOCD, sizeof(filePathOCD), filePath, "ocd")) {
-            hasOCD = ocGetFileInfo(pLibrary->pLoader->pFS, filePathOCD, &fileInfoOCD) == OC_RESULT_SUCCESS;
+            hasOCD = ocGetFileInfo(pLibrary->pLoader->pFS, filePathOCD, &fileInfoOCD) == OC_SUCCESS;
         }
     }
 
-    if (!hasSrc && !hasOCD) return OC_RESULT_DOES_NOT_EXIST;
+    if (!hasSrc && !hasOCD) return OC_DOES_NOT_EXIST;
     if (!hasSrc) {
         fileInfoSrc = fileInfoOCD;
     }
@@ -202,7 +202,7 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     // Here is where we actually load the asset. The file path we load from depends on whether or not we have an up-to-date OCD file.
     ocResourceType resourceType;
     ocResult result = ocResourceLoaderDetermineResourceType(pLibrary->pLoader, fileInfoSrc.absolutePath, &resourceType);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -222,15 +222,15 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
         case ocResourceType_Unknown:
         default:
         {
-            result = OC_RESULT_UNKNOWN_RESOURCE_TYPE;
+            result = OC_UNKNOWN_RESOURCE_TYPE;
         } break;
     }
 
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
@@ -265,9 +265,9 @@ void ocResourceLibraryUnload(ocResourceLibrary* pLibrary, ocResource* pResource)
 ocResult ocResourceLibrarySyncOCD(ocResourceLibrary* pLibrary, const char* filePath)
 {
     if (pLibrary == NULL || filePath == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     // TODO: Implement me.
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }

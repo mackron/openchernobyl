@@ -32,39 +32,39 @@ OC_PRIVATE ocResult ocMallocAndReadEntireStreamReader(ocStreamReader* pReader, v
 
     ocUInt64 fileSize;
     ocResult result = ocStreamReaderSize(pReader, &fileSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     if (fileSize > SIZE_MAX) {
-        return OC_RESULT_TOO_LARGE; // OCD file is too big to fit into memory.
+        return OC_TOO_LARGE; // OCD file is too big to fit into memory.
     }
 
     void* pDataOut = (ocUInt8*)ocMalloc((ocSizeT)fileSize);
     if (pDataOut == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     result = ocStreamReaderRead(pReader, pDataOut, (ocSizeT)fileSize, NULL);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pDataOut);
         return result;
     }
 
     *ppDataOut = pDataOut;
     *pSizeOut = fileSize;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
 ocResult ocResourceLoaderInit(ocFileSystem* pFS, ocResourceLoader* pLoader)
 {
-    if (pLoader == NULL || pFS == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLoader == NULL || pFS == NULL) return OC_INVALID_ARGS;
 
     ocZeroObject(pLoader);
     pLoader->pFS = pFS;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocResourceLoaderUninit(ocResourceLoader* pLoader)
@@ -81,7 +81,7 @@ OC_PRIVATE ocResult ocResourceLoaderDetermineOCDResourceType(ocResourceLoader* p
 
     ocFile file;
     ocResult result = ocFileOpen(pLoader->pFS, filePath, OC_READ, &file);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -90,28 +90,28 @@ OC_PRIVATE ocResult ocResourceLoaderDetermineOCDResourceType(ocResourceLoader* p
     result = ocFileRead(&file, ids, sizeof(ids), &bytesRead);
     ocFileClose(&file);
 
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     if (bytesRead != sizeof(ids) || ids[0] != OC_OCD_FOURCC) {
-        return OC_RESULT_CORRUPT_FILE;
+        return OC_CORRUPT_FILE;
     }
 
     switch (ids[1])
     {
-        case OC_OCD_TYPE_ID_IMAGE: *pType = ocResourceType_Image; return OC_RESULT_SUCCESS;
-        case OC_OCD_TYPE_ID_SCENE: *pType = ocResourceType_Scene; return OC_RESULT_SUCCESS;
-        default: return OC_RESULT_UNKNOWN_RESOURCE_TYPE;
+        case OC_OCD_TYPE_ID_IMAGE: *pType = ocResourceType_Image; return OC_SUCCESS;
+        case OC_OCD_TYPE_ID_SCENE: *pType = ocResourceType_Scene; return OC_SUCCESS;
+        default: return OC_UNKNOWN_RESOURCE_TYPE;
     }
 }
 
 ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const char* filePath, ocResourceType* pType)
 {
-    if (pType == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pType == NULL) return OC_INVALID_ARGS;
     *pType = ocResourceType_Unknown;
 
-    if (pLoader == NULL || filePath == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLoader == NULL || filePath == NULL) return OC_INVALID_ARGS;
 
     const char* ext = drpath_extension(filePath);
     if (_stricmp(ext, "ocd") == 0) {
@@ -123,25 +123,25 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
         _stricmp(ext, "tga") == 0 ||
         _stricmp(ext, "jpg") == 0) {
         *pType = ocResourceType_Image;
-        return OC_RESULT_SUCCESS;
+        return OC_SUCCESS;
     }
 
 #ifdef OC_ENABLE_PCX
     if (_stricmp(ext, "pcx") == 0) {
         *pType = ocResourceType_Image;
-        return OC_RESULT_SUCCESS;
+        return OC_SUCCESS;
     }
 #endif
 #ifdef OC_ENABLE_KTX
     if (_stricmp(ext, "ktx") == 0) {
         *pType = ocResourceType_Image;
-        return OC_RESULT_SUCCESS;
+        return OC_SUCCESS;
     }
 #endif
 #ifdef OC_ENABLE_DDS
     if (_stricmp(ext, "dds") == 0) {
         *pType = ocResourceType_Image;
-        return OC_RESULT_SUCCESS;
+        return OC_SUCCESS;
     }
 #endif
 
@@ -149,10 +149,10 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
     // Meshes.
     if (_stricmp(ext, "obj") == 0) {
         *pType = ocResourceType_Scene;
-        return OC_RESULT_SUCCESS;
+        return OC_SUCCESS;
     }
 
-    return OC_RESULT_UNKNOWN_RESOURCE_TYPE;
+    return OC_UNKNOWN_RESOURCE_TYPE;
 }
 
 
@@ -169,7 +169,7 @@ OC_PRIVATE ocResult ocConvertToOCD_SimpleImage(ocImageFormat format, ocUInt32 wi
 
     ocOCDImageBuilder builder;
     ocResult result = ocOCDImageBuilderInit(format, width, height, pImageData, &builder);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -187,13 +187,13 @@ OC_PRIVATE ocResult ocLoadImage_OCD(ocStreamReader* pReader, ocImageData* pData)
 
     ocUInt64 fileSize;
     ocResult result = ocMallocAndReadEntireStreamReader(pReader, (void**)&pData->pPayload, &fileSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     if (!ocCheckOCDHeader(pData->pPayload, fileSize, OC_OCD_TYPE_ID_IMAGE)) {
         ocFree(pData->pPayload);
-        return OC_RESULT_CORRUPT_FILE;
+        return OC_CORRUPT_FILE;
     }
 
     pData->format        = (ocImageFormat)(*(ocUInt32*)(pData->pPayload + OC_OCD_HEADER_SIZE + 0));
@@ -202,7 +202,7 @@ OC_PRIVATE ocResult ocLoadImage_OCD(ocStreamReader* pReader, ocImageData* pData)
     pData->imageDataSize =                 *(ocUInt64*)(pData->pPayload + OC_OCD_HEADER_SIZE + 8 + (sizeof(ocMipmapInfo)*pData->mipmapCount));
     pData->pImageData    =                             (pData->pPayload + OC_OCD_HEADER_SIZE + 8 + (sizeof(ocMipmapInfo)*pData->mipmapCount) + 8);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocLoadImage_Raw(ocImageFormat format, ocUInt32 width, ocUInt32 height, const void* pImageData, ocImageData* pData)
@@ -213,14 +213,14 @@ OC_PRIVATE ocResult ocLoadImage_Raw(ocImageFormat format, ocUInt32 width, ocUInt
     ocSizeT dataSizeOCD;
     ocStreamWriter writerOCD;
     ocResult result = ocStreamWriterInit(&pDataOCD, &dataSizeOCD, &writerOCD);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocConvertToOCD_SimpleImage(format, width, height, pImageData, &writerOCD);
     ocStreamWriterUninit(&writerOCD);   // <-- Don't need this anymore. Data will be in pDataOCD, which needs to be ocFree()'d by us.
 
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pDataOCD);
         return result;
     }
@@ -228,7 +228,7 @@ OC_PRIVATE ocResult ocLoadImage_Raw(ocImageFormat format, ocUInt32 width, ocUInt
 
     ocStreamReader readerOCD;
     result = ocStreamReaderInit(pDataOCD, dataSizeOCD, &readerOCD);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pDataOCD);
         return result;
     }
@@ -247,7 +247,7 @@ OC_PRIVATE int oc__stbi_read(void* user, char *data, int size)
     ocAssert(pReader != NULL);
 
     size_t bytesRead;
-    if (ocStreamReaderRead(pReader, data, (size_t)size, &bytesRead) == OC_RESULT_SUCCESS) {
+    if (ocStreamReaderRead(pReader, data, (size_t)size, &bytesRead) == OC_SUCCESS) {
         return (int)bytesRead;
     }
 
@@ -287,7 +287,7 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocStreamReader* pReader, ocImageData* pData)
     int imageHeight;
     stbi_uc* pImageData = stbi_load_from_callbacks(&cb, pReader, &imageWidth, &imageHeight, NULL, 4); // Always want RGBA images.
     if (pImageData == NULL) {
-        return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+        return OC_FAILED_TO_LOAD_RESOURCE;
     }
 
     ocResult result = ocLoadImage_Raw(ocImageFormat_R8G8B8A8, imageWidth, imageHeight, pImageData, pData);
@@ -298,21 +298,21 @@ OC_PRIVATE ocResult ocLoadImage_STB(ocStreamReader* pReader, ocImageData* pData)
 
 ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePath, ocImageData* pData)
 {
-    if (pData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pData == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pData);
 
-    if (pLoader == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLoader == NULL) return OC_INVALID_ARGS;
 
     // Try opening the file to begin with.
     ocFile file;
     ocResult result = ocFileOpen(pLoader->pFS, filePath, OC_READ, &file);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     ocStreamReader reader;
     result = ocStreamReaderInit(&file, &reader);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFileClose(&file);
         return result;
     }
@@ -324,25 +324,25 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
     if (drpath_extension_equal(filePath, "ocd")) {
         result = ocLoadImage_OCD(&reader, pData);
     } else {
-        result = OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+        result = OC_FAILED_TO_LOAD_RESOURCE;
 
         // stb_image
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             result = ocLoadImage_STB(&reader, pData);
         }
 
 #ifdef OC_ENABLE_PCX
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             result = ocLoadImage_PCX(&reader, pData);
         }
 #endif
 #ifdef OC_ENABLE_KTX
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             result = ocLoadImage_KTX(&reader, pData);
         }
 #endif
 #ifdef OC_ENABLE_DDS
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             result = ocLoadImage_DDS(&reader, pData);
         }
 #endif
@@ -375,13 +375,13 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
     // Loading an OCD file is very simple because the file format nicely maps to our data structures.
     ocUInt64 fileSize;
     ocResult result = ocMallocAndReadEntireStreamReader(pReader, (void**)&pData->pPayload, &fileSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     if (!ocCheckOCDHeader(pData->pPayload, fileSize, OC_OCD_TYPE_ID_SCENE)) {
         ocFree(pData->pPayload);
-        return OC_RESULT_CORRUPT_FILE;
+        return OC_CORRUPT_FILE;
     }
 
 
@@ -395,7 +395,7 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
     pData->pSubresources = (ocSceneSubresource*)(pData->pPayload + subresourcesOffset);
     pData->pObjects      =      (ocSceneObject*)(pData->pPayload + objectsOffset);
     
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
@@ -403,7 +403,7 @@ OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesTo
 {
     size_t bytesRead;
     ocResult result = ocStreamReaderRead((ocStreamReader*)userData, bufferOut, bytesToRead, &bytesRead);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return 0;
     }
 
@@ -412,7 +412,7 @@ OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesTo
 
 OC_PRIVATE ocBool32 oc__drobj_seek_to_start(void* userData)
 {
-    return ocStreamReaderSeek((ocStreamReader*)userData, 0, ocSeekOrigin_Start) == OC_RESULT_SUCCESS;
+    return ocStreamReaderSeek((ocStreamReader*)userData, 0, ocSeekOrigin_Start) == OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWriter* pOCDWriter)
@@ -422,25 +422,25 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
 
     drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pOBJReader);
     if (obj == NULL) {
-        return OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+        return OC_FAILED_TO_LOAD_RESOURCE;
     }
 
     // We use a scene builder to convert OBJ to OCD.
     ocOCDSceneBuilder builder;
     ocResult result = ocOCDSceneBuilderInit(&builder);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         drobj_delete(obj);
         return result;
     }
 
     result = ocOCDSceneBuilderBeginObject(&builder, "mesh", glm::vec3(0, 0, 0), glm::quat(1, 0, 0, 0), glm::vec3(1, 1, 1));
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
     {
         // The object has a single mesh component, with a group for each material.
         result = ocOCDSceneBuilderBeginMeshComponent(&builder);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             goto done;
         }
         {
@@ -456,7 +456,7 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
                 // TODO: With the material, might want to first find the full library/name path.
 
                 result = ocOCDSceneBuilderMeshComponentAddGroup(&builder, pMaterial->name, ocGraphicsPrimitiveType_Triangle, ocGraphicsVertexFormat_P3T2N3, vertexCount, pVertexData, indexCount, pIndexData);
-                if (result != OC_RESULT_SUCCESS) {
+                if (result != OC_SUCCESS) {
                     drobj_free(pVertexData);
                     drobj_free(pIndexData);
                     goto done;
@@ -467,21 +467,21 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
             }
         }
         result = ocOCDSceneBuilderEndMeshComponent(&builder);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             goto done;
         }
     }
     result = ocOCDSceneBuilderEndObject(&builder);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     result = ocOCDSceneBuilderRender(&builder, pOCDWriter);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
-    result = OC_RESULT_SUCCESS;
+    result = OC_SUCCESS;
 
 done:
     ocOCDSceneBuilderUninit(&builder);
@@ -504,13 +504,13 @@ OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
     ocSizeT dataSizeOCD;
     ocStreamWriter writerOCD;
     ocResult result = ocStreamWriterInit(&pDataOCD, &dataSizeOCD, &writerOCD);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // Convert the OBJ file to an OCD file. pReader is the OBJ file, writerOCD is the OCD file.
     result = ocConvertToOCD_OBJ(pReader, &writerOCD);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocStreamWriterUninit(&writerOCD);
         ocFree(pDataOCD);
         return result;
@@ -524,7 +524,7 @@ OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
     // Now we just load the OCD file like normal.
     ocStreamReader readerOCD;
     result = ocStreamReaderInit(pDataOCD, dataSizeOCD, &readerOCD);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pDataOCD);
         return result;
     }
@@ -539,21 +539,21 @@ OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
 
 ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePath, ocSceneData* pData)
 {
-    if (pData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pData == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pData);
 
-    if (pLoader == NULL || filePath == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLoader == NULL || filePath == NULL) return OC_INVALID_ARGS;
 
     // Try opening the file to begin with.
     ocFile file;
     ocResult result = ocFileOpen(pLoader->pFS, filePath, OC_READ, &file);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     ocStreamReader reader;
     result = ocStreamReaderInit(&file, &reader);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFileClose(&file);
         return result;
     }
@@ -564,21 +564,21 @@ ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePa
     if (drpath_extension_equal(filePath, "ocd")) {
         result = ocLoadScene_OCD(&reader, pData);
     } else {
-        result = OC_RESULT_FAILED_TO_LOAD_RESOURCE;
+        result = OC_FAILED_TO_LOAD_RESOURCE;
 
         // OBJ.
-        if (result != OC_RESULT_SUCCESS && drpath_extension_equal(filePath, "obj")) {
+        if (result != OC_SUCCESS && drpath_extension_equal(filePath, "obj")) {
             result = ocLoadScene_OBJ(&reader, pData);
         }
 
 #if 0
         // glTF
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             result = ocLoadScene_glTF(&reader, pData);
         }
 
         // Assimp, maybe?
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             result = ocLoadScene_Assimp(&reader, pData);
         }
 #endif

@@ -106,12 +106,12 @@ OC_PRIVATE void APIENTRY ocOpenGLErrorCB(GLenum source, GLenum type, GLuint id, 
 ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, ocGraphicsContext* pGraphics)
 {
     ocResult result = ocGraphicsInitBase(pEngine, pGraphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     if (!drglInit(&pGraphics->gl)) {
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
     drgl &gl = pGraphics->gl;
@@ -148,7 +148,7 @@ ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, o
 
     pGraphics->pCurrentWindow = NULL;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsUninit(ocGraphicsContext* pGraphics)
@@ -162,16 +162,16 @@ void ocGraphicsUninit(ocGraphicsContext* pGraphics)
 
 ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode, ocGraphicsSwapchain** ppSwapchain)
 {
-    if (ppSwapchain == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppSwapchain == NULL) return OC_INVALID_ARGS;
     *ppSwapchain = NULL;
 
     ocGraphicsSwapchain* pSwapchain = ocCallocObject(ocGraphicsSwapchain);
     if (pSwapchain == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     ocResult result = ocGraphicsSwapchainBaseInit(pGraphics, pWindow, vsyncMode, pSwapchain);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pSwapchain);
         return result;
     }
@@ -180,7 +180,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 #ifdef OC_WIN32
     if (!SetPixelFormat(pWindow->hDC, pGraphics->gl.pixelFormat, &pGraphics->gl.pfd)) {
         ocFree(pSwapchain);
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 #endif
 
@@ -209,7 +209,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 
 
     *ppSwapchain = pSwapchain;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsDeleteSwapchain(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapchain)
@@ -249,14 +249,14 @@ void ocGraphicsPresent(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapc
 
 ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc* pDesc, ocGraphicsImage** ppImage)
 {
-    if (ppImage == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppImage == NULL) return OC_INVALID_ARGS;
     *ppImage = NULL;
 
-    if (pGraphics == NULL || pDesc == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pGraphics == NULL || pDesc == NULL) return OC_INVALID_ARGS;
 
     ocGraphicsImage* pImage = ocCallocObject(ocGraphicsImage);
     if (pImage == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     drgl &gl = pGraphics->gl;
@@ -277,7 +277,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
     }
 
     *ppImage = pImage;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage)
@@ -291,11 +291,11 @@ void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage
 
 ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* pDesc, ocGraphicsMesh** ppMesh)
 {
-    if (pGraphics == NULL || pDesc == NULL || ppMesh == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pGraphics == NULL || pDesc == NULL || ppMesh == NULL) return OC_INVALID_ARGS;
 
     ocGraphicsMesh* pMesh = ocCallocObject(ocGraphicsMesh);
     if (pMesh == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     pMesh->primitiveType = pDesc->primitiveType;
@@ -318,7 +318,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
     gl.BufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, pDesc->pIndices, GL_STATIC_DRAW);
 
     *ppMesh = pMesh;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
@@ -344,7 +344,7 @@ void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
 ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWorld)
 {
     ocResult result = ocGraphicsWorldInitBase(pGraphics, pWorld);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -359,12 +359,12 @@ ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWor
     if (pWorld->testProgramGL == 0) {
         ocErrorf(pGraphics->pEngine, "%s\n", errorStr);
         drglFree(errorStr);
-        return OC_RESULT_SHADER_ERROR;
+        return OC_SHADER_ERROR;
     }
     drglFree(errorStr);
 
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsWorldUninit(ocGraphicsWorld* pWorld)
@@ -465,12 +465,12 @@ void ocGraphicsWorldStep(ocGraphicsWorld* pWorld, double dt)
 
 OC_PRIVATE ocResult ocGraphicsWorldAddRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 {
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
-    if (pWorld->renderTargetCount == OC_MAX_RENDER_TARGETS) return OC_RESULT_TOO_MANY_RENDER_TARGETS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pWorld->renderTargetCount == OC_MAX_RENDER_TARGETS) return OC_TOO_MANY_RENDER_TARGETS;
 
     pWorld->pRenderTargets[pWorld->renderTargetCount++] = pRT;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE void ocGraphicsWorldRemoveRTByIndex(ocGraphicsWorld* pWorld, uint16_t index)
@@ -514,16 +514,16 @@ OC_PRIVATE const char* ocOpenGLFramebufferStatusToString(GLenum status)
 
 OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGraphicsRT** ppRT, uint32_t sizeX, uint32_t sizeY)
 {
-    if (ppRT == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppRT == NULL) return OC_INVALID_ARGS;
     *ppRT = NULL;   // Safety.
 
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
 
     ocGraphicsRT* pRT = (ocGraphicsRT*)ocCalloc(1, sizeof(*pRT));
-    if (pRT == NULL) return OC_RESULT_OUT_OF_MEMORY;
+    if (pRT == NULL) return OC_OUT_OF_MEMORY;
 
     ocResult result = ocGraphicsRTInitBase(pWorld, pRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pRT);
         return result;
     }
@@ -568,12 +568,12 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     GLenum status = gl.CheckFramebufferStatusEXT(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         ocErrorf(pWorld->pGraphics->pEngine, "Invalid framebuffer status: %s", ocOpenGLFramebufferStatusToString(status));
-        return OC_RESULT_INVALID_FRAMEBUFFER;
+        return OC_INVALID_FRAMEBUFFER;
     }
 
 
     *ppRT = pRT;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE void ocGraphicsWorldUninitRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
@@ -595,7 +595,7 @@ ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphic
     ocGraphicsGetSwapchainSize(pWorld->pGraphics, pSwapchain, &sizeX, &sizeY);
 
     ocResult result = ocGraphicsWorldAllocAndInitRT(pWorld, ppRT, sizeX, sizeY);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -604,18 +604,18 @@ ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphic
     pRT->pImage = NULL;
 
     result = ocGraphicsWorldAddRT(pWorld, pRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocGraphicsRTUninitBase(pRT);
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGraphicsWorldCreateRTFromImage(ocGraphicsWorld* pWorld, ocGraphicsImage* pImage, ocGraphicsRT** ppRT)
 {
     ocResult result = ocGraphicsWorldAllocAndInitRT(pWorld, ppRT, pImage->sizeX, pImage->sizeY);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -624,12 +624,12 @@ ocResult ocGraphicsWorldCreateRTFromImage(ocGraphicsWorld* pWorld, ocGraphicsIma
     pRT->pImage = pImage;
 
     result = ocGraphicsWorldAddRT(pWorld, pRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocGraphicsRTUninitBase(pRT);
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsWorldDeleteRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
@@ -646,7 +646,7 @@ void ocGraphicsWorldDeleteRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWorld* pWorld, ocGraphicsObjectType type)
 {
     ocResult result = ocGraphicsObjectBaseInit(pWorld, type, pObject);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pObject);
         return result;
     }
@@ -656,20 +656,20 @@ OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWo
     pObject->_scale     = glm::vec4(1, 1, 1, 1);
     pObject->_transform = glm::mat4();
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGraphicsWorldCreateMeshObject(ocGraphicsWorld* pWorld, ocGraphicsMesh* pMesh, ocGraphicsObject** ppObjectOut)
 {
-    if (pWorld == NULL || pMesh == NULL || ppObjectOut == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL || pMesh == NULL || ppObjectOut == NULL) return OC_INVALID_ARGS;
 
     ocGraphicsObject* pObject = ocMallocObject(ocGraphicsObject);
     if (pObject == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     ocResult result = ocGraphicsObjectInit(pObject, pWorld, ocGraphicsObjectType_Mesh);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pObject);
         return result;
     }
@@ -680,7 +680,7 @@ ocResult ocGraphicsWorldCreateMeshObject(ocGraphicsWorld* pWorld, ocGraphicsMesh
     pWorld->pObjects->push_back(pObject);
 
     *ppObjectOut = pObject;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsWorldDeleteObject(ocGraphicsWorld* pWorld, ocGraphicsObject* pObject)

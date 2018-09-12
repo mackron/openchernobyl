@@ -3,7 +3,7 @@
 ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventProc onWindowEvent, void* pUserData, ocEngineContext* pEngine)
 {
     if (pEngine == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     #if defined(OC_USE_OPENGL) && defined(OC_X11)
@@ -31,49 +31,49 @@ ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventPro
 
     // File system. This is done early so we can open a log file ASAP.
     ocResult result = ocFileSystemInit(pEngine, &pEngine->fs);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // Logging. Initialize logging early so we can output messages during initialization.
     result = ocLoggerInit(pEngine, &pEngine->logger);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error1;
     }
 
     // Graphics.
     result = ocGraphicsInit(pEngine, 4, &pEngine->graphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error2;
     }
 
     // Audio.
     result = ocAudioInit(pEngine, &pEngine->audio);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error3;
     }
 
     // Input.
     result = ocInputInit(&pEngine->input);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error4;
     }
 
     // Component allocator.
     result = ocComponentAllocatorInit(pEngine, &pEngine->componentAllocator);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error5;
     }
 
     // Resource loader.
     result = ocResourceLoaderInit(&pEngine->fs, &pEngine->resourceLoader);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error6;
     }
 
     // Resource library.
     result = ocResourceLibraryInit(&pEngine->resourceLoader, &pEngine->graphics, &pEngine->resourceLibrary);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error7;
     }
 
@@ -81,12 +81,12 @@ ocResult ocEngineInit(int argc, char** argv, ocStepProc onStep, ocWindowEventPro
     // The platform layer is initialized a little bit differently depending on the platform. It needs to come after the graphics system is
     // initialized due to the coupling of X11 and OpenGL.
     result = ocPlatformLayerInit(props);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto on_error8;
     }
 
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 
 on_error8: ocResourceLibraryUninit(&pEngine->resourceLibrary);
 on_error7: ocResourceLoaderUninit(&pEngine->resourceLoader);
@@ -248,7 +248,7 @@ void ocErrorf(ocEngineContext* pEngine, const char* format, ...)
 ocResult ocRegisterComponent(ocEngineContext* pEngine, ocComponentType type, ocCreateComponentProc onCreate, ocDeleteComponentProc onDelete, void* pUserData)
 {
     if (pEngine == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     return ocComponentAllocatorRegister(&pEngine->componentAllocator, type, onCreate, onDelete, pUserData);

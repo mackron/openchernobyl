@@ -3,14 +3,14 @@
 ocResult ocInputInit(ocInputState* pState)
 {
     if (pState == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     ocResult result;
 
     // Mouse
     result = ocMouseStateInit(&pState->mouseState[0]);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -18,7 +18,7 @@ ocResult ocInputInit(ocInputState* pState)
 
     // Joystick
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocInputUninit(ocInputState* pState)

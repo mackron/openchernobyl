@@ -2,36 +2,36 @@
 
 ocResult ocWorldInit(ocEngineContext* pEngine, ocWorld* pWorld)
 {
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pWorld);
 
-    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pEngine == NULL) return OC_INVALID_ARGS;
 
     pWorld->pEngine = pEngine;
 
 
     // Graphics.
     ocResult result = ocGraphicsWorldInit(&pEngine->graphics, &pWorld->graphicsWorld);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // Audio.
     result = ocAudioWorldInit(&pEngine->audio, &pWorld->audioWorld);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocGraphicsWorldUninit(&pWorld->graphicsWorld);
         return result;
     }
 
     // Physics.
     result = ocDynamicsWorldInit(&pWorld->dynamicsWorld);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocAudioWorldUninit(&pWorld->audioWorld);
         ocGraphicsWorldUninit(&pWorld->graphicsWorld);
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocWorldUninit(ocWorld* pWorld)
@@ -46,7 +46,7 @@ void ocWorldUninit(ocWorld* pWorld)
 
 ocResult ocWorldCreateRTFromSwapchain(ocWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT)
 {
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
 
     return ocGraphicsWorldCreateRTFromSwapchain(&pWorld->graphicsWorld, pSwapchain, ppRT);
 }

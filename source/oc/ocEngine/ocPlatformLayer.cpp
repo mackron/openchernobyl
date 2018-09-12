@@ -22,10 +22,10 @@ ocResult ocPlatformLayerInit_Win32(uintptr_t props[])
     wc.hCursor       = LoadCursorA(NULL, MAKEINTRESOURCEA(32512));
     wc.style         = CS_OWNDC | CS_DBLCLKS;
     if (!RegisterClassExA(&wc)) {
-        return OC_RESULT_UNKNOWN_ERROR;   // Failed to initialize the window class.
+        return OC_ERROR;   // Failed to initialize the window class.
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocPlatformLayerUninit_Win32()
@@ -331,7 +331,7 @@ ocResult ocWindowCaptureMouse_Win32(ocWindow* pWindow)
     ocAssert(pWindow != NULL);
 
     SetCapture(pWindow->hWnd);
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocWindowReleaseMouse_Win32(ocWindow* pWindow)
@@ -339,10 +339,10 @@ ocResult ocWindowReleaseMouse_Win32(ocWindow* pWindow)
     ocAssert(pWindow != NULL);
 
     if (!ReleaseCapture()) {
-        return OC_RESULT_UNKNOWN_ERROR;
+        return OC_ERROR;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 #endif  // Win32
 
@@ -390,7 +390,7 @@ ocResult ocPlatformLayerInit_X11(uintptr_t props[])
     if (g_X11Display == NULL) {
         g_X11Display = XOpenDisplay(NULL);
         if (g_X11Display == NULL) {
-            return OC_RESULT_NO_BACKEND;    // Failed to open a connection to the X display.
+            return OC_NO_BACKEND;    // Failed to open a connection to the X display.
         }
 
         g_OwnsDisplay = true;
@@ -399,7 +399,7 @@ ocResult ocPlatformLayerInit_X11(uintptr_t props[])
     if (g_VisualInfo == NULL) {
         g_VisualInfo = (XVisualInfo*)ocMalloc(sizeof(*g_VisualInfo));
         if (g_VisualInfo == NULL) {
-            return OC_RESULT_OUT_OF_MEMORY;
+            return OC_OUT_OF_MEMORY;
         }
 
         int screen = XDefaultScreen(g_X11Display);
@@ -416,7 +416,7 @@ ocResult ocPlatformLayerInit_X11(uintptr_t props[])
     g_WM_DELETE_WINDOW = XInternAtom(g_X11Display, "WM_DELETE_WINDOW", False);
     g_Atom_ocWindow = XInternAtom(g_X11Display, "ATOM_ocWindow", False);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocPlatformLayerUninit_X11()
@@ -515,7 +515,7 @@ ocResult ocPlatformLayerInit(uintptr_t props[])
 {
     g_InitCount = ocAtomicIncrement(&g_InitCount);
     if (g_InitCount > 1) {
-        return OC_RESULT_SUCCESS;   // Already initialized.
+        return OC_SUCCESS;   // Already initialized.
     }
 
 #ifdef OC_WIN32
@@ -635,7 +635,7 @@ void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY)
 ocResult ocWindowCaptureMouse(ocWindow* pWindow)
 {
     if (pWindow == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
 #ifdef OC_WIN32
@@ -649,7 +649,7 @@ ocResult ocWindowCaptureMouse(ocWindow* pWindow)
 ocResult ocWindowReleaseMouse(ocWindow* pWindow)
 {
     if (pWindow == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
 #ifdef OC_WIN32

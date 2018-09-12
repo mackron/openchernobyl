@@ -2,17 +2,17 @@
 
 ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject)
 {
-    if (pObject == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pObject == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pObject);
 
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
 
     pObject->pWorld   = pWorld;
     pObject->position = glm::vec4(0, 0, 0, 0);
     pObject->rotation = glm::quat(1, 0, 0, 0);
     pObject->scale    = glm::vec4(1, 1, 1, 0);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocWorldObjectUninit(ocWorldObject* pObject)
@@ -43,10 +43,10 @@ ocResult ocWorldObjectSetName(ocWorldObject* pObject, const char* name)
     
     pObject->name = ocSetString(pObject->name, name);
     if (pObject->name == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 const char* ocWorldObjectGetName(ocWorldObject* pObject)

@@ -4,7 +4,7 @@ OC_PRIVATE ocResult ocStreamWriterWriteOCDDataBlock(ocStreamWriter* pWriter, con
 {
     // Write nothing if the block is empty, but return successfully. Any block is allowed.
     if (block.dataSize == 0) {
-        return OC_RESULT_SUCCESS;
+        return OC_SUCCESS;
     }
 
     return ocStreamWriterWrite(pWriter, block.pData, block.dataSize, NULL);
@@ -20,33 +20,33 @@ OC_PRIVATE ocResult ocStreamWriterWriteOCDDataBlock(ocStreamWriter* pWriter, con
 
 ocResult ocOCDDataBlockInit(ocOCDDataBlock* pBlock)
 {
-    if (pBlock == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBlock == NULL) return OC_INVALID_ARGS;
 
     ocZeroObject(pBlock);
     ocStreamWriterInit(&pBlock->pData, &pBlock->dataSize, pBlock);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDDataBlockUninit(ocOCDDataBlock* pBlock)
 {
-    if (pBlock == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBlock == NULL) return OC_INVALID_ARGS;
 
     ocFree(pBlock->pData);
     ocStreamWriterUninit(pBlock);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDDataBlockWrite(ocOCDDataBlock* pBlock, const void* pData, ocSizeT dataSize, ocUInt64* pOffsetOut)
 {
     if (pOffsetOut) *pOffsetOut = 0;
-    if (pBlock == NULL || pData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBlock == NULL || pData == NULL) return OC_INVALID_ARGS;
 
     if (pOffsetOut) *pOffsetOut = pBlock->dataSize;
 
     ocResult result = ocStreamWriterWrite(pBlock, pData, dataSize, NULL);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     
@@ -56,7 +56,7 @@ ocResult ocOCDDataBlockWrite(ocOCDDataBlock* pBlock, const void* pData, ocSizeT 
 ocResult ocOCDDataBlockWriteString(ocOCDDataBlock* pBlock, const char* pString, ocUInt64* pOffsetOut)
 {
     ocResult result = ocOCDDataBlockWrite(pBlock, pString, strlen(pString)+1, pOffsetOut);  // +1 to include the null terminator.
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -80,7 +80,7 @@ ocResult ocOCDDataBlockWritePadding64(ocOCDDataBlock* pBlock)
 ocResult ocOCDImageBuilderInit(ocImageFormat format, ocUInt32 width, ocUInt32 height, const void* pImageData, ocOCDImageBuilder* pBuilder)
 {
     if (format == 0 || width == 0 || height == 0 || pImageData == NULL || pBuilder == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     ocZeroObject(pBuilder);
@@ -95,19 +95,19 @@ ocResult ocOCDImageBuilderInit(ocImageFormat format, ocUInt32 width, ocUInt32 he
 ocResult ocOCDImageBuilderUninit(ocOCDImageBuilder* pBuilder)
 {
     if (pBuilder == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     ocOCDDataBlockUninit(&pBuilder->imageDataBlock);
     ocStackUninit(&pBuilder->mipmaps);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDImageBuilderRender(ocOCDImageBuilder* pBuilder, ocStreamWriter* pWriter)
 {
     if (pBuilder == NULL || pWriter == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     // OCD header.
@@ -128,13 +128,13 @@ ocResult ocOCDImageBuilderRender(ocOCDImageBuilder* pBuilder, ocStreamWriter* pW
     ocStreamWriterWrite<ocUInt64>(pWriter, pBuilder->imageDataBlock.dataSize);
     ocStreamWriterWriteOCDDataBlock(pWriter, pBuilder->imageDataBlock);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDImageBuilderAddNextMipmap(ocOCDImageBuilder* pBuilder, ocUInt32 width, ocUInt32 height, const void* pData)
 {
     if (pBuilder == NULL || width == 0 || height == 0 || pData == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     // If we're adding the base level we don't need to do any size validation.
@@ -142,7 +142,7 @@ ocResult ocOCDImageBuilderAddNextMipmap(ocOCDImageBuilder* pBuilder, ocUInt32 wi
         ocUInt32 expectedWidth  = ocMax(1, pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].width  >> 1);
         ocUInt32 expectedHeight = ocMax(1, pBuilder->mipmaps.pItems[pBuilder->mipmaps.count-1].height >> 1);
         if (width != expectedWidth || height != expectedHeight) {
-            return OC_RESULT_INVALID_ARGS;
+            return OC_INVALID_ARGS;
         }
     }
 
@@ -152,39 +152,39 @@ ocResult ocOCDImageBuilderAddNextMipmap(ocOCDImageBuilder* pBuilder, ocUInt32 wi
     mipmap.height = height;
     mipmap.dataSize = (ocUInt64)width * (ocUInt64)height * ocImageFormatBytesPerPixel(pBuilder->format);
     if (mipmap.dataSize > SIZE_MAX) {
-        return OC_RESULT_INVALID_ARGS;  // Too big.
+        return OC_INVALID_ARGS;  // Too big.
     }
 
     ocResult result = ocOCDDataBlockWrite(&pBuilder->imageDataBlock, pData, (ocSizeT)mipmap.dataSize, &mipmap.dataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // Padding.
     result = ocOCDDataBlockWritePadding64(&pBuilder->imageDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
 
     // Add the mipmap to the main list last.
     result = ocStackPush(&pBuilder->mipmaps, mipmap);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDImageBuilderGenerateMipmaps(ocOCDImageBuilder* pBuilder)
 {
     if (pBuilder == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     // Need at least one prior mipmap.
     if (pBuilder->mipmaps.count == 0) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     for (;;) {
@@ -200,12 +200,12 @@ ocResult ocOCDImageBuilderGenerateMipmaps(ocOCDImageBuilder* pBuilder)
         ocUInt32 nextHeight = ocMax(1, prevHeight >> 1);
         void* pNextData = ocMalloc(nextWidth * nextHeight * ocImageFormatBytesPerPixel(pBuilder->format));
         if (pNextData == NULL) {
-            return OC_RESULT_OUT_OF_MEMORY;
+            return OC_OUT_OF_MEMORY;
         }
 
         ocMipmapInfo mipmapInfo;
         ocResult result = ocGenerateMipmap(prevWidth, prevHeight, ocImageFormatComponentCount(pBuilder->format), pPrevData, pNextData, &mipmapInfo);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -215,12 +215,12 @@ ocResult ocOCDImageBuilderGenerateMipmaps(ocOCDImageBuilder* pBuilder)
         result = ocOCDImageBuilderAddNextMipmap(pBuilder, nextWidth, nextHeight, pNextData);
         ocFree(pNextData);
         
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
@@ -235,7 +235,7 @@ ocResult ocOCDImageBuilderGenerateMipmaps(ocOCDImageBuilder* pBuilder)
 ocResult ocOCDSceneBuilderInit(ocOCDSceneBuilder* pBuilder)
 {
     if (pBuilder == NULL) {
-        return OC_RESULT_INVALID_ARGS;
+        return OC_INVALID_ARGS;
     }
 
     ocZeroObject(pBuilder);
@@ -254,12 +254,12 @@ ocResult ocOCDSceneBuilderInit(ocOCDSceneBuilder* pBuilder)
 
     ocStackInit(&pBuilder->meshGroups);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderUninit(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL) return OC_INVALID_ARGS;
 
     ocStackUninit(&pBuilder->meshGroups);
 
@@ -275,7 +275,7 @@ ocResult ocOCDSceneBuilderUninit(ocOCDSceneBuilder* pBuilder)
     ocStackUninit(&pBuilder->subresources);
     ocStackUninit(&pBuilder->objectStack);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pWriter)
@@ -286,7 +286,7 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // access to the main data pointer, which ocOCDDataBlock provides.
     ocOCDDataBlock mainDataBlock;
     ocResult result = ocOCDDataBlockInit(&mainDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -305,7 +305,7 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // Header. Offsets are relative to the main payload chunk and updated in the second pass.
     ocUInt64 headerOffset;
     result = ocStreamWriterTell(&mainDataBlock, &headerOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -318,19 +318,19 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // Payload.
     ocUInt64 payloadOffset;
     result = ocStreamWriterTell(&mainDataBlock, &payloadOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // Subresources.
     ocUInt64 subresourcesOffset;
     result = ocStreamWriterTell(&mainDataBlock, &subresourcesOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     {
         result = ocStreamWriterWriteOCDDataBlock(&mainDataBlock, pBuilder->subresourceBlock);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
@@ -339,19 +339,19 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // Objects.
     for (ocUInt32 iObject = 0; iObject < pBuilder->objects.count; ++iObject) {
         result = ocOCDDataBlockWrite(&pBuilder->objectBlock, pBuilder->objects.pItems[iObject]);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
 
     ocUInt64 objectsOffset;
     result = ocStreamWriterTell(&mainDataBlock, &objectsOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     {
         result = ocStreamWriterWriteOCDDataBlock(&mainDataBlock, pBuilder->objectBlock);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
@@ -360,12 +360,12 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // Components.
     ocUInt64 componentsOffset;
     result = ocStreamWriterTell(&mainDataBlock, &componentsOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     {
         result = ocStreamWriterWriteOCDDataBlock(&mainDataBlock, pBuilder->componentBlock);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
@@ -373,12 +373,12 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // Component Data.
     ocUInt64 componentDataOffset;
     result = ocStreamWriterTell(&mainDataBlock, &componentDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     {
         result = ocStreamWriterWriteOCDDataBlock(&mainDataBlock, pBuilder->componentDataBlock);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
@@ -386,12 +386,12 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // Subresource Data.
     ocUInt64 subresourceDataOffset;
     result = ocStreamWriterTell(&mainDataBlock, &subresourceDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     {
         result = ocStreamWriterWriteOCDDataBlock(&mainDataBlock, pBuilder->subresourceDataBlock);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
@@ -399,12 +399,12 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
     // String Data.
     ocUInt64 stringDataOffset;
     result = ocStreamWriterTell(&mainDataBlock, &stringDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     {
         result = ocStreamWriterWriteOCDDataBlock(&mainDataBlock, pBuilder->stringDataBlock);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
     }
@@ -416,7 +416,7 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
 
     // Header. Offsets are relative to the main payload chunk.
     result = ocStreamWriterSeek(&mainDataBlock, (ocInt64)(headerOffset + sizeof(ocUInt32) + sizeof(ocUInt32)), ocSeekOrigin_Start);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -425,7 +425,7 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
 
     ocUInt64 payloadSize;
     result = ocStreamWriterSize(&mainDataBlock, &payloadSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
     ocStreamWriterWrite<ocUInt64>(&mainDataBlock, payloadSize);
@@ -455,16 +455,16 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
 
     // The last thing to do is write our in-memory data block to the main stream.
     result = ocStreamWriterWriteOCDDataBlock(pWriter, mainDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char* path, ocUInt32* pIndex)
 {
-    if (pBuilder == NULL || path == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL || path == NULL) return OC_INVALID_ARGS;
 
     // Check if the subresource already exists. If so, reuse it.
     for (ocUInt32 iSubresource = 0; iSubresource < (ocUInt32)pBuilder->subresources.count; ++iSubresource) {
@@ -473,7 +473,7 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
             const char* existingSubresourcePath = (const char*)ocOffsetPtr(pBuilder->stringDataBlock.pData, (ocSizeT)pSubresource->pathOffset);
             if (strcmp(existingSubresourcePath, path) == 0) {
                 if (pIndex) *pIndex = iSubresource;
-                return OC_RESULT_SUCCESS;
+                return OC_SUCCESS;
             }
         }
     }
@@ -483,32 +483,32 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
     ocZeroObject(&newSubresource);
     
     ocResult result = ocOCDDataBlockWriteString(&pBuilder->stringDataBlock, path, &newSubresource.pathOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocStackPush(&pBuilder->subresources, newSubresource);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
 
     // Add the subresource to the data block.
     result = ocOCDDataBlockWrite(&pBuilder->subresourceBlock, newSubresource);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
 
     if (pIndex) *pIndex = (ocUInt32)(pBuilder->subresources.count-1);
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* name, const glm::vec3 &relativePosition, const glm::quat &relativeRotation, const glm::vec3 &relativeScale)
 {
-    if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL) return OC_INVALID_ARGS;
 
-    ocResult result = OC_RESULT_SUCCESS;
+    ocResult result = OC_SUCCESS;
 
     ocOCDSceneBuilderObject object;
     ocZeroObject(&object);
@@ -517,7 +517,7 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
 
     // Name.
     result = ocOCDDataBlockWriteString(&pBuilder->stringDataBlock, name, &object.nameOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -562,33 +562,33 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
 
     // Add the object to the stack.
     result = ocStackPush(&pBuilder->objectStack, newObjectIndex);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // Add the object to the main list.
     result = ocStackPush(&pBuilder->objects, object);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderEndObject(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL) return OC_INVALID_ARGS;
 
     if (pBuilder->objectStack.count == 0) {
-        return OC_RESULT_INVALID_OPERATION;
+        return OC_INVALID_OPERATION;
     }
 
     ocResult result = ocStackPop(&pBuilder->objectStack);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocOCDSceneBuilder_AddComponent(ocOCDSceneBuilder* pBuilder, const ocOCDSceneBuilderComponent &component)
@@ -618,7 +618,7 @@ OC_PRIVATE ocResult ocOCDSceneBuilder_AddComponent(ocOCDSceneBuilder* pBuilder, 
     if (componentsInObject > 0) {
         ocUInt64 componentBlockSize;
         ocResult result = ocStreamWriterSize(&pBuilder->componentBlock, &componentBlockSize);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             return result;
         }
 
@@ -634,7 +634,7 @@ OC_PRIVATE ocResult ocOCDSceneBuilder_AddComponent(ocOCDSceneBuilder* pBuilder, 
     // First add the component to the Components data block.
     ocUInt64 componentOffset;
     ocResult result = ocOCDDataBlockWrite(&pBuilder->componentBlock, component, &componentOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -649,48 +649,48 @@ OC_PRIVATE ocResult ocOCDSceneBuilder_AddComponent(ocOCDSceneBuilder* pBuilder, 
 
     // The component needs to be added to the master list.
     result = ocStackPush(&pBuilder->components, component);
-    if (result != OC_RESULT_SUCCESS) {
-        return OC_RESULT_SUCCESS;
+    if (result != OC_SUCCESS) {
+        return OC_SUCCESS;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const char* path)
 {
-    if (pBuilder == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL) return OC_INVALID_ARGS;
 
     if (pBuilder->objectStack.count == 0) {
-        return OC_RESULT_INVALID_OPERATION;
+        return OC_INVALID_OPERATION;
     }
 
     // The first thing to do is add the subresource. Then we just add the component to the object.
     ocUInt32 subresourceIndex;
     ocResult result = ocOCDSceneBuilderAddSubresource(pBuilder, path, &subresourceIndex);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     // The component data is simple for scenes - it's just an index to the subresource followed by 4 bytes of 0 padding.
     ocUInt64 componentDataOffset;
     result = ocStreamWriterTell(&pBuilder->componentDataBlock, &componentDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, subresourceIndex);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, 0);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     ocUInt64 componentDataOffsetEnd;
     result = ocStreamWriterTell(&pBuilder->componentDataBlock, &componentDataOffsetEnd);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -702,45 +702,45 @@ ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const c
     component.dataSize   = componentDataOffsetEnd - componentDataOffset;
     component.dataOffset = componentDataOffset;
     result = ocOCDSceneBuilder_AddComponent(pBuilder, component);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
 ocResult ocOCDSceneBuilderBeginMeshComponent(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_TRUE) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_TRUE) return OC_INVALID_ARGS;
 
     if (pBuilder->objectStack.count == 0) {
-        return OC_RESULT_INVALID_OPERATION;
+        return OC_INVALID_OPERATION;
     }
 
     ocStackClear(&pBuilder->meshGroups);
 
     ocResult result = ocOCDDataBlockInit(&pBuilder->meshGroupVertexDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocOCDDataBlockInit(&pBuilder->meshGroupIndexDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
 
     pBuilder->isAddingMeshComponent = OC_TRUE;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_FALSE) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_FALSE) return OC_INVALID_ARGS;
 
     if (pBuilder->objectStack.count == 0) {
-        return OC_RESULT_INVALID_OPERATION;
+        return OC_INVALID_OPERATION;
     }
 
     ocResult result;
@@ -748,7 +748,7 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     // We need the offset of this data block for later.
     ocUInt64 componentDataOffset;
     result = ocStreamWriterTell(&pBuilder->componentDataBlock, &componentDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -757,36 +757,36 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     // Before writing the vertex and index data, we need to make sure they are padded for alignment.
     ocUInt64 vertexDataSize;
     result = ocStreamWriterSize(&pBuilder->meshGroupVertexDataBlock, &vertexDataSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     result = ocOCDDataBlockWritePadding64(&pBuilder->meshGroupVertexDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     ocUInt64 vertexDataSizeWithPadding;
     result = ocStreamWriterSize(&pBuilder->meshGroupVertexDataBlock, &vertexDataSizeWithPadding);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
 
     ocUInt64 indexDataSize;
     result = ocStreamWriterSize(&pBuilder->meshGroupIndexDataBlock, &indexDataSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     result = ocOCDDataBlockWritePadding64(&pBuilder->meshGroupIndexDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     //ocUInt64 indexDataSizeWithPadding;
     //result = ocStreamWriterSize(&pBuilder->meshGroupIndexDataBlock, &indexDataSizeWithPadding);
-    //if (result != OC_RESULT_SUCCESS) {
+    //if (result != OC_SUCCESS) {
     //    goto done;
     //}
 
@@ -795,66 +795,66 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     // Group count.
     ocUInt32 groupCount = (ocUInt32)pBuilder->meshGroups.count;
     result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, groupCount);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Padding.
     result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, 0);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Vertex data size.
     result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, vertexDataSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Vertex data offset. Vertex data is located past the groups.
     ocUInt64 vertexDataOffset = 40 + (groupCount * sizeof(ocOCDSceneBuilderMeshGroup)); // 40 = size of the header section.
     result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, vertexDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Index data size.
     result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, indexDataSize);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Index data offset. Index data is located after the vertex data.
     ocUInt64 indexDataOffset = vertexDataOffset + vertexDataSizeWithPadding;
     result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, indexDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Groups.
     for (ocUInt32 iGroup = 0; iGroup < groupCount; ++iGroup) {
         result = ocOCDDataBlockWrite(&pBuilder->componentDataBlock, pBuilder->meshGroups.pItems[iGroup]);
-        if (result != OC_RESULT_SUCCESS) {
+        if (result != OC_SUCCESS) {
             goto done;
         }
     }
 
     // Vertex data.
     result = ocStreamWriterWriteOCDDataBlock(&pBuilder->componentDataBlock, pBuilder->meshGroupVertexDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
     // Index data.
     result = ocStreamWriterWriteOCDDataBlock(&pBuilder->componentDataBlock, pBuilder->meshGroupIndexDataBlock);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         goto done;
     }
 
 
     ocUInt64 componentDataOffsetEnd;
     result = ocStreamWriterTell(&pBuilder->componentDataBlock, &componentDataOffsetEnd);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -866,7 +866,7 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     component.dataSize   = componentDataOffsetEnd - componentDataOffset;
     component.dataOffset = componentDataOffset;
     result = ocOCDSceneBuilder_AddComponent(pBuilder, component);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -879,11 +879,11 @@ done:
 
 ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocGraphicsIndexFormat indexFormat, ocUInt32 indexCount, void* pIndexData)
 {
-    if (pBuilder == NULL || pVertexData == NULL || pIndexData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pBuilder == NULL || pVertexData == NULL || pIndexData == NULL) return OC_INVALID_ARGS;
 
     ocOCDSceneBuilderMeshGroup meshGroup;
     ocResult result = ocOCDSceneBuilderAddSubresource(pBuilder, materialPath, &meshGroup.materialSubresourceIndex);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -892,23 +892,23 @@ ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, con
     meshGroup.vertexFormat = (ocUInt32)vertexFormat;
     meshGroup.vertexCount = vertexCount;
     result = ocOCDDataBlockWrite(&pBuilder->meshGroupVertexDataBlock, pVertexData, ocGetVertexSizeFromFormat((ocGraphicsVertexFormat)meshGroup.vertexFormat) * vertexCount, &meshGroup.vertexDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     meshGroup.indexFormat = (ocUInt32)indexFormat;
     meshGroup.indexCount = indexCount;
     result = ocOCDDataBlockWrite(&pBuilder->meshGroupIndexDataBlock, pIndexData, ocGetIndexSizeFromFormat((ocGraphicsIndexFormat)meshGroup.indexFormat) * indexCount, &meshGroup.indexDataOffset);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocStackPush(&pBuilder->meshGroups, meshGroup);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocUInt32 indexCount, ocUInt32* pIndexData)

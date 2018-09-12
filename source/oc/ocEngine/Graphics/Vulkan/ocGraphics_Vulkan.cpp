@@ -98,8 +98,8 @@ OC_PRIVATE ocResult ocToResultFromVulkan(VkResult vkresult)
     // TODO: Implement me fully.
     switch (vkresult)
     {
-        case VK_SUCCESS: return OC_RESULT_SUCCESS;
-        default: return OC_RESULT_UNKNOWN_ERROR;
+        case VK_SUCCESS: return OC_SUCCESS;
+        default: return OC_ERROR;
     }
 }
 
@@ -149,7 +149,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanInstance(ocGraphicsContext* pGraphics)
     ocAssert(pGraphics != NULL);
 
     if (!drvkInit(DRVK_INIT_ALL)) {
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
     // Layers.
@@ -214,16 +214,16 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanInstance(ocGraphicsContext* pGraphics)
     vkInstanceInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
     if (vkCreateInstance(&vkInstanceInfo, NULL, &pGraphics->instance) != VK_SUCCESS) {
         drvkUninit();
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
     if (!drvkInitInstanceAPIs(pGraphics->instance)) {
         vkDestroyInstance(pGraphics->instance, NULL);
         drvkUninit();
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, uint32_t desiredMSAASamples)
@@ -253,7 +253,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     }
 
     if (pGraphics->queueFamilyIndex == (uint32_t)-1) {
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
     pGraphics->queueLocalIndex = 0;
@@ -294,7 +294,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     deviceInfo.pEnabledFeatures = &physicalDeviceFeatures;
     result = vkCreateDevice(pGraphics->physicalDevice, &deviceInfo, NULL, &pGraphics->device);
     if (result != VK_SUCCESS) {
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
 
@@ -308,7 +308,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     result = vkCreateCommandPool(pGraphics->device, &cmdpoolInfo, NULL, &pGraphics->commandPool);
     if (result != VK_SUCCESS) {
         vkDestroyDevice(pGraphics->device, NULL);
-        return OC_RESULT_FAILED_TO_INIT_GRAPHICS;
+        return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
 
@@ -326,7 +326,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     pGraphics->maxMSAA = ocMin(maxMSAAColor, ocMin(maxMSAADepth, maxMSAAStencil));
     pGraphics->msaaSamples = (VkSampleCountFlagBits)ocClamp(desiredMSAASamples, pGraphics->minMSAA, pGraphics->maxMSAA);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocGraphicsInit_VulkanRenderPass_FinalComposite(ocGraphicsContext* pGraphics, VkImageLayout outputImageFinalLayout, VkRenderPass* pRenderPass)
@@ -396,7 +396,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanRenderPass_FinalComposite(ocGraphicsCon
         return ocToResultFromVulkan(vkresult);
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocGraphicsInit_VulkanRenderPasses(ocGraphicsContext* pGraphics)
@@ -405,12 +405,12 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanRenderPasses(ocGraphicsContext* pGraphi
 
     // Final composition render passes. There is one of these for image output and another for window output.
     ocResult result = ocGraphicsInit_VulkanRenderPass_FinalComposite(pGraphics, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, &pGraphics->renderPass_FinalComposite_Image);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocGraphicsInit_VulkanRenderPass_FinalComposite(pGraphics, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, &pGraphics->renderPass_FinalComposite_Window);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -467,7 +467,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanRenderPasses(ocGraphicsContext* pGraphi
         return ocToResultFromVulkan(vkresult);
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
@@ -693,7 +693,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
         return ocToResultFromVulkan(vkresult);
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocGraphicsInit_VulkanSamplers(ocGraphicsContext* pGraphics)
@@ -730,33 +730,33 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanSamplers(ocGraphicsContext* pGraphics)
         return ocToResultFromVulkan(vkresult);
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocGraphicsInit_Vulkan(ocGraphicsContext* pGraphics, uint32_t desiredMSAASamples)
 {
     ocResult result = ocGraphicsInit_VulkanInstance(pGraphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocGraphicsInit_VulkanDevices(pGraphics, desiredMSAASamples);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocGraphicsInit_VulkanRenderPasses(pGraphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocGraphicsInit_VulkanPipelines(pGraphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocGraphicsInit_VulkanSamplers(pGraphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -792,18 +792,18 @@ OC_PRIVATE ocResult ocGraphicsInit_Vulkan(ocGraphicsContext* pGraphics, uint32_t
         return ocToResultFromVulkan(vkresult);
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, ocGraphicsContext* pGraphics)
 {
     ocResult result = ocGraphicsInitBase(pEngine, pGraphics);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     result = ocGraphicsInit_Vulkan(pGraphics, desiredMSAASamples);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -817,7 +817,7 @@ ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, o
     pGraphics->supportFlags |= OC_GRAPHICS_SUPPORT_FLAG_ADAPTIVE_VSYNC;
 
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
@@ -842,16 +842,16 @@ void ocGraphicsUninit(ocGraphicsContext* pGraphics)
 
 ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode, ocGraphicsSwapchain** ppSwapchain)
 {
-    if (ppSwapchain == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppSwapchain == NULL) return OC_INVALID_ARGS;
     *ppSwapchain = NULL;
 
     ocGraphicsSwapchain* pSwapchain = ocCallocObject(ocGraphicsSwapchain);
     if (pSwapchain == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     ocResult result = ocGraphicsSwapchainBaseInit(pGraphics, pWindow, vsyncMode, pSwapchain);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pSwapchain);
         return result;
     }
@@ -1029,7 +1029,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
     }
 
     *ppSwapchain = pSwapchain;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsDeleteSwapchain(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapchain)
@@ -1088,15 +1088,15 @@ void ocGraphicsPresent(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapc
 
 ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc* pDesc, ocGraphicsImage** ppImage)
 {
-    if (ppImage == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppImage == NULL) return OC_INVALID_ARGS;
     *ppImage = NULL;
 
-    if (pGraphics == NULL || pDesc == NULL) return OC_RESULT_INVALID_ARGS;
-    if (pDesc->mipLevels == 0 || pDesc->usage == 0) return OC_RESULT_INVALID_ARGS;
+    if (pGraphics == NULL || pDesc == NULL) return OC_INVALID_ARGS;
+    if (pDesc->mipLevels == 0 || pDesc->usage == 0) return OC_INVALID_ARGS;
 
     ocGraphicsImage* pImage = ocMallocObject(ocGraphicsImage);
     if (pImage == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     pImage->format = ocToVulkanImageFormat(pDesc->format);
@@ -1241,7 +1241,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
     pImage->descriptor.sampler = pGraphics->sampler_Nearest;
 
     *ppImage = pImage;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage)
@@ -1255,14 +1255,14 @@ void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage
 
 ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* pDesc, ocGraphicsMesh** ppMesh)
 {
-    if (ppMesh == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppMesh == NULL) return OC_INVALID_ARGS;
     *ppMesh = NULL;
 
-    if (pGraphics == NULL || pDesc == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pGraphics == NULL || pDesc == NULL) return OC_INVALID_ARGS;
 
     ocGraphicsMesh* pMesh = ocCallocObject(ocGraphicsMesh);
     if (pMesh == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     pMesh->primitiveType = pDesc->primitiveType;
@@ -1330,7 +1330,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
 
 
     *ppMesh = pMesh;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
@@ -1350,13 +1350,13 @@ void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
 ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWorld)
 {
     ocResult result = ocGraphicsWorldInitBase(pGraphics, pWorld);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     pWorld->pObjects = new std::vector<ocGraphicsObject*>();
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsWorldUninit(ocGraphicsWorld* pWorld)
@@ -1546,12 +1546,12 @@ void ocGraphicsWorldStep(ocGraphicsWorld* pWorld, double dt)
 
 OC_PRIVATE ocResult ocGraphicsWorldAddRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 {
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
-    if (pWorld->renderTargetCount == OC_MAX_RENDER_TARGETS) return OC_RESULT_TOO_MANY_RENDER_TARGETS;
+    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pWorld->renderTargetCount == OC_MAX_RENDER_TARGETS) return OC_TOO_MANY_RENDER_TARGETS;
 
     pWorld->pRenderTargets[pWorld->renderTargetCount++] = pRT;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE void ocGraphicsWorldRemoveRTByIndex(ocGraphicsWorld* pWorld, uint16_t index)
@@ -1700,7 +1700,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
     }
     vkEndCommandBuffer(pRT->cbPreTransition);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
@@ -1728,7 +1728,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(ocGraphicsW
     ocAssert(pRT->colorImageView != 0);
     ocAssert(pRT->dsImageView != 0);
 
-    if ((outputImageCount == 0 || outputImageCount > 3) || pOutputImages == NULL) return OC_RESULT_INVALID_ARGS;
+    if ((outputImageCount == 0 || outputImageCount > 3) || pOutputImages == NULL) return OC_INVALID_ARGS;
     memcpy(pRT->outputImages, pOutputImages, sizeof(*pOutputImages) * outputImageCount);
     pRT->outputImageCount = 0;
 
@@ -1785,26 +1785,26 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(ocGraphicsW
         pRT->outputImageCount += 1;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 
 on_error:
     ocGraphicsWorldUninitRT_OutputFramebuffers(pWorld, pRT);
-    return OC_RESULT_UNKNOWN_ERROR;
+    return OC_ERROR;
 }
 
 OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGraphicsRT** ppRT, ocGraphicsSwapchain* pSwapchain, ocGraphicsImage* pImage, uint32_t sizeX, uint32_t sizeY, uint32_t outputImageCount, VkImage* pOutputImages, VkFormat outputImageFormat)
 {
-    if (ppRT == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppRT == NULL) return OC_INVALID_ARGS;
     *ppRT = NULL;   // Safety.
 
-    if (pWorld == NULL) return OC_RESULT_INVALID_ARGS;
-    if (pSwapchain != NULL && pImage != NULL) return OC_RESULT_INVALID_ARGS;   // It's not valid for a swapchain _and_ an image to be the output of an RT.
+    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pSwapchain != NULL && pImage != NULL) return OC_INVALID_ARGS;   // It's not valid for a swapchain _and_ an image to be the output of an RT.
 
     ocGraphicsRT* pRT = (ocGraphicsRT*)ocCalloc(1, sizeof(*pRT));
-    if (pRT == NULL) return OC_RESULT_OUT_OF_MEMORY;
+    if (pRT == NULL) return OC_OUT_OF_MEMORY;
 
     ocResult result = ocGraphicsRTInitBase(pWorld, pRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pRT);
         return result;
     }
@@ -1818,14 +1818,14 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
 
     // Main framebuffer.
     result = ocGraphicsWorldAllocAndInitRT_MainFramebuffer(pWorld, pRT, sizeX, sizeY);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pRT);
         return result;
     }
 
     // Output framebuffers.
     result = ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(pWorld, pRT, sizeX, sizeY, outputImageCount, pOutputImages, outputImageFormat);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         ocFree(pRT);
         return result;
@@ -1870,7 +1870,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     pRT->uniformBufferDescriptor.range  = sizeof(glm::mat4)*2;
 
     *ppRT = pRT;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT)
@@ -1880,7 +1880,7 @@ ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphic
     ocGraphicsGetSwapchainSize(pSwapchain->pGraphics, pSwapchain, &sizeX, &sizeY);
 
     ocResult result = ocGraphicsWorldAllocAndInitRT(pWorld, ppRT, pSwapchain, NULL, (uint32_t)sizeX, (uint32_t)sizeY, pSwapchain->vkSwapchainImageCount, pSwapchain->vkSwapchainImages, VK_FORMAT_R8G8B8A8_UNORM);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -1889,18 +1889,18 @@ ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphic
     pRT->pImage = NULL;
 
     result = ocGraphicsWorldAddRT(pWorld, pRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocGraphicsRTUninitBase(pRT);
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGraphicsWorldCreateRTFromImage(ocGraphicsWorld* pWorld, ocGraphicsImage* pImage, ocGraphicsRT** ppRT)
 {
     ocResult result = ocGraphicsWorldAllocAndInitRT(pWorld, ppRT, NULL, pImage, pImage->sizeX, pImage->sizeY, 1, &pImage->imageVK, VK_FORMAT_R8G8B8A8_UNORM);     // <-- Change this to the format of the image for robustness?
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -1909,12 +1909,12 @@ ocResult ocGraphicsWorldCreateRTFromImage(ocGraphicsWorld* pWorld, ocGraphicsIma
     pRT->pImage = pImage;
 
     result = ocGraphicsWorldAddRT(pWorld, pRT);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocGraphicsRTUninitBase(pRT);
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsWorldDeleteRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
@@ -1935,7 +1935,7 @@ void ocGraphicsWorldDeleteRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWorld* pWorld, ocGraphicsObjectType type)
 {
     ocResult result = ocGraphicsObjectBaseInit(pWorld, type, pObject);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pObject);
         return result;
     }
@@ -1975,20 +1975,20 @@ OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWo
     pObject->uniformBufferDescriptor.offset = 0;
     pObject->uniformBufferDescriptor.range  = sizeof(glm::mat4);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocGraphicsWorldCreateMeshObject(ocGraphicsWorld* pWorld, ocGraphicsMesh* pMesh, ocGraphicsObject** ppObjectOut)
 {
-    if (pWorld == NULL || pMesh == NULL || ppObjectOut == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWorld == NULL || pMesh == NULL || ppObjectOut == NULL) return OC_INVALID_ARGS;
 
     ocGraphicsObject* pObject = ocMallocObject(ocGraphicsObject);
     if (pObject == NULL) {
-        return OC_RESULT_OUT_OF_MEMORY;
+        return OC_OUT_OF_MEMORY;
     }
 
     ocResult result = ocGraphicsObjectInit(pObject, pWorld, ocGraphicsObjectType_Mesh);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         ocFree(pObject);
         return result;
     }
@@ -1999,7 +1999,7 @@ ocResult ocGraphicsWorldCreateMeshObject(ocGraphicsWorld* pWorld, ocGraphicsMesh
     pWorld->pObjects->push_back(pObject);
 
     *ppObjectOut = pObject;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocGraphicsWorldDeleteObject(ocGraphicsWorld* pWorld, ocGraphicsObject* pObject)

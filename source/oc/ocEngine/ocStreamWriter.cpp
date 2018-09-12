@@ -34,16 +34,16 @@ OC_PRIVATE ocResult ocStreamWriter_OnSize_File(void* pUserData, ocUInt64* pSize)
 
 ocResult ocStreamWriterInit(ocFile* pFile, ocStreamWriter* pWriter)
 {
-    if (pFile == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pFile == NULL) return OC_INVALID_ARGS;
 
     ocResult result = ocStreamWriterInit(ocStreamWriter_OnWrite_File, ocStreamWriter_OnSeek_File, ocStreamWriter_OnTell_File, ocStreamWriter_OnSize_File, (void*)pWriter, pWriter);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
     pWriter->pFile = pFile;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
@@ -63,7 +63,7 @@ OC_PRIVATE ocResult ocStreamWriter_OnWrite_Memory(void* pUserData, const void* p
 
         ocUInt8* pNewBuffer = (ocUInt8*)ocRealloc(pWriter->memory.pBuffer, newBufferSize);
         if (pNewBuffer == NULL) {
-            return OC_RESULT_OUT_OF_MEMORY;
+            return OC_OUT_OF_MEMORY;
         }
 
         pWriter->memory.pBuffer = pNewBuffer;
@@ -83,7 +83,7 @@ OC_PRIVATE ocResult ocStreamWriter_OnWrite_Memory(void* pUserData, const void* p
     *pWriter->memory.ppData = (void*)pWriter->memory.pBuffer;
     *pWriter->memory.pDataSize = pWriter->memory.dataSize;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocStreamWriter_OnSeek_Memory(void* pUserData, ocInt64 bytesToSeek, ocSeekOrigin origin)
@@ -97,13 +97,13 @@ OC_PRIVATE ocResult ocStreamWriter_OnSeek_Memory(void* pUserData, ocInt64 bytesT
         {
             if (bytesToSeek > 0) {
                 if (pWriter->memory.currentPos + bytesToSeek > pWriter->memory.dataSize) {
-                    return OC_RESULT_INVALID_ARGS;  // Seeking too far forward.
+                    return OC_INVALID_ARGS;  // Seeking too far forward.
                 }
 
                 pWriter->memory.currentPos += (ocSizeT)bytesToSeek;
             } else {
                 if (pWriter->memory.currentPos + bytesToSeek < 0) {
-                    return OC_RESULT_INVALID_ARGS;  // Seeking too far backwards.
+                    return OC_INVALID_ARGS;  // Seeking too far backwards.
                 }
 
                 pWriter->memory.currentPos -= (ocSizeT)(-bytesToSeek);
@@ -113,10 +113,10 @@ OC_PRIVATE ocResult ocStreamWriter_OnSeek_Memory(void* pUserData, ocInt64 bytesT
         case ocSeekOrigin_Start:
         {
             if (bytesToSeek < 0) {
-                return OC_RESULT_INVALID_ARGS;  // Does not make sense to use a negative seek when seeking from the start.
+                return OC_INVALID_ARGS;  // Does not make sense to use a negative seek when seeking from the start.
             }
             if (bytesToSeek > (ocInt64)pWriter->memory.dataSize) {
-                return OC_RESULT_INVALID_ARGS;  // Seeking too far.
+                return OC_INVALID_ARGS;  // Seeking too far.
             }
 
             pWriter->memory.currentPos = (ocSizeT)bytesToSeek;
@@ -130,14 +130,14 @@ OC_PRIVATE ocResult ocStreamWriter_OnSeek_Memory(void* pUserData, ocInt64 bytesT
             }
 
             if (bytesToSeek > (ocInt64)pWriter->memory.dataSize) {
-                return OC_RESULT_INVALID_ARGS;  // Seeking too far.
+                return OC_INVALID_ARGS;  // Seeking too far.
             }
 
             pWriter->memory.currentPos = pWriter->memory.dataSize - (ocSizeT)bytesToSeek;
         } break;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocStreamWriter_OnTell_Memory(void* pUserData, ocUInt64* pPos)
@@ -146,7 +146,7 @@ OC_PRIVATE ocResult ocStreamWriter_OnTell_Memory(void* pUserData, ocUInt64* pPos
     ocAssert(pWriter != NULL);
 
     *pPos = pWriter->memory.currentPos;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 OC_PRIVATE ocResult ocStreamWriter_OnSize_Memory(void* pUserData, ocUInt64* pSize)
@@ -155,15 +155,15 @@ OC_PRIVATE ocResult ocStreamWriter_OnSize_Memory(void* pUserData, ocUInt64* pSiz
     ocAssert(pWriter != NULL);
 
     *pSize = pWriter->memory.dataSize;
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocStreamWriterInit(void** ppData, size_t* pDataSize, ocStreamWriter* pWriter)
 {
-    if (ppData == NULL || pDataSize == NULL) return OC_RESULT_INVALID_ARGS;
+    if (ppData == NULL || pDataSize == NULL) return OC_INVALID_ARGS;
 
     ocResult result = ocStreamWriterInit(ocStreamWriter_OnWrite_Memory, ocStreamWriter_OnSeek_Memory, ocStreamWriter_OnTell_Memory, ocStreamWriter_OnSize_Memory, (void*)pWriter, pWriter);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -173,13 +173,13 @@ ocResult ocStreamWriterInit(void** ppData, size_t* pDataSize, ocStreamWriter* pW
     *ppData = NULL;
     *pDataSize = 0;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 
 ocResult ocStreamWriterInit(ocStreamWriter_OnWriteProc onWrite, ocStreamWriter_OnSeekProc onSeek, ocStreamWriter_OnTellProc onTell, ocStreamWriter_OnSizeProc onSize, void* pUserData, ocStreamWriter* pWriter)
 {
-    if (pWriter == NULL || onWrite == NULL || onSeek == NULL || onTell == NULL || onSize == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWriter == NULL || onWrite == NULL || onSeek == NULL || onTell == NULL || onSize == NULL) return OC_INVALID_ARGS;
 
     ocZeroObject(pWriter);
     pWriter->onWrite = onWrite;
@@ -188,18 +188,18 @@ ocResult ocStreamWriterInit(ocStreamWriter_OnWriteProc onWrite, ocStreamWriter_O
     pWriter->onSize = onSize;
     pWriter->pUserData = pUserData;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 ocResult ocStreamWriterUninit(ocStreamWriter* pWriter)
 {
-    if (pWriter == NULL) return OC_RESULT_INVALID_ARGS;
-    return OC_RESULT_SUCCESS;
+    if (pWriter == NULL) return OC_INVALID_ARGS;
+    return OC_SUCCESS;
 }
 
 ocResult ocStreamWriterWrite(ocStreamWriter* pWriter, const void* pData, ocSizeT bytesToWrite, ocSizeT* pBytesWritten)
 {
-    if (pWriter == NULL || pData == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWriter == NULL || pData == NULL) return OC_INVALID_ARGS;
 
     ocAssert(pWriter->onWrite != NULL);
     return pWriter->onWrite(pWriter->pUserData, pData, bytesToWrite, pBytesWritten);
@@ -207,24 +207,24 @@ ocResult ocStreamWriterWrite(ocStreamWriter* pWriter, const void* pData, ocSizeT
 
 ocResult ocStreamWriterWriteString(ocStreamWriter* pWriter, const char* str)
 {
-    if (pWriter == NULL || str == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWriter == NULL || str == NULL) return OC_INVALID_ARGS;
     return ocStreamWriterWrite(pWriter, str, strlen(str)+1, NULL);  // <-- Include null terminator in output.
 }
 
 ocResult ocStreamWriterSeek(ocStreamWriter* pWriter, ocInt64 bytesToSeek, ocSeekOrigin origin)
 {
-    if (pWriter == NULL || pWriter->onSeek == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWriter == NULL || pWriter->onSeek == NULL) return OC_INVALID_ARGS;
     return pWriter->onSeek(pWriter->pUserData, bytesToSeek, origin);
 }
 
 ocResult ocStreamWriterTell(ocStreamWriter* pWriter, ocUInt64* pPos)
 {
-    if (pWriter == NULL || pWriter->onTell == NULL || pPos == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWriter == NULL || pWriter->onTell == NULL || pPos == NULL) return OC_INVALID_ARGS;
     return pWriter->onTell(pWriter->pUserData, pPos);
 }
 
 ocResult ocStreamWriterSize(ocStreamWriter* pWriter, ocUInt64* pSize)
 {
-    if (pWriter == NULL || pWriter->onSize == NULL || pSize == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pWriter == NULL || pWriter->onSize == NULL || pSize == NULL) return OC_INVALID_ARGS;
     return pWriter->onSize(pWriter->pUserData, pSize);
 }

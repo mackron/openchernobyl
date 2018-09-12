@@ -65,10 +65,10 @@ OC_PRIVATE void ocDeleteComponent_Light(ocComponent* pComponent, void* pUserData
 
 ocResult ocComponentAllocatorInit(ocEngineContext* pEngine, ocComponentAllocator* pAllocator)
 {
-    if (pAllocator == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pAllocator == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pAllocator);
 
-    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pEngine == NULL) return OC_INVALID_ARGS;
 
     pAllocator->pEngine = pEngine;
     pAllocator->pAllocators = NULL;
@@ -77,7 +77,7 @@ ocResult ocComponentAllocatorInit(ocEngineContext* pEngine, ocComponentAllocator
     ocComponentAllocatorRegister(pAllocator, OC_COMPONENT_TYPE_MESH, ocCreateComponent_Mesh, ocDeleteComponent_Mesh, NULL);
     ocComponentAllocatorRegister(pAllocator, OC_COMPONENT_TYPE_LIGHT, ocCreateComponent_Light, ocDeleteComponent_Light, NULL);
     
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocComponentAllocatorUninit(ocComponentAllocator* pAllocator)
@@ -89,12 +89,12 @@ void ocComponentAllocatorUninit(ocComponentAllocator* pAllocator)
 
 ocResult ocComponentAllocatorRegister(ocComponentAllocator* pAllocator, ocComponentType type, ocCreateComponentProc onCreate, ocDeleteComponentProc onDelete, void* pUserData)
 {
-    if (pAllocator == NULL || onCreate == NULL || onDelete == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pAllocator == NULL || onCreate == NULL || onDelete == NULL) return OC_INVALID_ARGS;
 
     // Return an error if an allocator has already been registered for this type.
     for (int i = 0; i < stb_sb_count(pAllocator->pAllocators); ++i) {
         if (pAllocator->pAllocators[i].type == type) {
-            return OC_RESULT_INVALID_ARGS;
+            return OC_INVALID_ARGS;
         }
     }
 
@@ -105,7 +105,7 @@ ocResult ocComponentAllocatorRegister(ocComponentAllocator* pAllocator, ocCompon
     allocator.pUserData = pUserData;
     stb_sb_push(pAllocator->pAllocators, allocator);
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 

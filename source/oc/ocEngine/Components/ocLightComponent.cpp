@@ -3,7 +3,7 @@
 ocResult ocComponentLightInit(ocWorldObject* pObject, ocLightComponent* pComponent)
 {
     ocResult result = ocComponentInit(pObject, OC_COMPONENT_TYPE_LIGHT, pComponent);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
@@ -12,7 +12,7 @@ ocResult ocComponentLightInit(ocWorldObject* pObject, ocLightComponent* pCompone
     pComponent->color.b = 1;
     pComponent->color.a = 1;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocComponentLightUninit(ocLightComponent* pComponent)

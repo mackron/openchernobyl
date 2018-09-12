@@ -2,10 +2,10 @@
 
 ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger)
 {
-    if (pLogger == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pLogger == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pLogger);
 
-    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pEngine == NULL) return OC_INVALID_ARGS;
 
     pLogger->pEngine = pEngine;
 
@@ -18,12 +18,12 @@ ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger)
     drpath_append(logFilePath, sizeof(logFilePath), OC_LOG_FILE_NAME);
 
     ocResult result = ocFileOpen(&pEngine->fs, logFilePath, OC_WRITE | OC_CREATE_DIRS, &pLogger->file);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         // We failed to create the log file, but it's not a critical error. Just mark it as such so we don't try to use the file.
         pLogger->noFileOutput = OC_TRUE;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocLoggerUninit(ocLogger* pLogger)

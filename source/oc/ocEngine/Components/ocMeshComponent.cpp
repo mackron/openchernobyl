@@ -3,11 +3,11 @@
 ocResult ocComponentMeshInit(ocWorldObject* pObject, ocMeshComponent* pComponent)
 {
     ocResult result = ocComponentInit(pObject, OC_COMPONENT_TYPE_MESH, pComponent);
-    if (result != OC_RESULT_SUCCESS) {
+    if (result != OC_SUCCESS) {
         return result;
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocComponentMeshUninit(ocMeshComponent* pComponent)
@@ -17,13 +17,13 @@ void ocComponentMeshUninit(ocMeshComponent* pComponent)
 
 ocResult ocComponentMeshSetMesh(ocMeshComponent* pComponent, ocGraphicsMesh* pMesh)
 {
-    if (pComponent == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pComponent == NULL) return OC_INVALID_ARGS;
 
     if (ocWorldObjectIsInWorld(pComponent->pObject)) {
-        return OC_RESULT_INVALID_OPERATION;
+        return OC_INVALID_OPERATION;
     }
 
     pComponent->pMesh = pMesh;
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }

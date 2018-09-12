@@ -4,11 +4,11 @@ OC_INLINE ocResult ocToResultFromMAL(mal_result resultMAL)
 {
     switch (resultMAL)
     {
-        case MAL_SUCCESS:       return OC_RESULT_SUCCESS;
-        case MAL_INVALID_ARGS:  return OC_RESULT_INVALID_ARGS;
-        case MAL_OUT_OF_MEMORY: return OC_RESULT_OUT_OF_MEMORY;
-        case MAL_NO_BACKEND:    return OC_RESULT_FAILED_TO_INIT_AUDIO;
-        default:                return OC_RESULT_UNKNOWN_ERROR;
+        case MAL_SUCCESS:       return OC_SUCCESS;
+        case MAL_INVALID_ARGS:  return OC_INVALID_ARGS;
+        case MAL_OUT_OF_MEMORY: return OC_OUT_OF_MEMORY;
+        case MAL_NO_BACKEND:    return OC_FAILED_TO_INIT_AUDIO;
+        default:                return OC_ERROR;
     }
 }
 
@@ -33,10 +33,10 @@ void ocOnLogMAL(mal_context* pContext, mal_device* pDevice, const char* pMessage
 
 ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
 {
-    if (pAudio == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pAudio == NULL) return OC_INVALID_ARGS;
     ocZeroObject(pAudio);
 
-    if (pEngine == NULL) return OC_RESULT_INVALID_ARGS;
+    if (pEngine == NULL) return OC_INVALID_ARGS;
 
     pAudio->pEngine = pEngine;
 
@@ -60,7 +60,7 @@ ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
         return ocToResultFromMAL(resultMAL);
     }
 
-    return OC_RESULT_SUCCESS;
+    return OC_SUCCESS;
 }
 
 void ocAudioUninit(ocAudioContext* pAudio)
