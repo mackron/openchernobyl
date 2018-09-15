@@ -109,7 +109,7 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
                 ocMeshComponent* pMeshComponent = OC_MESH_COMPONENT(pObject->ppComponents[iComponent]);
                 ocAssert(pMeshComponent->pMeshObject == NULL);  // <-- You've done something wrong if the mesh object is not null at this point.
                 ocGraphicsWorldCreateMeshObject(&pWorld->graphicsWorld, pMeshComponent->pMesh, &pMeshComponent->pMeshObject);
-                ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, pObject->position, pObject->rotation, pObject->scale);
+                ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, pObject->absolutePosition, pObject->absoluteRotation, pObject->absoluteScale);
             } break;
 
             case OC_COMPONENT_TYPE_PARTICLE_SYSTEM:
@@ -178,42 +178,42 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
     pObject->isInWorld = OC_FALSE;
 }
 
-void ocWorldSetObjectPosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position)
+void ocWorldSetObjectAbsolutePosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &absolutePosition)
 {
     if (pWorld == NULL || pObject == NULL) {
         return;
     }
 
-    return ocWorldSetObjectTransform(pWorld, pObject, position, pObject->rotation, glm::vec3(pObject->scale));
+    return ocWorldSetObjectAbsoluteTransform(pWorld, pObject, absolutePosition, pObject->absoluteRotation, glm::vec3(pObject->absoluteScale));
 }
 
-void ocWorldSetObjectRotation(ocWorld* pWorld, ocWorldObject* pObject, const glm::quat &rotation)
+void ocWorldSetObjectAbsoluteRotation(ocWorld* pWorld, ocWorldObject* pObject, const glm::quat &absoluteRotation)
 {
     if (pWorld == NULL || pObject == NULL) {
         return;
     }
 
-    return ocWorldSetObjectTransform(pWorld, pObject, pObject->position, rotation, glm::vec3(pObject->scale));
+    return ocWorldSetObjectAbsoluteTransform(pWorld, pObject, pObject->absolutePosition, absoluteRotation, glm::vec3(pObject->absoluteScale));
 }
 
-void ocWorldSetObjectScale(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &scale)
+void ocWorldSetObjectAbsoluteScale(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &absoluteScale)
 {
     if (pWorld == NULL || pObject == NULL) {
         return;
     }
 
-    return ocWorldSetObjectTransform(pWorld, pObject, pObject->position, pObject->rotation, scale);
+    return ocWorldSetObjectAbsoluteTransform(pWorld, pObject, pObject->absolutePosition, pObject->absoluteRotation, absoluteScale);
 }
 
-void ocWorldSetObjectTransform(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
+void ocWorldSetObjectAbsoluteTransform(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &absolutePosition, const glm::quat &absoluteRotation, const glm::vec3 &absoluteScale)
 {
     if (pWorld == NULL || pObject == NULL) {
         return;
     }
 
-    pObject->position = glm::vec4(position, 0);
-    pObject->rotation = rotation;
-    pObject->scale    = glm::vec4(scale, 0);
+    pObject->absolutePosition = glm::vec4(absolutePosition, 0);
+    pObject->absoluteRotation = absoluteRotation;
+    pObject->absoluteScale    = glm::vec4(absoluteScale, 0);
 
     // If the object is already in the world we'll need to update the backends.
     if (ocWorldObjectIsInWorld(pObject)) {
@@ -223,7 +223,7 @@ void ocWorldSetObjectTransform(ocWorld* pWorld, ocWorldObject* pObject, const gl
                 case OC_COMPONENT_TYPE_MESH:
                 {
                     ocMeshComponent* pMeshComponent = OC_MESH_COMPONENT(pObject->ppComponents[iComponent]);
-                    ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, position, rotation, scale);
+                    ocGraphicsWorldSetObjectTransform(&pWorld->graphicsWorld, pMeshComponent->pMeshObject, absolutePosition, absoluteRotation, absoluteScale);
                 } break;
 
                 case OC_COMPONENT_TYPE_PARTICLE_SYSTEM:

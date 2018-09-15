@@ -12,10 +12,10 @@ ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject)
         return OC_INVALID_ARGS;
     }
 
-    pObject->pWorld   = pWorld;
-    pObject->position = glm::vec4(0, 0, 0, 0);
-    pObject->rotation = glm::quat(1, 0, 0, 0);
-    pObject->scale    = glm::vec4(1, 1, 1, 0);
+    pObject->pWorld           = pWorld;
+    pObject->absolutePosition = glm::vec4(0, 0, 0, 0);
+    pObject->absoluteRotation = glm::quat(1, 0, 0, 0);
+    pObject->absoluteScale    = glm::vec4(1, 1, 1, 0);
 
     return OC_SUCCESS;
 }
@@ -124,34 +124,34 @@ void ocWorldObjectRemoveAllComponents(ocWorldObject* pObject)
 }
 
 
-void ocWorldObjectSetPosition(ocWorldObject* pObject, const glm::vec3 &position)
+void ocWorldObjectSetAbsolutePosition(ocWorldObject* pObject, const glm::vec3 &absolutePosition)
 {
     if (pObject == NULL) {
         return;
     }
 
-    ocWorldObjectSetTransform(pObject, position, pObject->rotation, glm::vec3(pObject->scale));
+    ocWorldObjectSetAbsoluteTransform(pObject, absolutePosition, pObject->absoluteRotation, glm::vec3(pObject->absoluteScale));
 }
 
-void ocWorldObjectSetRotation(ocWorldObject* pObject, const glm::quat &rotation)
+void ocWorldObjectSetAbsoluteRotation(ocWorldObject* pObject, const glm::quat &absoluteRotation)
 {
     if (pObject == NULL) {
         return;
     }
 
-    ocWorldObjectSetTransform(pObject, pObject->position, rotation, glm::vec3(pObject->scale));
+    ocWorldObjectSetAbsoluteTransform(pObject, pObject->absolutePosition, absoluteRotation, glm::vec3(pObject->absoluteScale));
 }
 
-void ocWorldObjectSetScale(ocWorldObject* pObject, const glm::vec3 &scale)
+void ocWorldObjectSetAbsoluteScale(ocWorldObject* pObject, const glm::vec3 &absoluteScale)
 {
     if (pObject == NULL) {
         return;
     }
 
-    ocWorldObjectSetTransform(pObject, pObject->position, pObject->rotation, scale);
+    ocWorldObjectSetAbsoluteTransform(pObject, pObject->absolutePosition, pObject->absoluteRotation, absoluteScale);
 }
 
-void ocWorldObjectSetTransform(ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
+void ocWorldObjectSetAbsoluteTransform(ocWorldObject* pObject, const glm::vec3 &absolutePosition, const glm::quat &absoluteRotation, const glm::vec3 &absoluteScale)
 {
     if (pObject == NULL) {
         return;
@@ -159,5 +159,5 @@ void ocWorldObjectSetTransform(ocWorldObject* pObject, const glm::vec3 &position
 
     // The state of the world itself needs to be modified when an object is transformed. Thus, we just
     // redirect this and let the world sort out the actual transformation.
-    ocWorldSetObjectTransform(pObject->pWorld, pObject, position, rotation, scale);
+    ocWorldSetObjectAbsoluteTransform(pObject->pWorld, pObject, absolutePosition, absoluteRotation, absoluteScale);
 }

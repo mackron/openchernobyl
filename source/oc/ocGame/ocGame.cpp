@@ -324,8 +324,8 @@ int ocInitAndRun(int argc, char** argv)
 
         ocComponentMeshSetMesh(OC_MESH_COMPONENT(pComponent), g_Game.pMesh);
         ocWorldInsertObject(&g_Game.world, &g_Game.object);
-        ocWorldObjectSetPosition(&g_Game.object, glm::vec3(0.2f, 0, 0));
-        ocWorldObjectSetScale(&g_Game.object, glm::vec3(0.5f, 0.5f, 0.5f));
+        ocWorldObjectSetAbsolutePosition(&g_Game.object, glm::vec3(0.2f, 0, 0));
+        ocWorldObjectSetAbsoluteScale(&g_Game.object, glm::vec3(0.5f, 0.5f, 0.5f));
     }
 
 
@@ -349,7 +349,7 @@ int ocInitAndRun(int argc, char** argv)
             ocWorldObjectSetName(&object, (const char*)g_Game.pSceneResource->scene.pPayload + pSceneObject->nameOffset);
 
             // Transform.
-            ocWorldObjectSetTransform(&object,
+            ocWorldObjectSetAbsoluteTransform(&object,
                 glm::vec3(pSceneObject->relativePositionX, pSceneObject->relativePositionY, pSceneObject->relativePositionZ),
                 glm::quat(pSceneObject->relativeRotationW, pSceneObject->relativeRotationX, pSceneObject->relativeRotationY, pSceneObject->relativeRotationZ),
                 glm::vec3(pSceneObject->relativeScaleX,    pSceneObject->relativeScaleY,    pSceneObject->relativeScaleZ));
