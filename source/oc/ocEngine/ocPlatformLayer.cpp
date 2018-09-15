@@ -958,17 +958,17 @@ int ocMainLoop_Win32(ocEngineContext* pEngine)
     for (;;) {
         // Handle window events.
         MSG msg;
-        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) {
+        while (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) {
                 return (int)msg.wParam;  // Received a quit message.
             }
 
             TranslateMessage(&msg);
             DispatchMessageA(&msg);
-        } else {
-            // We'll get here if there's no more events in the queue. Here is where we draw.
-            ocStep(pEngine);
         }
+
+        // We'll get here if there's no more events in the queue. Here is where we draw.
+        ocStep(pEngine);
     }
 }
 #endif  // Win32
