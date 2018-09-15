@@ -19,7 +19,7 @@ void ocWorldUninit(ocWorld* pWorld);
 ocResult ocWorldCreateRTFromSwapchain(ocWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT);
 
 //
-void ocWorldDeleteRT(ocWorld* pWorld);
+void ocWorldDeleteRT(ocWorld* pWorld, ocGraphicsRT* pRT);
 
 
 //
