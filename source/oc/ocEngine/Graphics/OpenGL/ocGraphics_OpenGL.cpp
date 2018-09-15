@@ -404,7 +404,9 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     gl.ClearStencil(0);
     gl.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    gl.BindTexture(GL_TEXTURE_2D, pWorld->pCurrentImage->objectGL);
+    if (pWorld->pCurrentImage) {
+        gl.BindTexture(GL_TEXTURE_2D, pWorld->pCurrentImage->objectGL);
+    }
 
     for (size_t iObject = 0; iObject < pWorld->pObjects->size(); ++iObject) {
         ocGraphicsObject* pObject = pWorld->pObjects->at(iObject);
