@@ -15,10 +15,11 @@ struct ocWorldObject
     glm::vec4 absoluteScale;    // <-- As above, except ocWorldObjectSetAbsoluteScale()
     ocComponent* ppComponents[OC_MAX_COMPONENTS];
     ocUInt16 componentCount;
-    ocUInt16 isInWorld          : 1;
-    ocUInt16 noRelativePosition : 1;
-    ocUInt16 noRelativeRotation : 1;
-    ocUInt16 noRelativeScale    : 1;
+    ocUInt16 isInWorld            : 1;
+    ocUInt16 noRelativePosition   : 1;
+    ocUInt16 noRelativeRotation   : 1;
+    ocUInt16 noRelativeScale      : 1;
+    ocUInt16 isMemoryOwnedByWorld : 1;  // <-- Internal use only. Used to determine if ocWorld should free the memory used by this object when ocWorldDeleteObject() is called.
     ocWorldObject* pParent;
     ocWorldObject* pFirstChild;
     ocWorldObject* pLastChild;
@@ -31,6 +32,9 @@ ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject);
 
 // Uninitializes the object. The object must be removed from the world with ocWorldRemoveObject() beforehand.
 void ocWorldObjectUninit(ocWorldObject* pObject);
+
+// Uninitializes the object recursively.
+void ocWorldObjectUninitRecursive(ocWorldObject* pObject);
 
 
 // A world object isn't inside the world until ocWorldInsertObject() is called. This function determines whether or not

@@ -90,10 +90,234 @@ void ocWorldDraw(ocWorld* pWorld)
 }
 
 
-void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
+OC_PRIVATE ocBool32 ocWorld_DoesSceneResourceHaveSingleParent(ocResource* pSceneResource)
+{
+    ocAssert(pSceneResource != NULL);
+
+    ocUInt32 counter = 0;
+    for (size_t iObject = 0; iObject < pSceneResource->scene.objectCount; ++iObject) {
+        ocSceneObject* pSceneObject = &pSceneResource->scene.pObjects[iObject];
+        if (pSceneObject->parentIndex == OC_SCENE_OBJECT_NONE) {
+            counter += 1;
+            if (counter > 1) {
+                return OC_FALSE;
+            }
+        }
+    }
+
+    return OC_TRUE;
+}
+
+OC_PRIVATE ocResult ocWorldCreateObjectFromResource_Scene(ocWorld* pWorld, ocResource* pSceneResource, ocResourceLibrary* pResourceLibrary, ocWorldObject** ppObject)
+{
+    ocAssert(pWorld != NULL);
+    ocAssert(pSceneResource != NULL);
+    ocAssert(ppObject != NULL);
+
+    ocBool32 isExplicitRootRequired = OC_FALSE;
+    if (pSceneResource->scene.objectCount == 0) {
+        isExplicitRootRequired = OC_TRUE;
+    } else {
+        // If there are multiple root elements in the scene resource we'll need to wrap it in a root element.
+        isExplicitRootRequired = !ocWorld_DoesSceneResourceHaveSingleParent(pSceneResource);
+    }
+
+    ocUInt32 objectCount = pSceneResource->scene.objectCount;
+    if (isExplicitRootRequired) {
+        objectCount += 1;   // An extra object for the root.
+    }
+
+    ocWorldObject* pObjects = (ocWorldObject*)ocMalloc(sizeof(*pObjects) * objectCount);
+    if (pObjects == NULL) {
+        return OC_OUT_OF_MEMORY;
+    }
+
+    // Do an initial pass to initialize each object.
+    for (ocUInt32 iObject = 0; iObject < objectCount; ++iObject) {
+        ocWorldObjectInit(pWorld, &pObjects[iObject]);
+    }
+
+    // Mark the first object as the one that has the memory allocation.
+    pObjects[0].isMemoryOwnedByWorld = OC_TRUE;
+
+
+    ocWorldObject* pFirstObject = pObjects;
+    if (isExplicitRootRequired) {
+        pFirstObject += 1;
+    }
+
+    // Now we can go through each object and set everything up. This is actually done in two passes. The first pass sets the majority
+    // of everything up _except_ for the sibling order. The second pass gets siblings into the correct order.
+    for (size_t iObject = 0; iObject < pSceneResource->scene.objectCount; ++iObject) {
+        ocSceneObject* pSceneObject = &pSceneResource->scene.pObjects[iObject];
+        ocWorldObject* pWorldObject = &pFirstObject[iObject];
+
+        // Name.
+        ocWorldObjectSetName(pWorldObject, (const char*)pSceneResource->scene.pPayload + pSceneObject->nameOffset);
+
+
+        // Hierarchy.
+        {
+            ocWorldObject* pParentWorldObject = NULL;
+            if (pSceneObject->parentIndex != OC_SCENE_OBJECT_NONE) {
+                pParentWorldObject = &pFirstObject[pSceneObject->parentIndex];
+            } else {
+                if (isExplicitRootRequired) {
+                    pParentWorldObject = &pObjects[0];
+                }
+            }
+
+            if (pParentWorldObject != NULL) {
+                ocWorldObjectAppendChild(pParentWorldObject, pWorldObject);
+            } else {
+                // In this case it's the root item. No hierarchy operations need to be done here.
+            }
+        }
+
+
+        // Transform.
+        ocWorldObjectSetRelativeTransform(pWorldObject,
+            glm::vec3(pSceneObject->relativePositionX, pSceneObject->relativePositionY, pSceneObject->relativePositionZ),
+            glm::quat(pSceneObject->relativeRotationW, pSceneObject->relativeRotationX, pSceneObject->relativeRotationY, pSceneObject->relativeRotationZ),
+            glm::vec3(pSceneObject->relativeScaleX,    pSceneObject->relativeScaleY,    pSceneObject->relativeScaleZ));
+
+
+        // Components.
+        ocSceneObjectComponent* pSceneObjectComponents = (ocSceneObjectComponent*)(pSceneResource->scene.pPayload + pSceneObject->componentsOffset);
+        for (ocUInt32 iComponent = 0; iComponent < pSceneObject->componentCount; ++iComponent) {
+            ocSceneObjectComponent* pSceneObjectComponent = &pSceneObjectComponents[iComponent];
+
+            ocUInt64 componentDataOffset = pSceneObjectComponent->dataOffset;
+            ocUInt8* pComponentData = pSceneResource->scene.pPayload + componentDataOffset;
+                
+            switch (pSceneObjectComponent->type) {
+                case OC_COMPONENT_TYPE_SCENE:
+                {
+                    // This is a sub-resource that needs to be loaded in.
+                } break;
+
+                case OC_COMPONENT_TYPE_MESH:
+                {
+                    ocUInt32 groupCount       = *(ocUInt32*)(pComponentData + 0);
+                    //ocUInt32 padding          = *(ocUInt32*)(pComponentData + 4);
+                    //ocUInt64 vertexDataSize   = *(ocUInt64*)(pComponentData + 8);
+                    ocUInt64 vertexDataOffset = *(ocUInt64*)(pComponentData + 16);
+                    //ocUInt64 indexDataSize    = *(ocUInt64*)(pComponentData + 24);
+                    ocUInt64 indexDataOffset  = *(ocUInt64*)(pComponentData + 32);
+
+                    ocUInt8* pVertexData = pComponentData + vertexDataOffset;
+                    ocUInt8* pIndexData  = pComponentData + indexDataOffset;
+
+                    ocOCDSceneBuilderMeshGroup* pGroups = (ocOCDSceneBuilderMeshGroup*)(pComponentData + 40);
+                    for (ocUInt32 iGroup = 0; iGroup < groupCount; ++iGroup) {
+                        ocOCDSceneBuilderMeshGroup* pGroup = &pGroups[iGroup];
+
+                        ocGraphicsMeshDesc desc;
+                        desc.primitiveType = (ocGraphicsPrimitiveType)pGroup->primitiveType;
+                        desc.vertexFormat  = (ocGraphicsVertexFormat)pGroup->vertexFormat;
+                        desc.vertexCount   = pGroup->vertexCount;
+                        desc.pVertices     = pVertexData + pGroup->vertexDataOffset;
+                        desc.indexFormat   = (ocGraphicsIndexFormat)pGroup->indexFormat;
+                        desc.indexCount    = pGroup->indexCount;
+                        desc.pIndices      = pIndexData + pGroup->indexDataOffset;
+
+                        ocGraphicsMesh* pMesh;
+                        ocResult result = ocGraphicsCreateMesh(pResourceLibrary->pGraphics, &desc, &pMesh);
+                        if (result != OC_SUCCESS) {
+                            return result;  // Need better recovery than this.
+                        }
+
+                        ocComponent* pComponent = ocWorldObjectAddComponent(pWorldObject, OC_COMPONENT_TYPE_MESH);
+                        if (pComponent == NULL) {
+                            return OC_ERROR;
+                        }
+
+                        result = ocComponentMeshSetMesh(OC_MESH_COMPONENT(pComponent), pMesh);
+                        if (result != OC_SUCCESS) {
+                            return result;
+                        }
+                    }
+                } break;
+            }
+        }
+    }
+
+    // Get siblings into the correct order.
+    for (size_t iObject = 0; iObject < pSceneResource->scene.objectCount; ++iObject) {
+        ocSceneObject* pSceneObject = &pSceneResource->scene.pObjects[iObject];
+        ocWorldObject* pWorldObject = &pFirstObject[iObject];
+
+        if (pSceneObject->prevSiblingIndex != OC_SCENE_OBJECT_NONE) {
+            ocWorldObjectAppendSibling(&pFirstObject[pSceneObject->prevSiblingIndex], pWorldObject);
+        } else if (pSceneObject->nextSiblingIndex != OC_SCENE_OBJECT_NONE) {
+            ocWorldObjectPrependSibling(&pFirstObject[pSceneObject->nextSiblingIndex], pWorldObject);
+        }
+    }
+
+    *ppObject = pObjects;
+    return OC_SUCCESS;
+}
+
+ocResult ocWorldCreateObjectFromResource(ocWorld* pWorld, ocResource* pResource, ocResourceLibrary* pResourceLibrary, ocWorldObject** ppObject)
+{
+    if (ppObject == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    *ppObject = NULL;   // Safety.
+
+    if (pWorld == NULL || pResource == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    switch (pResource->type)
+    {
+        case ocResourceType_Scene:
+        {
+            return ocWorldCreateObjectFromResource_Scene(pWorld, pResource, pResourceLibrary, ppObject);
+        } break;
+
+        // Hitting the default case means we can't do anything with this resource type.
+        default: return OC_INVALID_ARGS;
+    }
+}
+
+OC_PRIVATE void ocWorldDeleteObjectRecursive(ocWorld* pWorld, ocWorldObject* pObject)
+{
+    if (pObject == NULL) {
+        return;
+    }
+
+    // Children first.
+    for (ocWorldObject* pChild = pObject->pFirstChild; pChild != NULL; pChild = pChild->pNextSibling) {
+        ocWorldDeleteObjectRecursive(pWorld, pChild);
+    }
+
+    ocWorldObjectUninit(pObject);
+
+    if (pObject->isMemoryOwnedByWorld) {
+        ocFree(pObject);
+    }
+}
+
+void ocWorldDeleteObject(ocWorld* pWorld, ocWorldObject* pObject)
 {
     if (pWorld == NULL || pObject == NULL) {
         return;
+    }
+
+    // Remove the object from the world first.
+    ocWorldRemoveObject(pWorld, pObject);
+    
+    // Uninitialize and free.
+    ocWorldDeleteObjectRecursive(pWorld, pObject);
+}
+
+
+ocResult ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
+{
+    if (pWorld == NULL || pObject == NULL) {
+        return OC_INVALID_ARGS;
     }
 
     // If you trigger this assert it means you've mismatched your world and object.
@@ -131,13 +355,25 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
         }
     }
 
+    // Children last.
+    for (ocWorldObject* pChild = pObject->pFirstChild; pChild != NULL; pChild = pChild->pNextSibling) {
+        ocWorldInsertObject(pWorld, pChild);
+    }
+
     pObject->isInWorld = OC_TRUE;
+
+    return OC_SUCCESS;
 }
 
-void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
+ocResult ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
 {
     if (pWorld == NULL || pObject == NULL) {
-        return;
+        return OC_INVALID_ARGS;
+    }
+
+    // Children first.
+    for (ocWorldObject* pChild = pObject->pFirstChild; pChild != NULL; pChild = pChild->pNextSibling) {
+        ocWorldRemoveObject(pWorld, pChild);
     }
 
     // If you trigger this assert it means you've mismatched your world and object.
@@ -176,6 +412,8 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
     }
 
     pObject->isInWorld = OC_FALSE;
+
+    return OC_SUCCESS;
 }
 
 
