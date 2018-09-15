@@ -169,6 +169,7 @@ struct ocWindowEvent
 ocBool32 ocWindowInit(ocEngineContext* pEngine, unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow);
 void ocWindowUninit(ocWindow* pWindow);
 void ocWindowShow(ocWindow* pWindow);
+void ocWindowShowCentered(ocWindow* pWindow);
 
 void ocWindowGetSize(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY);
 void ocWindowSetSize(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY);

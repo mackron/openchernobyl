@@ -51,6 +51,15 @@ ocResult ocWorldCreateRTFromSwapchain(ocWorld* pWorld, ocGraphicsSwapchain* pSwa
     return ocGraphicsWorldCreateRTFromSwapchain(&pWorld->graphicsWorld, pSwapchain, ppRT);
 }
 
+void ocWorldDeleteRT(ocWorld* pWorld, ocGraphicsRT* pRT)
+{
+    if (pWorld == NULL) {
+        return;
+    }
+
+    ocGraphicsWorldDeleteRT(&pWorld->graphicsWorld, pRT);
+}
+
 
 void ocWorldStep(ocWorld* pWorld, double dt)
 {

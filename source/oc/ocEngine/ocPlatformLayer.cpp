@@ -721,6 +721,12 @@ void ocWindowShow(ocWindow* pWindow)
 #endif
 }
 
+void ocWindowShowCentered(ocWindow* pWindow)
+{
+    ocWindowShow(pWindow);
+    ocWindowMoveToCenterOfScreen(pWindow);
+}
+
 
 void ocWindowGetSize(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
 {
