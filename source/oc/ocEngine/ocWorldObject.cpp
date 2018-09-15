@@ -32,6 +32,11 @@ void ocWorldObjectUninit(ocWorldObject* pObject)
     // the object while it's still in the world.
     ocAssert(!ocWorldObjectIsInWorld(pObject));
 
+    // The object needs to be detached from it's parent.
+    if (pObject->pParent != NULL) {
+        ocWorldObjectDetach(pObject);
+    }
+
     // Components need to be removed.
     ocWorldObjectRemoveAllComponents(pObject);
 
