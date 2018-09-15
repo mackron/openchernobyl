@@ -54,8 +54,13 @@ GLenum ocToOpenGLIndexFormat(ocGraphicsIndexFormat indexFormat)
 
 OC_PRIVATE void ocGraphicsSetCurrentWindow(ocGraphicsContext* pGraphics, ocWindow* pWindow)
 {
-    if (pGraphics == NULL || pWindow == NULL) return;
-    if (pGraphics->pCurrentWindow == pWindow) return;
+    if (pGraphics == NULL || pWindow == NULL) {
+        return;
+    }
+
+    if (pGraphics->pCurrentWindow == pWindow) {
+        return;
+    }
 
 #ifdef OC_WIN32
     pGraphics->gl.MakeCurrent(pWindow->hDC, pGraphics->gl.hRC);
@@ -153,7 +158,9 @@ ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, o
 
 void ocGraphicsUninit(ocGraphicsContext* pGraphics)
 {
-    if (pGraphics == NULL) return;
+    if (pGraphics == NULL) {
+        return;
+    }
 
     drglUninit(&pGraphics->gl);
     ocGraphicsUninitBase(pGraphics);
@@ -162,7 +169,10 @@ void ocGraphicsUninit(ocGraphicsContext* pGraphics)
 
 ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWindow, ocVSyncMode vsyncMode, ocGraphicsSwapchain** ppSwapchain)
 {
-    if (ppSwapchain == NULL) return OC_INVALID_ARGS;
+    if (ppSwapchain == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     *ppSwapchain = NULL;
 
     ocGraphicsSwapchain* pSwapchain = ocCallocObject(ocGraphicsSwapchain);
@@ -214,16 +224,25 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 
 void ocGraphicsDeleteSwapchain(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapchain)
 {
-    if (pGraphics == NULL || pSwapchain == NULL) return;
+    if (pGraphics == NULL || pSwapchain == NULL) {
+        return;
+    }
 
     ocGraphicsSwapchainBaseUninit(pSwapchain);
 }
 
 void ocGraphicsGetSwapchainSize(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapchain, uint32_t* pSizeX, uint32_t* pSizeY)
 {
-    if (pSizeX != NULL) *pSizeX = 0;
-    if (pSizeY != NULL) *pSizeY = 0;
-    if (pGraphics == NULL || pSwapchain == NULL) return;
+    if (pSizeX != NULL) {
+        *pSizeX = 0;
+    }
+    if (pSizeY != NULL) {
+        *pSizeY = 0;
+    }
+
+    if (pGraphics == NULL || pSwapchain == NULL) {
+        return;
+    }
 
     unsigned int sizeX;
     unsigned int sizeY;
@@ -235,7 +254,9 @@ void ocGraphicsGetSwapchainSize(ocGraphicsContext* pGraphics, ocGraphicsSwapchai
 
 void ocGraphicsPresent(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapchain)
 {
-    if (pGraphics == NULL || pSwapchain == NULL) return;
+    if (pGraphics == NULL || pSwapchain == NULL) {
+        return;
+    }
 
 #ifdef OC_WIN32
     SwapBuffers(pSwapchain->pWindow->hDC);
@@ -249,7 +270,10 @@ void ocGraphicsPresent(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapc
 
 ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc* pDesc, ocGraphicsImage** ppImage)
 {
-    if (ppImage == NULL) return OC_INVALID_ARGS;
+    if (ppImage == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     *ppImage = NULL;
 
     if (pGraphics == NULL || pDesc == NULL) return OC_INVALID_ARGS;
@@ -282,7 +306,9 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
 
 void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage)
 {
-    if (pGraphics == NULL || pImage == NULL) return;
+    if (pGraphics == NULL || pImage == NULL) {
+        return;
+    }
 
     pGraphics->gl.DeleteTextures(1, &pImage->objectGL);
     ocFree(pImage);
@@ -291,7 +317,9 @@ void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage
 
 ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* pDesc, ocGraphicsMesh** ppMesh)
 {
-    if (pGraphics == NULL || pDesc == NULL || ppMesh == NULL) return OC_INVALID_ARGS;
+    if (pGraphics == NULL || pDesc == NULL || ppMesh == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocGraphicsMesh* pMesh = ocCallocObject(ocGraphicsMesh);
     if (pMesh == NULL) {
@@ -323,7 +351,9 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
 
 void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
 {
-    if (pGraphics == NULL || pMesh == NULL) return;
+    if (pGraphics == NULL || pMesh == NULL) {
+        return;
+    }
 
     drgl &gl = pGraphics->gl;
 
@@ -369,7 +399,9 @@ ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWor
 
 void ocGraphicsWorldUninit(ocGraphicsWorld* pWorld)
 {
-    if (pWorld == NULL) return;
+    if (pWorld == NULL) {
+        return;
+    }
 
     delete pWorld->pObjects;
     ocGraphicsWorldUninitBase(pWorld);
@@ -378,7 +410,9 @@ void ocGraphicsWorldUninit(ocGraphicsWorld* pWorld)
 
 void ocGraphicsWorldDraw(ocGraphicsWorld* pWorld)
 {
-    if (pWorld == NULL) return;
+    if (pWorld == NULL) {
+        return;
+    }
 
     for (uint16_t iRT = 0; iRT < pWorld->renderTargetCount; ++iRT) {
         ocGraphicsWorldDrawRT(pWorld, pWorld->pRenderTargets[iRT]);
@@ -387,7 +421,10 @@ void ocGraphicsWorldDraw(ocGraphicsWorld* pWorld)
 
 void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 {
-    if (pWorld == NULL || pRT == NULL) return;
+    if (pWorld == NULL || pRT == NULL) {
+        return;
+    }
+
     drgl &gl = pWorld->pGraphics->gl;
 
     gl.BindFramebufferEXT(GL_FRAMEBUFFER, pRT->framebuffer.objectGL);
@@ -458,7 +495,9 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 
 void ocGraphicsWorldStep(ocGraphicsWorld* pWorld, double dt)
 {
-    if (pWorld == NULL || dt == 0) return;
+    if (pWorld == NULL || dt == 0) {
+        return;
+    }
 
     // TODO: Step animations and particle effects.
 }
@@ -467,8 +506,13 @@ void ocGraphicsWorldStep(ocGraphicsWorld* pWorld, double dt)
 
 OC_PRIVATE ocResult ocGraphicsWorldAddRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 {
-    if (pWorld == NULL) return OC_INVALID_ARGS;
-    if (pWorld->renderTargetCount == OC_MAX_RENDER_TARGETS) return OC_TOO_MANY_RENDER_TARGETS;
+    if (pWorld == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pWorld->renderTargetCount == OC_MAX_RENDER_TARGETS) {
+        return OC_TOO_MANY_RENDER_TARGETS;
+    }
 
     pWorld->pRenderTargets[pWorld->renderTargetCount++] = pRT;
 
@@ -478,7 +522,10 @@ OC_PRIVATE ocResult ocGraphicsWorldAddRT(ocGraphicsWorld* pWorld, ocGraphicsRT* 
 OC_PRIVATE void ocGraphicsWorldRemoveRTByIndex(ocGraphicsWorld* pWorld, uint16_t index)
 {
     ocAssert(pWorld != NULL);
-    if (pWorld->renderTargetCount == 0) return;
+
+    if (pWorld->renderTargetCount == 0) {
+        return;
+    }
 
     for (uint16_t i = index; i < pWorld->renderTargetCount-1; ++i) {
         pWorld->pRenderTargets[i] = pWorld->pRenderTargets[i+1];
@@ -489,7 +536,9 @@ OC_PRIVATE void ocGraphicsWorldRemoveRTByIndex(ocGraphicsWorld* pWorld, uint16_t
 
 OC_PRIVATE void ocGraphicsWorldRemoveRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 {
-    if (pWorld == NULL || pRT == NULL) return;
+    if (pWorld == NULL || pRT == NULL) {
+        return;
+    }
 
     for (uint16_t iRT = 0; iRT < pWorld->renderTargetCount; ++iRT) {
         if (pWorld->pRenderTargets[iRT] == pRT) {
@@ -516,10 +565,15 @@ OC_PRIVATE const char* ocOpenGLFramebufferStatusToString(GLenum status)
 
 OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGraphicsRT** ppRT, uint32_t sizeX, uint32_t sizeY)
 {
-    if (ppRT == NULL) return OC_INVALID_ARGS;
+    if (ppRT == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     *ppRT = NULL;   // Safety.
 
-    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pWorld == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocGraphicsRT* pRT = (ocGraphicsRT*)ocCalloc(1, sizeof(*pRT));
     if (pRT == NULL) return OC_OUT_OF_MEMORY;
@@ -636,7 +690,9 @@ ocResult ocGraphicsWorldCreateRTFromImage(ocGraphicsWorld* pWorld, ocGraphicsIma
 
 void ocGraphicsWorldDeleteRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 {
-    if (pWorld == NULL || pRT == NULL) return;
+    if (pWorld == NULL || pRT == NULL) {
+        return;
+    }
 
     ocGraphicsWorldUninitRT(pWorld, pRT);
 
@@ -663,7 +719,9 @@ OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWo
 
 ocResult ocGraphicsWorldCreateMeshObject(ocGraphicsWorld* pWorld, ocGraphicsMesh* pMesh, ocGraphicsObject** ppObjectOut)
 {
-    if (pWorld == NULL || pMesh == NULL || ppObjectOut == NULL) return OC_INVALID_ARGS;
+    if (pWorld == NULL || pMesh == NULL || ppObjectOut == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocGraphicsObject* pObject = ocMallocObject(ocGraphicsObject);
     if (pObject == NULL) {
@@ -687,7 +745,9 @@ ocResult ocGraphicsWorldCreateMeshObject(ocGraphicsWorld* pWorld, ocGraphicsMesh
 
 void ocGraphicsWorldDeleteObject(ocGraphicsWorld* pWorld, ocGraphicsObject* pObject)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
 
     pWorld->pObjects->erase(std::remove(pWorld->pObjects->begin(), pWorld->pObjects->end(), pObject), pWorld->pObjects->end());
 
@@ -712,7 +772,10 @@ void ocGraphicsWorldSetObjectScale(ocGraphicsWorld* pWorld, ocGraphicsObject* pO
 
 void ocGraphicsWorldSetObjectTransform(ocGraphicsWorld* pWorld, ocGraphicsObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
+
     pObject->_position  = glm::vec4(position, 0);
     pObject->_rotation  = rotation;
     pObject->_scale     = glm::vec4(scale, 1);

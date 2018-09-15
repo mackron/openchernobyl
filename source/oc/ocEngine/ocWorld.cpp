@@ -2,10 +2,15 @@
 
 ocResult ocWorldInit(ocEngineContext* pEngine, ocWorld* pWorld)
 {
-    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pWorld == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     ocZeroObject(pWorld);
 
-    if (pEngine == NULL) return OC_INVALID_ARGS;
+    if (pEngine == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     pWorld->pEngine = pEngine;
 
@@ -36,7 +41,9 @@ ocResult ocWorldInit(ocEngineContext* pEngine, ocWorld* pWorld)
 
 void ocWorldUninit(ocWorld* pWorld)
 {
-    if (pWorld == NULL) return;
+    if (pWorld == NULL) {
+        return;
+    }
 
     ocDynamicsWorldUninit(&pWorld->dynamicsWorld);
     ocAudioWorldUninit(&pWorld->audioWorld);
@@ -46,7 +53,9 @@ void ocWorldUninit(ocWorld* pWorld)
 
 ocResult ocWorldCreateRTFromSwapchain(ocWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT)
 {
-    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pWorld == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     return ocGraphicsWorldCreateRTFromSwapchain(&pWorld->graphicsWorld, pSwapchain, ppRT);
 }
@@ -63,7 +72,9 @@ void ocWorldDeleteRT(ocWorld* pWorld, ocGraphicsRT* pRT)
 
 void ocWorldStep(ocWorld* pWorld, double dt)
 {
-    if (pWorld == NULL) return;
+    if (pWorld == NULL) {
+        return;
+    }
     
     ocDynamicsWorldStep(&pWorld->dynamicsWorld, dt);
     ocGraphicsWorldStep(&pWorld->graphicsWorld, dt);
@@ -71,7 +82,9 @@ void ocWorldStep(ocWorld* pWorld, double dt)
 
 void ocWorldDraw(ocWorld* pWorld)
 {
-    if (pWorld == NULL) return;
+    if (pWorld == NULL) {
+        return;
+    }
 
     ocGraphicsWorldDraw(&pWorld->graphicsWorld);
 }
@@ -79,7 +92,9 @@ void ocWorldDraw(ocWorld* pWorld)
 
 void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
 
     // If you trigger this assert it means you've mismatched your world and object.
     ocAssert(pObject->pWorld == pWorld);
@@ -121,7 +136,9 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject)
 
 void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
 
     // If you trigger this assert it means you've mismatched your world and object.
     ocAssert(pObject->pWorld == pWorld);
@@ -163,25 +180,36 @@ void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject)
 
 void ocWorldSetObjectPosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
+
     return ocWorldSetObjectTransform(pWorld, pObject, position, pObject->rotation, glm::vec3(pObject->scale));
 }
 
 void ocWorldSetObjectRotation(ocWorld* pWorld, ocWorldObject* pObject, const glm::quat &rotation)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
+
     return ocWorldSetObjectTransform(pWorld, pObject, pObject->position, rotation, glm::vec3(pObject->scale));
 }
 
 void ocWorldSetObjectScale(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &scale)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
+
     return ocWorldSetObjectTransform(pWorld, pObject, pObject->position, pObject->rotation, scale);
 }
 
 void ocWorldSetObjectTransform(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
 {
-    if (pWorld == NULL || pObject == NULL) return;
+    if (pWorld == NULL || pObject == NULL) {
+        return;
+    }
 
     pObject->position = glm::vec4(position, 0);
     pObject->rotation = rotation;

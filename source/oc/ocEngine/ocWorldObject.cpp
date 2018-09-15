@@ -2,10 +2,15 @@
 
 ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject)
 {
-    if (pObject == NULL) return OC_INVALID_ARGS;
+    if (pObject == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     ocZeroObject(pObject);
 
-    if (pWorld == NULL) return OC_INVALID_ARGS;
+    if (pWorld == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     pObject->pWorld   = pWorld;
     pObject->position = glm::vec4(0, 0, 0, 0);
@@ -17,7 +22,10 @@ ocResult ocWorldObjectInit(ocWorld* pWorld, ocWorldObject* pObject)
 
 void ocWorldObjectUninit(ocWorldObject* pObject)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
+
     ocAssert(pObject->pWorld != NULL);
 
     // The correct way to uninitialize a world object is to first remove it from the world. If you trigger this assert it means you're trying to uninitialize
@@ -32,14 +40,19 @@ void ocWorldObjectUninit(ocWorldObject* pObject)
 
 ocBool32 ocWorldObjectIsInWorld(ocWorldObject* pObject)
 {
-    if (pObject == NULL) return OC_FALSE;
+    if (pObject == NULL) {
+        return OC_FALSE;
+    }
+
     return pObject->isInWorld;
 }
 
 
 ocResult ocWorldObjectSetName(ocWorldObject* pObject, const char* name)
 {
-    if (pObject == NULL) return OC_FALSE;
+    if (pObject == NULL) {
+        return OC_FALSE;
+    }
     
     pObject->name = ocSetString(pObject->name, name);
     if (pObject->name == NULL) {
@@ -51,14 +64,19 @@ ocResult ocWorldObjectSetName(ocWorldObject* pObject, const char* name)
 
 const char* ocWorldObjectGetName(ocWorldObject* pObject)
 {
-    if (pObject == NULL) return NULL;
+    if (pObject == NULL) {
+        return NULL;
+    }
+
     return pObject->name;
 }
 
 
 ocComponent* ocWorldObjectAddComponent(ocWorldObject* pObject, ocComponentType type)
 {
-    if (pObject == NULL) return NULL;
+    if (pObject == NULL) {
+        return NULL;
+    }
     
     // Check that we haven't hit the component limit.
     if (pObject->componentCount == ocCountOf(pObject->ppComponents)) {
@@ -78,7 +96,10 @@ ocComponent* ocWorldObjectAddComponent(ocWorldObject* pObject, ocComponentType t
 
 void ocWorldObjectRemoveComponentByIndex(ocWorldObject* pObject, uint32_t index)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
+
     ocAssert(index < pObject->componentCount);  // <-- You've got a logic error if you've triggered this.
 
     // The component allocator is responsible for uninitialization and deletion.
@@ -92,7 +113,9 @@ void ocWorldObjectRemoveComponentByIndex(ocWorldObject* pObject, uint32_t index)
 
 void ocWorldObjectRemoveAllComponents(ocWorldObject* pObject)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
 
     // Components are removed back to front for efficiency.
     while (pObject->componentCount > 0) {
@@ -103,25 +126,36 @@ void ocWorldObjectRemoveAllComponents(ocWorldObject* pObject)
 
 void ocWorldObjectSetPosition(ocWorldObject* pObject, const glm::vec3 &position)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
+
     ocWorldObjectSetTransform(pObject, position, pObject->rotation, glm::vec3(pObject->scale));
 }
 
 void ocWorldObjectSetRotation(ocWorldObject* pObject, const glm::quat &rotation)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
+
     ocWorldObjectSetTransform(pObject, pObject->position, rotation, glm::vec3(pObject->scale));
 }
 
 void ocWorldObjectSetScale(ocWorldObject* pObject, const glm::vec3 &scale)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
+
     ocWorldObjectSetTransform(pObject, pObject->position, pObject->rotation, scale);
 }
 
 void ocWorldObjectSetTransform(ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale)
 {
-    if (pObject == NULL) return;
+    if (pObject == NULL) {
+        return;
+    }
 
     // The state of the world itself needs to be modified when an object is transformed. Thus, we just
     // redirect this and let the world sort out the actual transformation.
