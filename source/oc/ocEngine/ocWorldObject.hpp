@@ -42,6 +42,39 @@ ocResult ocWorldObjectSetName(ocWorldObject* pObject, const char* name);
 const char* ocWorldObjectGetName(ocWorldObject* pObject);
 
 
+
+// Detaches a child from this object.
+ocResult ocWorldObjectDetachChild(ocWorldObject* pParent, ocWorldObject* pChild);
+
+// Detaches the object from it's parent.
+ocResult ocWorldObjectDetach(ocWorldObject* pObject);
+
+// Appends an object as a child.
+//
+// This will maintain the child object's absolute transformation. If the child is already a child of the
+// specified parent object, it will be moved to the end of the child list.
+ocResult ocWorldObjectAppendChild(ocWorldObject* pParent, ocWorldObject* pChild);
+
+// Prepends an object as a child.
+//
+// This will maintain the child object's absolute transformation. If the child is already a child of the
+// specified parent object, it will be moved ot the end of the child list.
+ocResult ocWorldObjectPrependChild(ocWorldObject* pParent, ocWorldObject* pChild);
+
+// Append an object to a sibling.
+//
+// The will maintain the child object's absolute transformation. This will position the object such that
+// it comes after the specified sibling.
+ocResult ocWorldObjectAppendSibling(ocWorldObject* pObjectToAppendTo, ocWorldObject* pObjectToAppend);
+
+// Prepends an object as a sibling.
+//
+// The will maintain the child object's absolute transformation. This will position the object such that
+// it comes after the specified sibling.
+ocResult ocWorldObjectPrependSibling(ocWorldObject* pObjectToPrependTo, ocWorldObject* pObjectToPrepend);
+
+
+
 // Creates and adds a new component to an object.
 //
 // This will fail if the object is already in the world. To add and remove components, you need

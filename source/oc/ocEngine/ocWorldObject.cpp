@@ -72,6 +72,165 @@ const char* ocWorldObjectGetName(ocWorldObject* pObject)
 }
 
 
+
+ocResult ocWorldObjectDetachChild(ocWorldObject* pParent, ocWorldObject* pChild)
+{
+    if (pParent == NULL || pChild == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pChild->pParent != pParent) {
+        return OC_INVALID_ARGS; // The child object is not a child of the specified parent object.
+    }
+
+    if (pChild->pNextSibling) {
+        pChild->pNextSibling->pPrevSibling = pChild->pPrevSibling;
+    }
+    if (pChild->pPrevSibling) {
+        pChild->pPrevSibling->pNextSibling = pChild->pNextSibling;
+    }
+
+    if (pParent->pLastChild == pChild) {
+        pParent->pLastChild = pChild->pPrevSibling;
+    }
+    if (pParent->pFirstChild == pChild) {
+        pParent->pFirstChild = pChild->pNextSibling;
+    }
+
+    pChild->pParent = NULL;
+    pChild->pPrevSibling = NULL;
+    pChild->pNextSibling = NULL;
+
+    return OC_SUCCESS;
+}
+
+ocResult ocWorldObjectDetach(ocWorldObject* pObject)
+{
+    if (pObject == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    return ocWorldObjectDetachChild(pObject->pParent, pObject);
+}
+
+ocResult ocWorldObjectAppendChild(ocWorldObject* pParent, ocWorldObject* pChild)
+{
+    if (pParent == NULL || pChild == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pChild->pParent != NULL) {
+        ocResult result = ocWorldObjectDetachChild(pChild->pParent, pChild);
+        if (result != OC_SUCCESS) {
+            return result;
+        }
+    }
+    
+    pChild->pParent = pParent;
+
+    if (pParent->pFirstChild == NULL) {
+        pParent->pFirstChild = pChild;
+        ocAssert(pParent->pLastChild == NULL);
+    } else {
+        pChild->pPrevSibling = pParent->pLastChild;
+        pChild->pNextSibling = NULL;
+        pChild->pPrevSibling->pNextSibling = pChild;
+    }
+
+    pParent->pLastChild = pChild;
+
+    return OC_SUCCESS;
+}
+
+ocResult ocWorldObjectPrependChild(ocWorldObject* pParent, ocWorldObject* pChild)
+{
+    if (pParent == NULL || pChild == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pChild->pParent != NULL) {
+        ocResult result = ocWorldObjectDetachChild(pChild->pParent, pChild);
+        if (result != OC_SUCCESS) {
+            return result;
+        }
+    }
+
+    pChild->pParent = pParent;
+
+    if (pParent->pLastChild == NULL) {
+        pParent->pLastChild = pChild;
+        ocAssert(pParent->pFirstChild == NULL);
+    } else {
+        pChild->pNextSibling = pParent->pFirstChild;
+        pChild->pPrevSibling = NULL;
+        pChild->pNextSibling->pPrevSibling = pChild;
+    }
+
+    pParent->pFirstChild = pChild;
+
+    return OC_SUCCESS;
+}
+
+ocResult ocWorldObjectAppendSibling(ocWorldObject* pObjectToAppendTo, ocWorldObject* pObjectToAppend)
+{
+    if (pObjectToAppendTo == NULL || pObjectToAppend == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pObjectToAppend->pParent != NULL) {
+        ocResult result = ocWorldObjectDetachChild(pObjectToAppend->pParent, pObjectToAppend);
+        if (result != OC_SUCCESS) {
+            return result;
+        }
+    }
+
+    pObjectToAppend->pParent = pObjectToAppendTo->pParent;
+    if (pObjectToAppend->pParent != NULL) {
+        pObjectToAppend->pNextSibling = pObjectToAppendTo->pNextSibling;
+        pObjectToAppend->pPrevSibling = pObjectToAppendTo;
+
+        pObjectToAppendTo->pNextSibling->pPrevSibling = pObjectToAppend;
+        pObjectToAppendTo->pNextSibling = pObjectToAppend;
+
+        if (pObjectToAppend->pParent->pLastChild == pObjectToAppendTo) {
+            pObjectToAppend->pParent->pLastChild = pObjectToAppend;
+        }
+    }
+
+    return OC_SUCCESS;
+}
+
+ocResult ocWorldObjectPrependSibling(ocWorldObject* pObjectToPrependTo, ocWorldObject* pObjectToPrepend)
+{
+    if (pObjectToPrependTo == NULL || pObjectToPrepend == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pObjectToPrepend->pParent != NULL) {
+        ocResult result = ocWorldObjectDetachChild(pObjectToPrepend->pParent, pObjectToPrepend);
+        if (result != OC_SUCCESS) {
+            return result;
+        }
+    }
+
+    pObjectToPrepend->pParent = pObjectToPrependTo->pParent;
+    if (pObjectToPrepend->pParent != NULL) {
+        pObjectToPrepend->pPrevSibling = pObjectToPrependTo->pNextSibling;
+        pObjectToPrepend->pNextSibling = pObjectToPrependTo;
+
+        pObjectToPrependTo->pPrevSibling->pNextSibling = pObjectToPrepend;
+        pObjectToPrependTo->pNextSibling = pObjectToPrepend;
+
+        if (pObjectToPrepend->pParent->pFirstChild == pObjectToPrependTo) {
+            pObjectToPrepend->pParent->pFirstChild = pObjectToPrepend;
+        }
+    }
+
+    return OC_SUCCESS;
+}
+
+
+
 ocComponent* ocWorldObjectAddComponent(ocWorldObject* pObject, ocComponentType type)
 {
     if (pObject == NULL) {
