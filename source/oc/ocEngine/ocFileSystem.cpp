@@ -40,10 +40,15 @@ OC_PRIVATE drfs_seek_origin ocToDRFSSeekOrigin(ocSeekOrigin origin)
 
 ocResult ocFileSystemInit(ocEngineContext* pEngine, ocFileSystem* pFS)
 {
-    if (pFS == NULL) return OC_INVALID_ARGS;
+    if (pFS == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     ocZeroObject(pFS);
 
-    if (pEngine == NULL) return OC_INVALID_ARGS;
+    if (pEngine == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     pFS->pEngine = pEngine;
 
@@ -67,23 +72,36 @@ ocResult ocFileSystemInit(ocEngineContext* pEngine, ocFileSystem* pFS)
 
 void ocFileSystemUninit(ocFileSystem* pFS)
 {
-    if (pFS == NULL) return;
+    if (pFS == NULL) {
+        return;
+    }
+
     drfs_uninit(&pFS->internalFS);
 }
 
 
 ocResult ocGetFileInfo(ocFileSystem* pFS, const char* relativePath, ocFileInfo* pInfo)
 {
-    if (pInfo != NULL) ocZeroObject(pInfo);
+    if (pInfo != NULL) {
+        ocZeroObject(pInfo);
+    }
+
     return ocToResult(drfs_get_file_info(&pFS->internalFS, relativePath, pInfo));
 }
 
 ocResult ocFindAbsoluteFilePath(ocFileSystem* pFS, const char* relativePath, char* absolutePath, size_t absolutePathSize)
 {
-    if (absolutePath == NULL) return OC_INVALID_ARGS;
-    if (absolutePathSize > 0) absolutePath[0] = '\0';
+    if (absolutePath == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
-    if (pFS == NULL || relativePath == NULL) return OC_INVALID_ARGS;
+    if (absolutePathSize > 0) {
+        absolutePath[0] = '\0';
+    }
+
+    if (pFS == NULL || relativePath == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     return ocToResult(drfs_find_absolute_path(&pFS->internalFS, relativePath, absolutePath, absolutePathSize));
 }
@@ -92,10 +110,15 @@ ocResult ocFindAbsoluteFilePath(ocFileSystem* pFS, const char* relativePath, cha
 
 ocResult ocFileOpen(ocFileSystem* pFS, const char* path, unsigned int accessMode, ocFile* pFile)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     ocZeroObject(pFile);
 
-    if (pFS == NULL || path == NULL) return OC_INVALID_ARGS;
+    if (pFS == NULL || path == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     drfs_result result = drfs_open(&pFS->internalFS, path, accessMode, &pFile->pInternalFile);
     if (result != drfs_success) {
@@ -107,31 +130,45 @@ ocResult ocFileOpen(ocFileSystem* pFS, const char* path, unsigned int accessMode
 
 void ocFileClose(ocFile* pFile)
 {
-    if (pFile == NULL) return;
+    if (pFile == NULL) {
+        return;
+    }
+
     drfs_close(pFile->pInternalFile);
 }
 
 ocResult ocFileRead(ocFile* pFile, void* pDataOut, size_t bytesToRead, size_t* pBytesReadOut)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     return ocToResult(drfs_read(pFile->pInternalFile, pDataOut, bytesToRead, pBytesReadOut));
 }
 
 ocResult ocFileWrite(ocFile* pFile, const void* pData, size_t bytesToWrite, size_t* pBytesWrittenOut)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     return ocToResult(drfs_write(pFile->pInternalFile, pData, bytesToWrite, pBytesWrittenOut));
 }
 
 ocResult ocFileSeek(ocFile* pFile, int64_t bytesToSeek, ocSeekOrigin origin)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     return ocToResult(drfs_seek(pFile->pInternalFile, bytesToSeek, ocToDRFSSeekOrigin(origin)));
 }
 
 ocResult ocFileTell(ocFile* pFile, uint64_t* pPos)
 {
-    if (pFile == NULL || pPos == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL || pPos == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     // Currently no error detection with dr_fs.
     *pPos = drfs_tell(pFile->pInternalFile);
@@ -140,7 +177,9 @@ ocResult ocFileTell(ocFile* pFile, uint64_t* pPos)
 
 ocResult ocFileSize(ocFile* pFile, uint64_t* pSize)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     // Currently no error detection with dr_fs.
     *pSize = drfs_size(pFile->pInternalFile);
@@ -149,13 +188,19 @@ ocResult ocFileSize(ocFile* pFile, uint64_t* pSize)
 
 void ocFileFlush(ocFile* pFile)
 {
-    if (pFile == NULL) return;
+    if (pFile == NULL) {
+        return;
+    }
+
     drfs_flush(pFile->pInternalFile);
 }
 
 ocBool32 ocAtEOF(ocFile* pFile)
 {
-    if (pFile == NULL) return false;
+    if (pFile == NULL) {
+        return false;
+    }
+
     return drfs_eof(pFile->pInternalFile);
 }
 
@@ -169,13 +214,19 @@ ocBool32 ocAtEOF(ocFile* pFile)
 
 ocResult ocFileWriteString(ocFile* pFile, const char* str)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     return ocToResult(drfs_write_string(pFile->pInternalFile, str)); 
 }
 
 ocResult ocFileWriteLine(ocFile* pFile, const char* str)
 {
-    if (pFile == NULL) return OC_INVALID_ARGS;
+    if (pFile == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     return ocToResult(drfs_write_line(pFile->pInternalFile, str)); 
 }
 
@@ -189,7 +240,9 @@ ocResult ocFileWriteLine(ocFile* pFile, const char* str)
 
 void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
 {
-    if (pathOut == NULL || pathOutSize == 0) return;
+    if (pathOut == NULL || pathOutSize == 0) {
+        return;
+    }
 
     char logFolderPath[DRFS_MAX_PATH];
     if (!ocIsPortable(pFS->pEngine) && dr_get_log_folder_path(logFolderPath, sizeof(logFolderPath))) {
@@ -331,7 +384,9 @@ ocResult ocSetCurrentDirectory(const char* path)
 
 ocResult ocCreateDirectory(const char* directoryPath)
 {
-    if (directoryPath == NULL) return OC_INVALID_ARGS;
+    if (directoryPath == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
 #ifdef OC_WIN32
     if (CreateDirectoryA(directoryPath, NULL) == 0) {
@@ -458,7 +513,9 @@ OC_PRIVATE ocResult ocFTell(FILE* pFile, ocUInt64* pPosOut)
 
 OC_PRIVATE ocResult ocFRead(FILE* pFile, size_t bytesToRead, void* pData, size_t* pBytesRead)
 {
-    if (pBytesRead) *pBytesRead = 0;
+    if (pBytesRead) {
+        *pBytesRead = 0;
+    }
 
     // TODO: Proper 64-bit read.
     size_t bytesRead = fread(pData, 1, bytesToRead, pFile);
@@ -476,7 +533,9 @@ OC_PRIVATE ocResult ocFRead(FILE* pFile, size_t bytesToRead, void* pData, size_t
 
 OC_PRIVATE ocResult ocFWrite(FILE* pFile, size_t bytesToWrite, const void* pData, size_t* pBytesWritten)
 {
-    if (pBytesWritten) *pBytesWritten = 0;
+    if (pBytesWritten) {
+        *pBytesWritten = 0;
+    }
 
     // TODO: Proper 64-bit write.
     size_t bytesWritten = fwrite(pData, 1, bytesToWrite, pFile);
@@ -489,7 +548,9 @@ OC_PRIVATE ocResult ocFWrite(FILE* pFile, size_t bytesToWrite, const void* pData
 
 OC_PRIVATE ocResult ocOpenAndReadFileWithExtraData(const char* filePath, void** ppFileData, size_t* pFileSizeOut, size_t extraBytes)
 {
-    if (pFileSizeOut) *pFileSizeOut = 0;   // For safety.
+    if (pFileSizeOut) {
+        *pFileSizeOut = 0;   // For safety.
+    }
 
     if (filePath == NULL) {
         return OC_INVALID_ARGS;

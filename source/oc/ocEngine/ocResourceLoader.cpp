@@ -59,7 +59,9 @@ OC_PRIVATE ocResult ocMallocAndReadEntireStreamReader(ocStreamReader* pReader, v
 
 ocResult ocResourceLoaderInit(ocFileSystem* pFS, ocResourceLoader* pLoader)
 {
-    if (pLoader == NULL || pFS == NULL) return OC_INVALID_ARGS;
+    if (pLoader == NULL || pFS == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocZeroObject(pLoader);
     pLoader->pFS = pFS;
@@ -69,7 +71,9 @@ ocResult ocResourceLoaderInit(ocFileSystem* pFS, ocResourceLoader* pLoader)
 
 void ocResourceLoaderUninit(ocResourceLoader* pLoader)
 {
-    if (pLoader == NULL) return;
+    if (pLoader == NULL) {
+        return;
+    }
 }
 
 
@@ -108,10 +112,15 @@ OC_PRIVATE ocResult ocResourceLoaderDetermineOCDResourceType(ocResourceLoader* p
 
 ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const char* filePath, ocResourceType* pType)
 {
-    if (pType == NULL) return OC_INVALID_ARGS;
+    if (pType == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     *pType = ocResourceType_Unknown;
 
-    if (pLoader == NULL || filePath == NULL) return OC_INVALID_ARGS;
+    if (pLoader == NULL || filePath == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     const char* ext = drpath_extension(filePath);
     if (_stricmp(ext, "ocd") == 0) {
@@ -355,7 +364,10 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
 
 void ocResourceLoaderUnloadImage(ocResourceLoader* pLoader, ocImageData* pData)
 {
-    if (pLoader == NULL || pData == NULL) return;
+    if (pLoader == NULL || pData == NULL) {
+        return;
+    }
+
     ocFree(pData->pPayload);
 }
 
@@ -539,10 +551,15 @@ OC_PRIVATE ocResult ocLoadScene_OBJ(ocStreamReader* pReader, ocSceneData* pData)
 
 ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePath, ocSceneData* pData)
 {
-    if (pData == NULL) return OC_INVALID_ARGS;
+    if (pData == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
     ocZeroObject(pData);
 
-    if (pLoader == NULL || filePath == NULL) return OC_INVALID_ARGS;
+    if (pLoader == NULL || filePath == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     // Try opening the file to begin with.
     ocFile file;
@@ -591,7 +608,10 @@ ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePa
 
 void ocResourceLoaderUnloadScene(ocResourceLoader* pLoader, ocSceneData* pData)
 {
-    if (pLoader == NULL || pData == NULL) return;
+    if (pLoader == NULL || pData == NULL) {
+        return;
+    }
+
     ocFree(pData->pPayload);
 }
 
