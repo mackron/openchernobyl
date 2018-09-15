@@ -35,20 +35,7 @@ void ocWorldInsertObject(ocWorld* pWorld, ocWorldObject* pObject);
 //
 void ocWorldRemoveObject(ocWorld* pWorld, ocWorldObject* pObject);
 
-// Sets the absolute position of the given object.
-//
-// Use ocWorldSetObjectAbsoluteTransform() if you want to change the position, rotation and/or scale at the same time.
-void ocWorldSetObjectAbsolutePosition(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &absolutePosition);
 
-// Sets the absolute rotation of the given object.
-//
-// Use ocWorldSetObjectAbsoluteTransform() if you want to change the position, rotation and/or scale at the same time.
-void ocWorldSetObjectAbsoluteRotation(ocWorld* pWorld, ocWorldObject* pObject, const glm::quat &absoluteRotation);
-
-// Sets the absolute scale of the given object.
-//
-// Use ocWorldSetObjectAbsoluteTransform() if you want to change the position, rotation and/or scale at the same time.
-void ocWorldSetObjectAbsoluteScale(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &absoluteScale);
-
-// Sets the absolute position, rotation and scale of an object as a single operation.
+// Sets the absolute position, rotation and scale of an object as a single operation. You should rarely need to call this
+// directly. Instead you should use ocWorldObjectSetAbsolutePosition(), etc.
 void ocWorldSetObjectAbsoluteTransform(ocWorld* pWorld, ocWorldObject* pObject, const glm::vec3 &absolutePosition, const glm::quat &absoluteRotation, const glm::vec3 &absoluteScale);

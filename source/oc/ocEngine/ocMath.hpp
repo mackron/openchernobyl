@@ -32,3 +32,33 @@ OC_INLINE glm::mat4 ocMakeMat4_VulkanClipCorrection()
     result[3] = glm::vec4(0,  0, 0.5f, 1);
     return result;
 }
+
+OC_INLINE glm::vec3 ocMakeAbsolutePosition(const glm::vec3 &relativePosition, const glm::vec3 &relativeTo)
+{
+    return relativeTo + relativePosition;
+}
+
+OC_INLINE glm::vec3 ocMakeRelativePosition(const glm::vec3 &absolutePosition, const glm::vec3 &relativeTo)
+{
+    return absolutePosition - relativeTo;
+}
+
+OC_INLINE glm::quat ocMakeAbsoluteRotation(const glm::quat &relativeRotation, const glm::quat &relativeTo)
+{
+    return relativeTo * relativeRotation;
+}
+
+OC_INLINE glm::quat ocMakeRelativeRotation(const glm::quat &absoluteRotation, const glm::quat &relativeTo)
+{
+    return glm::inverse(relativeTo) * absoluteRotation;
+}
+
+OC_INLINE glm::vec3 ocMakeAbsoluteScale(const glm::vec3 &relativeScale, const glm::vec3 &relativeTo)
+{
+    return relativeTo * relativeScale;
+}
+
+OC_INLINE glm::vec3 ocMakeRelativeScale(const glm::vec3 &absoluteScale, const glm::vec3 &relativeTo)
+{
+    return absoluteScale / relativeTo;
+}

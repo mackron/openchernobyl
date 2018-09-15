@@ -15,7 +15,10 @@ struct ocWorldObject
     glm::vec4 absoluteScale;    // <-- As above, except ocWorldObjectSetAbsoluteScale()
     ocComponent* ppComponents[OC_MAX_COMPONENTS];
     ocUInt16 componentCount;
-    ocUInt16 isInWorld : 1;
+    ocUInt16 isInWorld          : 1;
+    ocUInt16 noRelativePosition : 1;
+    ocUInt16 noRelativeRotation : 1;
+    ocUInt16 noRelativeScale    : 1;
     ocWorldObject* pParent;
     ocWorldObject* pFirstChild;
     ocWorldObject* pLastChild;
@@ -88,19 +91,32 @@ void ocWorldObjectRemoveComponentByIndex(ocWorldObject* pObject, uint32_t index)
 void ocWorldObjectRemoveAllComponents(ocWorldObject* pObject);
 
 
-// Sets the position of the world object.
+// Retrieves the absolute position of the given object.
+glm::vec3 ocWorldObjectGetAbsolutePosition(ocWorldObject* pObject);
+
+// Retrieves the absolute rotation of the given object.
+glm::quat ocWorldObjectGetAbsoluteRotation(ocWorldObject* pObject);
+
+// Retrieves the absolute scale of the given object.
+glm::vec3 ocWorldObjectGetAbsoluteScale(ocWorldObject* pObject);
+
+// Retrieves the absolute transform of the given object (position, rotation and scale in a single call).
+void ocWorldObjectGetAbsoluteTransform(ocWorldObject* pObject, glm::vec3 &absolutePosition, glm::quat &absoluteRotation, glm::vec3 &absoluteScale);
+
+
+// Sets the absolute position of the world object.
 //
 // Consider using ocWorldObjectSetAbsoluteTransform() if you need to change the position, rotation and/or scale
 // at the same time.
 void ocWorldObjectSetAbsolutePosition(ocWorldObject* pObject, const glm::vec3 &absolutePosition);
 
-// Sets the rotation of the world object.
+// Sets the absolute rotation of the world object.
 //
 // Consider using ocWorldObjectSetAbsoluteTransform() if you need to change the position, rotation and/or scale
 // at the same time.
 void ocWorldObjectSetAbsoluteRotation(ocWorldObject* pObject, const glm::quat &absoluteRotation);
 
-// Sets the scale of the world object.
+// Sets the absolute scale of the world object.
 //
 // Consider using ocWorldObjectSetTransform() if you need to change the position, rotation and/or scale
 // at the same time.
@@ -108,3 +124,29 @@ void ocWorldObjectSetAbsoluteScale(ocWorldObject* pObject, const glm::vec3 &abso
 
 // Sets the position, rotation and scale of the object as a single operation.
 void ocWorldObjectSetAbsoluteTransform(ocWorldObject* pObject, const glm::vec3 &absolutePosition, const glm::quat &absoluteRotation, const glm::vec3 &absoluteScale);
+
+
+// Retrieves the relative position of the given object.
+glm::vec3 ocWorldObjectGetRelativePosition(ocWorldObject* pObject);
+
+// Retrieves the relative rotation of the given object.
+glm::quat ocWorldObjectGetRelativeRotation(ocWorldObject* pObject);
+
+// Retrieves the relative scale of the given object.
+glm::vec3 ocWorldObjectGetRelativeScale(ocWorldObject* pObject);
+
+// Retrieves the relative transform of the given object (position, rotation and scale in a single call).
+void ocWorldObjectGetRelativeTransform(ocWorldObject* pObject, glm::vec3 &relativePosition, glm::quat &relativeRotation, glm::vec3 &relativeScale);
+
+
+// Sets the relative position of the given object.
+void ocWorldObjectSetRelativePosition(ocWorldObject* pObject, const glm::vec3 &relativePosition);
+
+// Sets the relative rotation of the given object.
+void ocWorldObjectSetRelativeRotation(ocWorldObject* pObject, const glm::quat &relativeRotation);
+
+// Sets the relative scale of the given object.
+void ocWorldObjectSetRelativeScale(ocWorldObject* pObject, const glm::vec3 &relativeScale);
+
+// Sets the relative transform of the given object.
+void ocWorldObjectSetRelativeTransform(ocWorldObject* pObject, const glm::vec3 &position, const glm::quat &rotation, const glm::vec3 &scale);
