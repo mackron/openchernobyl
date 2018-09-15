@@ -744,6 +744,9 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     }
 
     ocResult result;
+    ocUInt32 groupCount;
+    ocUInt64 vertexDataOffset;
+    ocUInt64 indexDataOffset;
 
     // We need the offset of this data block for later.
     ocUInt64 componentDataOffset;
@@ -793,7 +796,7 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
 
 
     // Group count.
-    ocUInt32 groupCount = (ocUInt32)pBuilder->meshGroups.count;
+    groupCount = (ocUInt32)pBuilder->meshGroups.count;
     result = ocOCDDataBlockWrite<ocUInt32>(&pBuilder->componentDataBlock, groupCount);
     if (result != OC_SUCCESS) {
         goto done;
@@ -812,7 +815,7 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     }
 
     // Vertex data offset. Vertex data is located past the groups.
-    ocUInt64 vertexDataOffset = 40 + (groupCount * sizeof(ocOCDSceneBuilderMeshGroup)); // 40 = size of the header section.
+    vertexDataOffset = 40 + (groupCount * sizeof(ocOCDSceneBuilderMeshGroup)); // 40 = size of the header section.
     result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, vertexDataOffset);
     if (result != OC_SUCCESS) {
         goto done;
@@ -825,7 +828,7 @@ ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
     }
 
     // Index data offset. Index data is located after the vertex data.
-    ocUInt64 indexDataOffset = vertexDataOffset + vertexDataSizeWithPadding;
+    indexDataOffset = vertexDataOffset + vertexDataSizeWithPadding;
     result = ocOCDDataBlockWrite<ocUInt64>(&pBuilder->componentDataBlock, indexDataOffset);
     if (result != OC_SUCCESS) {
         goto done;

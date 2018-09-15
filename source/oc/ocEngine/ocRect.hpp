@@ -24,13 +24,12 @@ template <typename T> ocRect<T> ocRectInit(T left, T top, T right, T bottom)
 template <typename T> ocRect<T> ocRectInitInsideOut()
 {
     return ocRect<T>(
-        ocMaxType<T>(),
-        ocMinType<T>(),
-        ocMaxType<T>(),
-        ocMinType<T>()
+        ocTypeMax<T>(),
+        ocTypeMin<T>(),
+        ocTypeMax<T>(),
+        ocTypeMin<T>()
     );
 }
 
 typedef ocRect<ocInt32>   ocRectI;
 typedef ocRect<ocFloat32> ocRectF;
-typedef ocRect<ocFloat64> ocRectD;
