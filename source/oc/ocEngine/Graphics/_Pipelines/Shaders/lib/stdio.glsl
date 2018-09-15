@@ -1,7 +1,31 @@
+#ifndef OC_UBO_BINDING_CAMERA_VERT
+#define OC_UBO_BINDING_CAMERA_VERT      0
+#endif
+#ifndef OC_UBO_BINDING_OBJECT_VERT
+#define OC_UBO_BINDING_OBJECT_VERT      1
+#endif
+#ifndef OC_UBO_BINDING_MATERIAL_VERT
+#define OC_UBO_BINDING_MATERIAL_VERT    2
+#endif
+#ifndef OC_UBO_BINDING_MATERIAL_FRAG
+#define OC_UBO_BINDING_MATERIAL_FRAG    3
+#endif
+
 //
 // Vertex
 //
 #if defined(SHADER_STAGE_VERTEX)
+    OC_UBO(0, OC_UBO_BINDING_CAMERA_VERT, UBO_Camera)
+    {
+        mat4 Projection;
+        mat4 View;
+    } Camera;
+    
+    OC_UBO(0, OC_UBO_BINDING_OBJECT_VERT, UBO_Object)
+    {
+        mat4 Model;
+    } Object;
+
     #ifdef VULKAN
         layout(location = 0) in vec3 VERT_Position;
         layout(location = 1) in vec2 VERT_TexCoord;
@@ -17,17 +41,6 @@
             layout(location = 2) out vec3 FRAG_Tangent;
             layout(location = 3) out vec3 FRAG_Binormal;
         #endif
-        
-        layout (set = 0, binding = 0) uniform UBO_Camera
-        {
-        	mat4 Projection;
-        	mat4 View;
-        } Camera;
-        
-        layout (set = 0, binding = 1) uniform UBO_Object
-        {
-            mat4 Model;
-        } Object;
     #else
         attribute vec3 VERT_Position;
         attribute vec2 VERT_TexCoord;
@@ -43,19 +56,6 @@
             varying vec3 FRAG_Tangent;
             varying vec3 FRAG_Binormal;
         #endif
-        
-        struct UBO_Camera
-        {
-            mat4 Projection;
-            mat4 View;
-        };
-        uniform UBO_Camera Camera;
-        
-        struct UBO_Object
-        {
-            mat4 Model;
-        };
-        uniform UBO_Object Object;
     #endif
 #endif
 

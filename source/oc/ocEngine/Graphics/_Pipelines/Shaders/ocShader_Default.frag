@@ -1,5 +1,5 @@
-#include "lib/stdio.glsl"
 #include "lib/stdlib.glsl"
+#include "lib/stdio.glsl"
 
 void main()
 {

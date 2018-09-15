@@ -13,6 +13,6 @@
     ],
     "InputGeometryTypes" : [
         "WorldMesh"
-    ]
+    ],
     "SupportMSAA"    : true,
 }
