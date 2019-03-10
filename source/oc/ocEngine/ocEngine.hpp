@@ -54,17 +54,19 @@
 #endif
 
 // External libraries.
+
+#include "../../external/stb/stb_image.h"
+
 #define STBI_WRITE_NO_STDIO
+#include "../../external/stb/stb_image_write.h"
+
 #define STB_VORBIS_HEADER_ONLY
 #define STB_VORBIS_NO_STDIO
-#include "../../external/stb/stb_image.h"
-#include "../../external/stb/stb_image_write.h"
 #include "../../external/stb/stb_vorbis.c"
 
 #include "../../external/dr_libs/dr_flac.h"
 #include "../../external/dr_libs/dr_wav.h"
-#include "../../external/dr_libs/old/dr_fs.h"   // TODO: Replace with dr-soft/dr_fs/dr_fs.h
-
+#include "../../external/dr_fs/dr_fs.h"
 #include "../../external/miniobj/miniobj.h"
 
 #ifdef OC_ENABLE_PCX

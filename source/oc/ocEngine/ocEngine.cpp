@@ -87,10 +87,11 @@
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_WAV_IMPLEMENTATION
-#define DR_FS_IMPLEMENTATION
 #include "../../external/dr_libs/dr_flac.h"
 #include "../../external/dr_libs/dr_wav.h"
-#include "../../external/dr_libs/old/dr_fs.h"   // TODO: Replace this with dr-soft/dr_fs/dr_fs.h
+
+#define DR_FS_IMPLEMENTATION
+#include "../../external/dr_fs/dr_fs.h"
 
 #define MINIOBJ_IMPLEMENTATION
 #include "../../external/miniobj/miniobj.h"
