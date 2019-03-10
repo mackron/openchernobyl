@@ -1,10 +1,7 @@
 Dependencies
 ============
-The source code of every dependency is included in the repository, but you will need to compile them
-before you'll be able to link. You will not need to configure include paths, but you will need to 
-configure library paths.
-
-Dependencies can be found in the source/external folder.
+The source code of every dependency is included in the repository. Dependencies can be found in the
+source/external folder.
 
 
 Building Open Chernobyl
@@ -13,12 +10,8 @@ Building Open Chernobyl
 Quick Instructions
 ------------------
  * Do a recursive checkout of this repository (https://github.com/openchernobyl/openchernobyl.git)
- * Compile Bullet (source/external/bullet3)
- * (Optional) Set up your build environment to run build/oc_build/bin/oc_build.bat as a pre-build step (make
-   sure it is run from the build/oc_build/bin directory)
-   * This is optional, but if you want to do serious development you will need to do this
- * Compile ocMain.cpp (the game is compiled as a single translation unit) and link to the necessary
-   third-party libraries:
-   * BulletDynamics_Debug.lib
-   * BulletCollision_Debug.lib
-   * LinearMath_Debug.lib
+ * Compile ocMain.cpp (the game is compiled as a single translation unit)
+ 
+If you want to do serious development on Open Chernobyl you will need to set up your build environment to run
+to run build/oc_build/bin/oc_build.bat as a pre-build step (make sure it is run from the build/oc_build/bin
+directory). The pre-build step does code generation.
