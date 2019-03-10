@@ -95,7 +95,7 @@
     #ifdef OC_X11
         #define VK_USE_PLATFORM_XLIB_KHR
     #endif
-    #include "../../external/dr_graphics/dr_vulkan.h"
+    #include "../../external/vkbind/vkbind.h"
 #endif
 
 #include "../../external/miniaudio/miniaudio.h"

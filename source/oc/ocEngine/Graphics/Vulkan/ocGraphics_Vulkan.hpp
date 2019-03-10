@@ -8,6 +8,7 @@
 
 struct ocGraphicsContext : public ocGraphicsContextBase
 {
+    VkbAPI vk;  /* The Vulkan API. This is also bound globally. */
     VkInstance instance;
     VkPhysicalDevice physicalDevice;
     VkDevice device;

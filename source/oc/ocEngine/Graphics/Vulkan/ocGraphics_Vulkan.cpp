@@ -26,6 +26,7 @@ OC_PRIVATE VkFormat ocToVulkanImageFormat(ocImageFormat format)
     }
 }
 
+#if 0
 OC_PRIVATE VkPrimitiveTopology ocToVulkanPrimitiveType(ocGraphicsPrimitiveType primitiveType)
 {
     switch (primitiveType) {
@@ -35,6 +36,7 @@ OC_PRIVATE VkPrimitiveTopology ocToVulkanPrimitiveType(ocGraphicsPrimitiveType p
         default: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     }
 }
+#endif
 
 OC_PRIVATE VkIndexType ocToVulkanIndexFormat(ocGraphicsIndexFormat indexFormat)
 {
@@ -105,17 +107,431 @@ OC_PRIVATE ocResult ocToResultFromVulkan(VkResult vkresult)
 }
 
 
+OC_PRIVATE VkComponentMapping ocvkDefaultComponentMapping()
+{
+    VkComponentMapping result;
+    result.r = VK_COMPONENT_SWIZZLE_R;
+    result.g = VK_COMPONENT_SWIZZLE_G;
+    result.b = VK_COMPONENT_SWIZZLE_B;
+    result.a = VK_COMPONENT_SWIZZLE_A;
+    return result;
+}
+
+OC_PRIVATE VkImageSubresourceRange ocvkImageSubresourceRange(VkImageAspectFlags aspectMask, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+    VkImageSubresourceRange result;
+    result.aspectMask = aspectMask;
+    result.baseMipLevel = baseMipLevel;
+    result.levelCount = levelCount;
+    result.baseArrayLayer = baseArrayLayer;
+    result.layerCount = layerCount;
+    return result;
+}
+
+OC_PRIVATE VkExtent3D ocvkExtent3D(uint32_t width, uint32_t height, uint32_t depth)
+{
+    VkExtent3D result;
+    result.width = width;
+    result.height = height;
+    result.depth = depth;
+    return result;
+}
+
+OC_PRIVATE VkRect2D ocvkRect2D(int32_t x, int32_t y, uint32_t width, uint32_t height)
+{
+    VkRect2D result;
+    result.offset.x = x;
+    result.offset.y = y;
+    result.extent.width = width;
+    result.extent.height = height;
+    return result;
+}
+
+#if 0
+OC_PRIVATE VkClearColorValue ocvkClearColorValue4f(float r, float g, float b, float a)
+{
+    VkClearColorValue result;
+    result.float32[0] = r;
+    result.float32[1] = g;
+    result.float32[2] = b;
+    result.float32[3] = a;
+    return result;
+}
+
+OC_PRIVATE VkClearColorValue ocvkClearColorValue4i(int32_t r, int32_t g, int32_t b, int32_t a)
+{
+    VkClearColorValue result;
+    result.int32[0] = r;
+    result.int32[1] = g;
+    result.int32[2] = b;
+    result.int32[3] = a;
+    return result;
+}
+
+OC_PRIVATE VkClearColorValue ocvkClearColorValue4ui(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
+{
+    VkClearColorValue result;
+    result.uint32[0] = r;
+    result.uint32[1] = g;
+    result.uint32[2] = b;
+    result.uint32[3] = a;
+    return result;
+}
+#endif
+
+OC_PRIVATE VkClearValue ocvkClearValueColor4f(float r, float g, float b, float a)
+{
+    VkClearValue result;
+    result.color.float32[0] = r;
+    result.color.float32[1] = g;
+    result.color.float32[2] = b;
+    result.color.float32[3] = a;
+    return result;
+}
+
+#if 0
+OC_PRIVATE VkClearValue ocvkClearValueColor4i(int32_t r, int32_t g, int32_t b, int32_t a)
+{
+    VkClearValue result;
+    result.color.int32[0] = r;
+    result.color.int32[1] = g;
+    result.color.int32[2] = b;
+    result.color.int32[3] = a;
+    return result;
+}
+
+OC_PRIVATE VkClearValue ocvkClearValueColor4ui(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
+{
+    VkClearValue result;
+    result.color.uint32[0] = r;
+    result.color.uint32[1] = g;
+    result.color.uint32[2] = b;
+    result.color.uint32[3] = a;
+    return result;
+}
+#endif
+
+OC_PRIVATE VkClearValue ocvkClearValueDepthStencil(float depth, uint32_t stencil)
+{
+    VkClearValue result;
+    result.depthStencil.depth = depth;
+    result.depthStencil.stencil = stencil;
+    return result;
+}
+
+OC_PRIVATE VkViewport ocvkViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
+{
+    VkViewport result;
+    result.x = x;
+    result.y = y;
+    result.width = width;
+    result.height = height;
+    result.minDepth = minDepth;
+    result.maxDepth = maxDepth;
+    return result;
+}
+
+OC_PRIVATE VkPipelineShaderStageCreateInfo ocvkPipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule module, const char* pName, VkSpecializationInfo* pSpecializationInfo)
+{
+    VkPipelineShaderStageCreateInfo result;
+    result.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    result.pNext = NULL;
+    result.flags = 0;
+    result.stage = stage;
+    result.module = module;
+    result.pName = pName;
+    result.pSpecializationInfo = pSpecializationInfo;
+    return result;
+}
+
+OC_PRIVATE VkImageCreateInfo ocvkSimpleImageCreateInfo2D(VkFormat format, uint32_t width, uint32_t height, uint32_t mipLevels, VkImageUsageFlags usage)
+{
+    VkImageCreateInfo result;
+    result.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    result.pNext = NULL;
+    result.flags = 0;
+    result.imageType = VK_IMAGE_TYPE_2D;
+    result.format = format;
+    result.extent.width = width;
+    result.extent.height = height;
+    result.extent.depth = 1;
+    result.mipLevels = mipLevels;
+    result.arrayLayers = 1;
+    result.samples = VK_SAMPLE_COUNT_1_BIT;
+    result.tiling = VK_IMAGE_TILING_OPTIMAL;
+    result.usage = usage;
+    result.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    result.queueFamilyIndexCount = 0;
+    result.pQueueFamilyIndices = NULL;
+    result.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    return result;
+}
+
+OC_PRIVATE VkResult ocvkCreateSimpleImageView(VkDevice device, VkImage image, VkImageViewType viewType, VkFormat format, VkImageSubresourceRange subresourceRange, const VkAllocationCallbacks* pAllocator, VkImageView* pView)
+{
+    VkImageViewCreateInfo viewInfo;
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.pNext = NULL;
+    viewInfo.flags = 0;
+    viewInfo.image = image;
+    viewInfo.viewType = viewType;
+    viewInfo.format = format;
+    viewInfo.components = ocvkDefaultComponentMapping();
+    viewInfo.subresourceRange = subresourceRange;
+    return vkCreateImageView(device, &viewInfo, pAllocator, pView);
+}
+
+OC_PRIVATE VkResult ocvkAllocateCommandBuffers(VkDevice device, VkCommandPool commandPool, VkCommandBufferLevel level, uint32_t commandBufferCount, VkCommandBuffer* pCommandBuffers)
+{
+    VkCommandBufferAllocateInfo info;
+    info.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    info.pNext              = NULL;
+    info.commandPool        = commandPool;
+    info.level              = level;
+    info.commandBufferCount = commandBufferCount;
+    return vkAllocateCommandBuffers(device, &info, pCommandBuffers);
+}
+
+OC_PRIVATE VkResult ocvkBeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags, VkCommandBufferInheritanceInfo* pInheritanceInfo)
+{
+    VkCommandBufferBeginInfo info;
+    info.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    info.pNext            = NULL;
+    info.flags            = flags;
+    info.pInheritanceInfo = pInheritanceInfo;
+    return vkBeginCommandBuffer(commandBuffer, &info);
+}
+
+OC_PRIVATE void ocvkFilterUnsupportedLayers(uint32_t* pLayerCount, const char** ppLayers)
+{
+    if (pLayerCount == NULL || ppLayers == NULL) return;
+
+    VkLayerProperties supportedLayers[64];
+    uint32_t supportedLayerCount = sizeof(supportedLayers) / sizeof(supportedLayers[0]);
+    vkEnumerateInstanceLayerProperties(&supportedLayerCount, supportedLayers);
+
+    for (uint32_t iDesiredLayer = 0; iDesiredLayer < *pLayerCount; /* DO NOTHING */) {
+        VkBool32 isSupported = VK_FALSE;
+        for (uint32_t iSupportedLayer = 0; iSupportedLayer < supportedLayerCount; ++iSupportedLayer) {
+            if (strcmp(supportedLayers[iSupportedLayer].layerName, ppLayers[iDesiredLayer]) == 0) {
+                isSupported = VK_TRUE;
+                break;
+            }
+        }
+
+        if (!isSupported) {
+            for (uint32_t j = iDesiredLayer; j < *pLayerCount-1; ++j) {
+                ppLayers[j] = ppLayers[j+1];
+            }
+
+            *pLayerCount -= 1;
+        } else {
+            iDesiredLayer += 1;
+        }
+    }
+}
+
+OC_PRIVATE void ocvkFilterUnsupportedInstanceExtensions(const char* pLayerName, uint32_t* pExtensionCount, const char** ppExtensions)
+{
+    if (pExtensionCount == NULL || ppExtensions == NULL) {
+        return;
+    }
+
+    VkExtensionProperties supportedExtensions[256];
+    uint32_t supportedExtensionCount = sizeof(supportedExtensions) / sizeof(supportedExtensions[0]);
+    vkEnumerateInstanceExtensionProperties(pLayerName, &supportedExtensionCount, supportedExtensions);
+
+    for (uint32_t iDesiredExtension = 0; iDesiredExtension < *pExtensionCount; /* DO NOTHING */) {
+        VkBool32 isSupported = VK_FALSE;
+        for (uint32_t iSupportedExtension = 0; iSupportedExtension < supportedExtensionCount; ++iSupportedExtension) {
+            if (strcmp(supportedExtensions[iSupportedExtension].extensionName, ppExtensions[iDesiredExtension]) == 0) {
+                isSupported = VK_TRUE;
+                break;
+            }
+        }
+
+        if (!isSupported) {
+            for (uint32_t j = iDesiredExtension; j < *pExtensionCount-1; ++j) {
+                ppExtensions[j] = ppExtensions[j+1];
+            }
+
+            *pExtensionCount -= 1;
+        } else {
+            iDesiredExtension += 1;
+        }
+    }
+}
+
+OC_PRIVATE void ocvkFilterUnsupportedDeviceExtensions(VkPhysicalDevice physicalDevice, const char* pLayerName, uint32_t* pExtensionCount, const char** ppExtensions)
+{
+    if (pExtensionCount == NULL || ppExtensions == NULL) {
+        return;
+    }
+
+    VkExtensionProperties supportedExtensions[256];
+    uint32_t supportedExtensionCount = sizeof(supportedExtensions) / sizeof(supportedExtensions[0]);
+    vkEnumerateDeviceExtensionProperties(physicalDevice, pLayerName, &supportedExtensionCount, supportedExtensions);
+
+    for (uint32_t iDesiredExtension = 0; iDesiredExtension < *pExtensionCount; /* DO NOTHING */) {
+        VkBool32 isSupported = VK_FALSE;
+        for (uint32_t iSupportedExtension = 0; iSupportedExtension < supportedExtensionCount; ++iSupportedExtension) {
+            if (strcmp(supportedExtensions[iSupportedExtension].extensionName, ppExtensions[iDesiredExtension]) == 0) {
+                isSupported = VK_TRUE;
+                break;
+            }
+        }
+
+        if (!isSupported) {
+            for (uint32_t j = iDesiredExtension; j < *pExtensionCount-1; ++j) {
+                ppExtensions[j] = ppExtensions[j+1];
+            }
+
+            *pExtensionCount -= 1;
+        } else {
+            iDesiredExtension += 1;
+        }
+    }
+}
+
+OC_PRIVATE VkResult ocvkCreateShaderModule(VkDevice device, size_t codeSize, const uint32_t* pCode, const VkAllocationCallbacks* pAllocator, VkShaderModule* pShaderModule)
+{
+    VkShaderModuleCreateInfo info;
+    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    info.pNext = NULL;
+    info.flags = 0;
+    info.codeSize = codeSize;
+    info.pCode = pCode;
+    return vkCreateShaderModule(device, &info, pAllocator, pShaderModule);
+}
+
+OC_PRIVATE uint32_t ocvkGetMemoryTypeIndex(VkPhysicalDevice physicalDevice, uint32_t memoryTypeBits, VkMemoryPropertyFlags propertyFlags)
+{
+    VkPhysicalDeviceMemoryProperties memoryProps;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProps);
+
+    for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
+        if ((memoryTypeBits & (1 << i)) && (memoryProps.memoryTypes[i].propertyFlags & propertyFlags) == propertyFlags) {
+            return i;
+        }
+    }
+
+    return 0xFFFFFFFF;  // Error.
+}
+
+OC_PRIVATE VkResult ocvkAllocateAndBindImageMemory(VkPhysicalDevice physicalDevice, VkDevice device, VkImage image, VkMemoryPropertyFlags memoryPropertyFlags, const VkAllocationCallbacks* pAllocator, VkDeviceMemory* pMemory)
+{
+    VkMemoryRequirements memreqs;
+    vkGetImageMemoryRequirements(device, image, &memreqs);
+
+    VkMemoryAllocateInfo allocInfo;
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.pNext = NULL;
+    allocInfo.allocationSize = memreqs.size;
+    allocInfo.memoryTypeIndex = ocvkGetMemoryTypeIndex(physicalDevice, memreqs.memoryTypeBits, memoryPropertyFlags);
+    VkResult result = vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
+    if (result != VK_SUCCESS) {
+        return result;
+    }
+
+    return vkBindImageMemory(device, image, *pMemory, 0);
+}
+
+OC_PRIVATE VkResult ocvkAllocateAndBindBufferMemory(VkPhysicalDevice physicalDevice, VkDevice device, VkBuffer buffer, VkMemoryPropertyFlags memoryPropertyFlags, const VkAllocationCallbacks* pAllocator, VkDeviceMemory* pMemory)
+{
+    VkMemoryRequirements memreqs;
+    vkGetBufferMemoryRequirements(device, buffer, &memreqs);
+
+    VkMemoryAllocateInfo allocInfo;
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.pNext = NULL;
+    allocInfo.allocationSize = memreqs.size;
+    allocInfo.memoryTypeIndex = ocvkGetMemoryTypeIndex(physicalDevice, memreqs.memoryTypeBits, memoryPropertyFlags);
+    VkResult result = vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
+    if (result != VK_SUCCESS) {
+        return result;
+    }
+
+    return vkBindBufferMemory(device, buffer, *pMemory, 0);
+}
+
+OC_PRIVATE VkResult ocvkFlushMemory(VkDevice device, VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size)
+{
+    VkMappedMemoryRange memoryRange;
+    memoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    memoryRange.pNext = NULL;
+    memoryRange.memory = memory;
+    memoryRange.offset = offset;
+    memoryRange.size = size;
+    return vkFlushMappedMemoryRanges(device, 1, &memoryRange);
+}
+
+OC_PRIVATE VkResult ocvkCreateStagingBuffer(VkPhysicalDevice physicalDevice, VkDevice device, size_t dataSize, const void* pData, const VkAllocationCallbacks* pAllocator, VkBuffer* pBuffer, VkDeviceMemory* pMemory)
+{
+    *pBuffer = NULL;
+    *pMemory = NULL;
+
+    VkBufferCreateInfo bufferInfo;
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.pNext = NULL;
+    bufferInfo.flags = 0;
+    bufferInfo.size = dataSize;
+    bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferInfo.queueFamilyIndexCount = 0;
+    bufferInfo.pQueueFamilyIndices = NULL;
+
+    VkBuffer buffer;
+    VkResult result = vkCreateBuffer(device, &bufferInfo, pAllocator, &buffer);
+    if (result != VK_SUCCESS) {
+        return result;
+    }
+
+    VkDeviceMemory memory;
+    result = ocvkAllocateAndBindBufferMemory(physicalDevice, device, buffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, pAllocator, &memory);
+    if (result != VK_SUCCESS) {
+        vkDestroyBuffer(device, buffer, pAllocator);
+        return result;
+    }
+
+    // Set the data if we have some.
+    if (pData != NULL) {
+        void* pInternalData;
+        result = vkMapMemory(device, memory, 0, dataSize, 0, &pInternalData);
+        if (result != VK_SUCCESS) {
+            vkFreeMemory(device, memory, pAllocator);
+            vkDestroyBuffer(device, buffer, pAllocator);
+            return result;
+        }
+
+        memcpy(pInternalData, pData, dataSize);
+
+        // My intuition tells me that vkUnmapMemory() should do an implicit flush, however I am unable to find any documentation that
+        // confirms this behaviour. If I try to flush the memory _after_ unmapping, I get an error from the validation layer. Doing it
+        // _before_ unmapping makes the error go away.
+        ocvkFlushMemory(device, memory, 0, dataSize);
+        vkUnmapMemory(device, memory);  // Is this an implicit flush?
+    }
+
+
+    *pBuffer = buffer;
+    *pMemory = memory;
+    return VK_SUCCESS;
+}
+
+
 OC_PRIVATE VkResult ocGraphicsDoInitialImageLayoutTransition(ocGraphicsContext* pGraphics, VkImage image, VkImageSubresourceRange subresourceRange, VkAccessFlags dstAccessMask, VkImageLayout newLayout)
 {
     VkCommandBuffer cmdbuffer;
-    VkResult vkresult = drvkAllocateCommandBuffers(pGraphics->device, pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmdbuffer);
+    VkResult vkresult = ocvkAllocateCommandBuffers(pGraphics->device, pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmdbuffer);
     if (vkresult != VK_SUCCESS) {
         return vkresult;
     }
 
-    drvkBeginCommandBuffer(cmdbuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT, NULL);
+    ocvkBeginCommandBuffer(cmdbuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT, NULL);
     {
-        VkImageMemoryBarrier barrier = drvkDefaultImageMemoryBarrier();
+        VkImageMemoryBarrier barrier;
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.pNext = NULL;
         barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
         barrier.dstAccessMask = dstAccessMask;
         barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -128,7 +544,9 @@ OC_PRIVATE VkResult ocGraphicsDoInitialImageLayoutTransition(ocGraphicsContext* 
     }
     vkEndCommandBuffer(cmdbuffer);
 
-    VkSubmitInfo submitInfo = drvkDefaultSubmitInfo();
+    VkSubmitInfo submitInfo;
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.pNext = NULL;
     submitInfo.waitSemaphoreCount = 0;
     submitInfo.pWaitSemaphores = NULL;
     submitInfo.pWaitDstStageMask = NULL;
@@ -144,12 +562,93 @@ OC_PRIVATE VkResult ocGraphicsDoInitialImageLayoutTransition(ocGraphicsContext* 
     return VK_SUCCESS;
 }
 
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+OC_PRIVATE VkResult ocvkCreateWin32Surface(VkInstance instance, HWND hWnd, HINSTANCE hWin32Instance, VkSurfaceKHR* pSurface)
+{
+    if (hWin32Instance == NULL) {
+        hWin32Instance = (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE);
+    }
+
+    VkWin32SurfaceCreateInfoKHR surfaceInfo;
+    surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    surfaceInfo.pNext = NULL;
+    surfaceInfo.flags = 0;
+    surfaceInfo.hinstance = hWin32Instance;
+    surfaceInfo.hwnd = hWnd;
+    return vkCreateWin32SurfaceKHR(instance, &surfaceInfo, NULL, pSurface);
+}
+#endif
+
+OC_PRIVATE VkResult ocvkCreateSwapchain(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, uint32_t imageCount, VkSurfaceFormatKHR imageFormat, VkImageUsageFlags imageUsage, VkPresentModeKHR presentMode, VkSwapchainKHR oldSwapchain, VkSwapchainKHR* pSwapchain)
+{
+    VkSurfaceCapabilitiesKHR surfaceCaps;
+    VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCaps);
+    if (result != VK_SUCCESS) {
+        return result;
+    }
+
+    VkSwapchainCreateInfoKHR swapchainInfo;
+    swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapchainInfo.pNext = NULL;
+    swapchainInfo.flags = 0;
+    swapchainInfo.surface = surface;
+    swapchainInfo.minImageCount = imageCount;
+    swapchainInfo.imageFormat = imageFormat.format;
+    swapchainInfo.imageColorSpace = imageFormat.colorSpace;
+    swapchainInfo.imageExtent = surfaceCaps.currentExtent;
+    swapchainInfo.imageArrayLayers = 1;
+    swapchainInfo.imageUsage = imageUsage;
+    swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapchainInfo.queueFamilyIndexCount = 0;
+    swapchainInfo.pQueueFamilyIndices = NULL;
+    swapchainInfo.preTransform = surfaceCaps.currentTransform;
+    swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapchainInfo.presentMode = presentMode;
+    swapchainInfo.clipped = VK_TRUE;
+    swapchainInfo.oldSwapchain = oldSwapchain;
+    return vkCreateSwapchainKHR(device, &swapchainInfo, NULL, pSwapchain);
+}
+
+OC_PRIVATE VkSurfaceFormatKHR ocvkChooseSurfaceImageFormat(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, uint32_t desiredFormatsCount, VkFormat* pDesiredFormats)
+{
+    VkSurfaceFormatKHR pSupportedFormats[1024];
+    uint32_t supportedFormatsCount = sizeof(pSupportedFormats) / sizeof(pSupportedFormats[0]);
+    VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &supportedFormatsCount, pSupportedFormats);
+    if (result != VK_SUCCESS) {
+        VkSurfaceFormatKHR format;
+        format.format = VK_FORMAT_UNDEFINED;
+        format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+        return format;
+    }
+
+    uint32_t iFormat = (uint32_t)-1;
+    for (uint32_t iDesiredFormat = 0; iDesiredFormat < desiredFormatsCount; ++iDesiredFormat) {
+        for (uint32_t iSupportedFormat = 0; iSupportedFormat < supportedFormatsCount; ++iSupportedFormat) {
+            if (pSupportedFormats[iSupportedFormat].format == pDesiredFormats[iDesiredFormat]) {
+                iFormat = iSupportedFormat;
+                break;
+            }
+        }
+    }
+
+    return pSupportedFormats[iFormat];
+}
+
+OC_PRIVATE VkResult ocvkCreateSemaphore(VkDevice device, VkSemaphore* pSemaphore)
+{
+    VkSemaphoreCreateInfo semInfo;
+    semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semInfo.pNext = NULL;
+    semInfo.flags = 0;
+    return vkCreateSemaphore(device, &semInfo, NULL, pSemaphore);
+}
+
 
 OC_PRIVATE ocResult ocGraphicsInit_VulkanInstance(ocGraphicsContext* pGraphics)
 {
     ocAssert(pGraphics != NULL);
 
-    if (!drvkInit(DRVK_INIT_ALL)) {
+    if (vkbInit(&pGraphics->vk) != VK_SUCCESS) {
         return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
@@ -167,7 +666,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanInstance(ocGraphicsContext* pGraphics)
     };
 
     uint32_t enabledLayerCount = sizeof(ppEnabledLayerNames) / sizeof(ppEnabledLayerNames[0]);
-    drvkFilterUnsupportedLayers(&enabledLayerCount, ppEnabledLayerNames);
+    ocvkFilterUnsupportedLayers(&enabledLayerCount, ppEnabledLayerNames);
 #else
     uint32_t enabledLayerCount = 0;
     const char** ppEnabledLayerNames = NULL;
@@ -186,7 +685,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanInstance(ocGraphicsContext* pGraphics)
     };
 
     uint32_t enabledExtensionCount = sizeof(ppEnabledExtensionNames) / sizeof(ppEnabledExtensionNames[0]);
-    drvkFilterUnsupportedInstanceExtensions(NULL, &enabledExtensionCount, ppEnabledExtensionNames);
+    ocvkFilterUnsupportedInstanceExtensions(NULL, &enabledExtensionCount, ppEnabledExtensionNames);
 
 #if OC_LOG_LEVEL >= OC_LOG_LEVEL_VERBOSE
     ocLog(pGraphics->pEngine, "Extensions:");
@@ -214,15 +713,18 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanInstance(ocGraphicsContext* pGraphics)
     vkInstanceInfo.enabledExtensionCount = enabledExtensionCount;
     vkInstanceInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
     if (vkCreateInstance(&vkInstanceInfo, NULL, &pGraphics->instance) != VK_SUCCESS) {
-        drvkUninit();
+        vkbUninit();
         return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
-    if (!drvkInitInstanceAPIs(pGraphics->instance)) {
+    if (vkbInitInstanceAPI(pGraphics->instance, &pGraphics->vk) != VK_SUCCESS) {
         vkDestroyInstance(pGraphics->instance, NULL);
-        drvkUninit();
+        vkbUninit();
         return OC_FAILED_TO_INIT_GRAPHICS;
     }
+
+    // Bind the API to global scope for now. 
+    vkbBindAPI(&pGraphics->vk);
 
     return OC_SUCCESS;
 }
@@ -280,7 +782,7 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanDevices(ocGraphicsContext* pGraphics, u
     };
 
     uint32_t enabledDeviceExtensionCount = sizeof(ppEnabledDeviceExtensionNames) / sizeof(ppEnabledDeviceExtensionNames[0]);
-    drvkFilterUnsupportedDeviceExtensions(pGraphics->physicalDevice, NULL, &enabledDeviceExtensionCount, ppEnabledDeviceExtensionNames);
+    ocvkFilterUnsupportedDeviceExtensions(pGraphics->physicalDevice, NULL, &enabledDeviceExtensionCount, ppEnabledDeviceExtensionNames);
 
     VkDeviceCreateInfo deviceInfo;
     deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -385,7 +887,10 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanRenderPass_FinalComposite(ocGraphicsCon
     subpasses[0].preserveAttachmentCount = ocCountOf(pPreserveAttachments);
     subpasses[0].pPreserveAttachments = pPreserveAttachments;
 
-    VkRenderPassCreateInfo renderPassInfo = drvkDefaultRenderPassCreateInfo();
+    VkRenderPassCreateInfo renderPassInfo;
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.pNext = NULL;
+    renderPassInfo.flags = 0;
     renderPassInfo.attachmentCount = ocCountOf(attachments);
     renderPassInfo.pAttachments = attachments;
     renderPassInfo.subpassCount = ocCountOf(subpasses);
@@ -476,20 +981,20 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
     VkResult vkresult = VK_SUCCESS;
 
     // Shaders.
-    vkresult = drvkCreateShaderModule(pGraphics->device, sizeof(g_ocShader_Default_VERTEX), (const uint32_t*)g_ocShader_Default_VERTEX, NULL, &pGraphics->mainPipeline_VS);
+    vkresult = ocvkCreateShaderModule(pGraphics->device, sizeof(g_ocShader_Default_VERTEX), (const uint32_t*)g_ocShader_Default_VERTEX, NULL, &pGraphics->mainPipeline_VS);
     if (vkresult != VK_SUCCESS) {
         return ocToResultFromVulkan(vkresult);
     }
 
-    vkresult = drvkCreateShaderModule(pGraphics->device, sizeof(g_ocShader_Default_FRAGMENT), (const uint32_t*)g_ocShader_Default_FRAGMENT, NULL, &pGraphics->mainPipeline_FS);
+    vkresult = ocvkCreateShaderModule(pGraphics->device, sizeof(g_ocShader_Default_FRAGMENT), (const uint32_t*)g_ocShader_Default_FRAGMENT, NULL, &pGraphics->mainPipeline_FS);
     if (vkresult != VK_SUCCESS) {
         vkDestroyShaderModule(pGraphics->device, pGraphics->mainPipeline_VS, NULL);
         return ocToResultFromVulkan(vkresult);
     }
     
     VkPipelineShaderStageCreateInfo pStages[2];
-    pStages[0] = drvkPipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, pGraphics->mainPipeline_VS, "main", NULL);
-    pStages[1] = drvkPipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, pGraphics->mainPipeline_FS, "main", NULL);
+    pStages[0] = ocvkPipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, pGraphics->mainPipeline_VS, "main", NULL);
+    pStages[1] = ocvkPipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, pGraphics->mainPipeline_FS, "main", NULL);
 
 
     // Vertex Input.
@@ -672,7 +1177,10 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanPipelines(ocGraphicsContext* pGraphics)
 
 
     // Pipeline
-    VkGraphicsPipelineCreateInfo pipelineInfo = drvkDefaultGraphicsPipelineCreateInfo();
+    VkGraphicsPipelineCreateInfo pipelineInfo;
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.pNext = NULL;
+    pipelineInfo.flags = 0;
     pipelineInfo.stageCount = ocCountOf(pStages);
     pipelineInfo.pStages = pStages;
     pipelineInfo.pVertexInputState = &vertexInputStateInfo;
@@ -701,7 +1209,10 @@ OC_PRIVATE ocResult ocGraphicsInit_VulkanSamplers(ocGraphicsContext* pGraphics)
 {
     ocAssert(pGraphics != NULL);
 
-    VkSamplerCreateInfo samplerInfo = drvkDefaultSamplerCreateInfo();
+    VkSamplerCreateInfo samplerInfo;
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.pNext = NULL;
+    samplerInfo.flags = 0;
     samplerInfo.magFilter = VK_FILTER_LINEAR;
     samplerInfo.minFilter = VK_FILTER_LINEAR;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -829,7 +1340,7 @@ OC_PRIVATE void ocGraphicsUninit_Vulkan(ocGraphicsContext* pGraphics)
     // TODO: Implement this fully.
 
     vkDestroyInstance(pGraphics->instance, NULL);
-    drvkUninit();
+    vkbUninit();
 }
 
 void ocGraphicsUninit(ocGraphicsContext* pGraphics)
@@ -862,7 +1373,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 
     // We need a surface before we can create a swapchain.
 #ifdef OC_WIN32
-    vkresult = drvkCreateWin32Surface(pGraphics->instance, pWindow->hWnd, NULL, &pSwapchain->vkSurface);
+    vkresult = ocvkCreateWin32Surface(pGraphics->instance, pWindow->hWnd, NULL, &pSwapchain->vkSurface);
     if (vkresult != VK_SUCCESS) {
         ocFree(pSwapchain);
         return ocToResultFromVulkan(vkresult);
@@ -910,11 +1421,11 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
         //VK_FORMAT_B8G8R8A8_SRGB,
     };
 
-    VkSurfaceFormatKHR format = drvkChooseSurfaceImageFormat(pGraphics->physicalDevice, pSwapchain->vkSurface, sizeof(pDesiredFormats) / sizeof(pDesiredFormats[0]), pDesiredFormats);
+    VkSurfaceFormatKHR format = ocvkChooseSurfaceImageFormat(pGraphics->physicalDevice, pSwapchain->vkSurface, sizeof(pDesiredFormats) / sizeof(pDesiredFormats[0]), pDesiredFormats);
 
     // Create the swapchain after support validation.
     // TODO: Check if we can remove VK_IMAGE_USAGE_TRANSFER_DST_BIT
-    vkresult = drvkCreateSwapchain(pGraphics->physicalDevice, pGraphics->device, pSwapchain->vkSurface, imageCount, format, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+    vkresult = ocvkCreateSwapchain(pGraphics->physicalDevice, pGraphics->device, pSwapchain->vkSurface, imageCount, format, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         ocGraphicsGetBestPresentMode(pGraphics->physicalDevice, pSwapchain->vkSurface, ocVSyncMode_Adaptive), NULL, &pSwapchain->vkSwapchain);
     if (vkresult != VK_SUCCESS) {
         vkDestroySurfaceKHR(pGraphics->instance, pSwapchain->vkSurface, NULL);
@@ -925,7 +1436,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 
     // We need a sempahore to wait on for when we need to output to final result to the next image in the swapchain. This is signaled
     // in vkAcquireNextImageKHR() and waited on by the queue when the image is transitioned to it's new state in preparation for output.
-    vkresult = drvkCreateSemaphore(pGraphics->device, &pSwapchain->vkNextImageSem);
+    vkresult = ocvkCreateSemaphore(pGraphics->device, &pSwapchain->vkNextImageSem);
     if (vkresult != VK_SUCCESS) {
         vkDestroySwapchainKHR(pGraphics->device, pSwapchain->vkSwapchain, NULL);
         vkDestroySurfaceKHR(pGraphics->instance, pSwapchain->vkSurface, NULL);
@@ -1116,10 +1627,13 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
     pImage->sizeY = pDesc->pMipmaps[0].height;
     pImage->mipLevels = pDesc->mipLevels;
 
-    VkImageCreateInfo imageInfo = drvkDefaultImageCreateInfo();
+    VkImageCreateInfo imageInfo;
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.pNext = NULL;
+    imageInfo.flags = 0;;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
     imageInfo.format = pImage->format;
-    imageInfo.extent = drvkExtent3D(pImage->sizeX, pImage->sizeY, 1);
+    imageInfo.extent = ocvkExtent3D(pImage->sizeX, pImage->sizeY, 1);
     imageInfo.mipLevels = pDesc->mipLevels;
     imageInfo.arrayLayers = 1;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -1134,7 +1648,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         return ocToResultFromVulkan(vkresult);
     }
 
-    vkresult = drvkAllocateAndBindImageMemory(pGraphics->physicalDevice, pGraphics->device, pImage->imageVK, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, NULL, &pImage->imageMemoryVK);
+    vkresult = ocvkAllocateAndBindImageMemory(pGraphics->physicalDevice, pGraphics->device, pImage->imageVK, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, NULL, &pImage->imageMemoryVK);
     if (vkresult != VK_SUCCESS) {
         return ocToResultFromVulkan(vkresult);
     }
@@ -1145,7 +1659,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         // We need a staging buffer for the image data. The data for each mipmap is tighly packed into the main buffer.
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        vkresult = drvkCreateStagingBuffer(pGraphics->physicalDevice, pGraphics->device, pDesc->imageDataSize, pDesc->pImageData, NULL, &stagingBuffer, &stagingBufferMemory);
+        vkresult = ocvkCreateStagingBuffer(pGraphics->physicalDevice, pGraphics->device, pDesc->imageDataSize, pDesc->pImageData, NULL, &stagingBuffer, &stagingBufferMemory);
         if (vkresult != VK_SUCCESS) {
             vkDestroyImage(pGraphics->device, pImage->imageVK, NULL);
             vkFreeMemory(pGraphics->device, pImage->imageMemoryVK, NULL);
@@ -1170,7 +1684,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         }
 
         VkCommandBuffer cmdbuffer;
-        vkresult = drvkAllocateCommandBuffers(pGraphics->device, pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmdbuffer);
+        vkresult = ocvkAllocateCommandBuffers(pGraphics->device, pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmdbuffer);
         if (vkresult != VK_SUCCESS) {
             vkDestroyImage(pGraphics->device, pImage->imageVK, NULL);
             vkFreeMemory(pGraphics->device, pImage->imageMemoryVK, NULL);
@@ -1179,7 +1693,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
             return ocToResultFromVulkan(vkresult);
         }
 
-        drvkBeginCommandBuffer(cmdbuffer, 0, NULL);
+        ocvkBeginCommandBuffer(cmdbuffer, 0, NULL);
         {
             VkImageMemoryBarrier barrier;
             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1209,7 +1723,9 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         vkEndCommandBuffer(cmdbuffer);
 
         
-        VkSubmitInfo submitInfo = drvkDefaultSubmitInfo();
+        VkSubmitInfo submitInfo;
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = NULL;
         submitInfo.waitSemaphoreCount = 0;
         submitInfo.pWaitSemaphores = NULL;
         submitInfo.pWaitDstStageMask = NULL;
@@ -1230,7 +1746,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
 
 
     // The image view. This is always the same format as the main image.
-    vkresult = drvkCreateSimpleImageView(pGraphics->device, pImage->imageVK, VK_IMAGE_VIEW_TYPE_2D, pImage->format, drvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, pDesc->mipLevels, 0, 1), NULL, &pImage->imageViewVK);
+    vkresult = ocvkCreateSimpleImageView(pGraphics->device, pImage->imageVK, VK_IMAGE_VIEW_TYPE_2D, pImage->format, ocvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, pDesc->mipLevels, 0, 1), NULL, &pImage->imageViewVK);
     if (vkresult != VK_SUCCESS) {
         // TODO: Cleanup.
         return ocToResultFromVulkan(vkresult);
@@ -1276,7 +1792,10 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
 
 
     // Buffer objects.
-    VkBufferCreateInfo bufferInfo = drvkDefaultBufferCreateInfo();
+    VkBufferCreateInfo bufferInfo;
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.pNext = NULL;
+    bufferInfo.flags = 0;
     bufferInfo.size = vertexBufferSize;
     bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -1302,7 +1821,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
     //
     // TODO: Make this device local and use a staging buffer.
 
-    vkresult = drvkAllocateAndBindBufferMemory(pGraphics->physicalDevice, pGraphics->device, pMesh->vertexBufferVK, /*VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT*/ VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, NULL, &pMesh->vertexBufferMemory);
+    vkresult = ocvkAllocateAndBindBufferMemory(pGraphics->physicalDevice, pGraphics->device, pMesh->vertexBufferVK, /*VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT*/ VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, NULL, &pMesh->vertexBufferMemory);
     if (vkresult != VK_SUCCESS) {
         vkDestroyBuffer(pGraphics->device, pMesh->vertexBufferVK, NULL);
         vkDestroyBuffer(pGraphics->device, pMesh->indexBufferVK, NULL);
@@ -1315,7 +1834,7 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
     vkUnmapMemory(pGraphics->device, pMesh->vertexBufferMemory);
 
 
-    vkresult = drvkAllocateAndBindBufferMemory(pGraphics->physicalDevice, pGraphics->device, pMesh->indexBufferVK, /*VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT*/ VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, NULL, &pMesh->indexBufferMemory);
+    vkresult = ocvkAllocateAndBindBufferMemory(pGraphics->physicalDevice, pGraphics->device, pMesh->indexBufferVK, /*VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT*/ VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, NULL, &pMesh->indexBufferMemory);
     if (vkresult != VK_SUCCESS) {
         vkDestroyBuffer(pGraphics->device, pMesh->vertexBufferVK, NULL);
         vkDestroyBuffer(pGraphics->device, pMesh->indexBufferVK, NULL);
@@ -1387,31 +1906,37 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     memcpy(ocOffsetPtr(pRT->pUniformBufferData, sizeof(glm::mat4)), &pRT->view,       sizeof(pRT->view));
 
     // The descriptor set for the RTs uniforms need to be updated.
-    VkWriteDescriptorSet descriptorWrite = drvkDefaultWriteDescriptorSet();
+    VkWriteDescriptorSet descriptorWrite;
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.pNext = NULL;
     descriptorWrite.dstSet = pWorld->pGraphics->mainPipeline_DescriptorSets[0];
     descriptorWrite.dstBinding = 0;
     descriptorWrite.dstArrayElement = 0;
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.pImageInfo = NULL;
     descriptorWrite.pBufferInfo = &pRT->uniformBufferDescriptor;
+    descriptorWrite.pTexelBufferView = NULL;
     vkUpdateDescriptorSets(pWorld->pGraphics->device, 1, &descriptorWrite, 0, NULL);
 
-    descriptorWrite = drvkDefaultWriteDescriptorSet();
     descriptorWrite.dstSet = pWorld->pGraphics->mainPipeline_DescriptorSets[0];
     descriptorWrite.dstBinding = 1;
     descriptorWrite.dstArrayElement = 0;
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.pImageInfo = NULL;
     descriptorWrite.pBufferInfo = &pWorld->pObjects->at(0)->uniformBufferDescriptor;
+    descriptorWrite.pTexelBufferView = NULL;
     vkUpdateDescriptorSets(pWorld->pGraphics->device, 1, &descriptorWrite, 0, NULL);
 
-    descriptorWrite = drvkDefaultWriteDescriptorSet();
     descriptorWrite.dstSet = pWorld->pGraphics->mainPipeline_DescriptorSets[0];
     descriptorWrite.dstBinding = 2;
     descriptorWrite.dstArrayElement = 0;
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     descriptorWrite.pImageInfo = &pWorld->pCurrentImage->descriptor;
+    descriptorWrite.pBufferInfo = NULL;
+    descriptorWrite.pTexelBufferView = NULL;
     vkUpdateDescriptorSets(pWorld->pGraphics->device, 1, &descriptorWrite, 0, NULL);
 
 
@@ -1426,7 +1951,9 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     // TODO:
     // - Use pre-recorded command buffers.
 
-    VkSubmitInfo submitInfo = drvkDefaultSubmitInfo();
+    VkSubmitInfo submitInfo;
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.pNext = NULL;
     submitInfo.waitSemaphoreCount = 0;
     submitInfo.pWaitSemaphores = NULL;
     submitInfo.pWaitDstStageMask = NULL;
@@ -1453,29 +1980,31 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     // RENDER STUFF
 
     VkCommandBuffer cmdbuf;
-    VkResult vkresult = drvkAllocateCommandBuffers(pWorld->pGraphics->device, pWorld->pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmdbuf);
+    VkResult vkresult = ocvkAllocateCommandBuffers(pWorld->pGraphics->device, pWorld->pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmdbuf);
     if (vkresult != VK_SUCCESS) {
         return;
     }
 
-    drvkBeginCommandBuffer(cmdbuf, 0, NULL);
+    ocvkBeginCommandBuffer(cmdbuf, 0, NULL);
     {
         VkClearValue pClearValues[2];
-        pClearValues[0] = drvkClearValueColor4f(0, 0, 1, 1);
-        pClearValues[1] = drvkClearValueDepthStencil(1.0, 0);
+        pClearValues[0] = ocvkClearValueColor4f(0, 0, 1, 1);
+        pClearValues[1] = ocvkClearValueDepthStencil(1.0, 0);
 
-        VkRenderPassBeginInfo renderPassBeginInfo = drvkDefaultrenderPassBeginInfo();
+        VkRenderPassBeginInfo renderPassBeginInfo;
+        renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.pNext = NULL;
         renderPassBeginInfo.renderPass = pWorld->pGraphics->renderPass0;
         renderPassBeginInfo.framebuffer = pRT->mainFramebuffer;
-        renderPassBeginInfo.renderArea = drvkRect2D(0, 0, pRT->sizeX, pRT->sizeY);
+        renderPassBeginInfo.renderArea = ocvkRect2D(0, 0, pRT->sizeX, pRT->sizeY);
         renderPassBeginInfo.clearValueCount = ocCountOf(pClearValues);
         renderPassBeginInfo.pClearValues = pClearValues;
         vkCmdBeginRenderPass(cmdbuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
         {
-            VkViewport viewport = drvkViewport(0, 0, (float)pRT->sizeX, (float)pRT->sizeY, 0, 1);
+            VkViewport viewport = ocvkViewport(0, 0, (float)pRT->sizeX, (float)pRT->sizeY, 0, 1);
             vkCmdSetViewport(cmdbuf, 0, 1, &viewport);
 
-            VkRect2D scissor = drvkRect2D(0, 0, pRT->sizeX, pRT->sizeY);
+            VkRect2D scissor = ocvkRect2D(0, 0, pRT->sizeX, pRT->sizeY);
             vkCmdSetScissor(cmdbuf, 0, 1, &scissor);
 
             // Draw some objects.
@@ -1506,7 +2035,7 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
             renderPassBeginInfo.framebuffer = pRT->outputFBs[0];
         }
 
-        renderPassBeginInfo.renderArea = drvkRect2D(0, 0, pRT->sizeX, pRT->sizeY);
+        renderPassBeginInfo.renderArea = ocvkRect2D(0, 0, pRT->sizeX, pRT->sizeY);
         renderPassBeginInfo.clearValueCount = 0;
         renderPassBeginInfo.pClearValues = NULL;
         vkCmdBeginRenderPass(cmdbuf, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -1521,7 +2050,6 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     }
     vkEndCommandBuffer(cmdbuf);
 
-    submitInfo = drvkDefaultSubmitInfo();
     submitInfo.waitSemaphoreCount = 0;
     submitInfo.pWaitSemaphores = NULL;
     submitInfo.pWaitDstStageMask = NULL;
@@ -1602,14 +2130,14 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
     ocAssert(sizeY > 0);
 
     // Image objects.
-    VkImageCreateInfo imageInfo = drvkSimpleImageCreateInfo2D(VK_FORMAT_R8G8B8A8_UNORM, sizeX, sizeY, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
+    VkImageCreateInfo imageInfo = ocvkSimpleImageCreateInfo2D(VK_FORMAT_R8G8B8A8_UNORM, sizeX, sizeY, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
     imageInfo.samples = pWorld->pGraphics->msaaSamples;
     VkResult vkresult = vkCreateImage(pWorld->pGraphics->device, &imageInfo, NULL, &pRT->colorImage);
     if (vkresult != VK_SUCCESS) {
         return ocToResultFromVulkan(vkresult);
     }
 
-    imageInfo = drvkSimpleImageCreateInfo2D(VK_FORMAT_D24_UNORM_S8_UINT, sizeX, sizeY, 1, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    imageInfo = ocvkSimpleImageCreateInfo2D(VK_FORMAT_D24_UNORM_S8_UINT, sizeX, sizeY, 1, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     imageInfo.samples = pWorld->pGraphics->msaaSamples;
     vkresult = vkCreateImage(pWorld->pGraphics->device, &imageInfo, NULL, &pRT->dsImage);
     if (vkresult != VK_SUCCESS) {
@@ -1619,13 +2147,13 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
 
 
     // Memory
-    vkresult = drvkAllocateAndBindImageMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pRT->colorImage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, NULL, &pRT->colorImageMemory);
+    vkresult = ocvkAllocateAndBindImageMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pRT->colorImage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, NULL, &pRT->colorImageMemory);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
     }
 
-    vkresult = drvkAllocateAndBindImageMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pRT->dsImage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, NULL, &pRT->dsImageMemory);
+    vkresult = ocvkAllocateAndBindImageMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pRT->dsImage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, NULL, &pRT->dsImageMemory);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
@@ -1633,13 +2161,13 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
 
 
     // Views
-    vkresult = drvkCreateSimpleImageView(pWorld->pGraphics->device, pRT->colorImage, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM, drvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1), NULL, &pRT->colorImageView);
+    vkresult = ocvkCreateSimpleImageView(pWorld->pGraphics->device, pRT->colorImage, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM, ocvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1), NULL, &pRT->colorImageView);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
     }
 
-    vkresult = drvkCreateSimpleImageView(pWorld->pGraphics->device, pRT->dsImage, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_D24_UNORM_S8_UINT, drvkImageSubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1), NULL, &pRT->dsImageView);
+    vkresult = ocvkCreateSimpleImageView(pWorld->pGraphics->device, pRT->dsImage, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_D24_UNORM_S8_UINT, ocvkImageSubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1), NULL, &pRT->dsImageView);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
@@ -1651,7 +2179,10 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
     attachments[0] = pRT->colorImageView;
     attachments[1] = pRT->dsImageView;
 
-    VkFramebufferCreateInfo fbInfo = drvkDefaultFramebufferCreateInfo();
+    VkFramebufferCreateInfo fbInfo;
+    fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbInfo.pNext = NULL;
+    fbInfo.flags = 0;
     fbInfo.renderPass = pWorld->pGraphics->renderPass0;
     fbInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
     fbInfo.pAttachments = attachments;
@@ -1666,13 +2197,13 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
 
 
     // Transition images to a known state.
-    vkresult = ocGraphicsDoInitialImageLayoutTransition(pWorld->pGraphics, pRT->colorImage, drvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    vkresult = ocGraphicsDoInitialImageLayoutTransition(pWorld->pGraphics, pRT->colorImage, ocvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
     }
 
-    vkresult = ocGraphicsDoInitialImageLayoutTransition(pWorld->pGraphics, pRT->dsImage, drvkImageSubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    vkresult = ocGraphicsDoInitialImageLayoutTransition(pWorld->pGraphics, pRT->dsImage, ocvkImageSubresourceRange(VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, 1, 0, 1), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
@@ -1680,15 +2211,17 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
 
 
     // Create the command buffer that is used to transition the framebuffers into their initial state.
-    vkresult = drvkAllocateCommandBuffers(pWorld->pGraphics->device, pWorld->pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &pRT->cbPreTransition);
+    vkresult = ocvkAllocateCommandBuffers(pWorld->pGraphics->device, pWorld->pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &pRT->cbPreTransition);
     if (vkresult != VK_SUCCESS) {
         ocGraphicsWorldUninitRT_MainFramebuffer(pWorld, pRT);
         return ocToResultFromVulkan(vkresult);
     }
 
-    drvkBeginCommandBuffer(pRT->cbPreTransition, 0, NULL);
+    ocvkBeginCommandBuffer(pRT->cbPreTransition, 0, NULL);
     {
-        VkImageMemoryBarrier barrier = drvkDefaultImageMemoryBarrier();
+        VkImageMemoryBarrier barrier;
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.pNext = NULL;
         barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
         barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -1696,7 +2229,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_MainFramebuffer(ocGraphicsWorl
         barrier.srcQueueFamilyIndex = pWorld->pGraphics->queueFamilyIndex;
         barrier.dstQueueFamilyIndex = pWorld->pGraphics->queueFamilyIndex;
         barrier.image = pRT->colorImage;
-        barrier.subresourceRange = drvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+        barrier.subresourceRange = ocvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
         vkCmdPipelineBarrier(pRT->cbPreTransition, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
     }
     vkEndCommandBuffer(pRT->cbPreTransition);
@@ -1735,7 +2268,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(ocGraphicsW
 
     // Output image views.
     for (uint32_t iOutputImage = 0; iOutputImage < outputImageCount; ++iOutputImage) {
-        VkResult vkresult = drvkCreateSimpleImageView(pWorld->pGraphics->device, pOutputImages[iOutputImage], VK_IMAGE_VIEW_TYPE_2D, outputImageFormat, drvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1), NULL, &pRT->outputImageViews[iOutputImage]);
+        VkResult vkresult = ocvkCreateSimpleImageView(pWorld->pGraphics->device, pOutputImages[iOutputImage], VK_IMAGE_VIEW_TYPE_2D, outputImageFormat, ocvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1), NULL, &pRT->outputImageViews[iOutputImage]);
         if (vkresult != VK_SUCCESS) {
             goto on_error;
         }
@@ -1744,7 +2277,10 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(ocGraphicsW
         attachments[0] = pRT->outputImageViews[iOutputImage];
         attachments[1] = pRT->colorImageView;
 
-        VkFramebufferCreateInfo fbInfo = drvkDefaultFramebufferCreateInfo();
+        VkFramebufferCreateInfo fbInfo;
+        fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        fbInfo.pNext = NULL;
+        fbInfo.flags = 0;
         fbInfo.renderPass = pWorld->pGraphics->renderPass_FinalComposite_Image;     // <-- renderPass_FinalComposite_Image and renderPass_FinalComposite_Window should be compatible.
         fbInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
         fbInfo.pAttachments = attachments;
@@ -1758,14 +2294,16 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(ocGraphicsW
 
 
         // Command buffers for initial transition before being drawn to.
-        vkresult = drvkAllocateCommandBuffers(pWorld->pGraphics->device, pWorld->pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &pRT->cbPreTransition_Outputs[iOutputImage]);
+        vkresult = ocvkAllocateCommandBuffers(pWorld->pGraphics->device, pWorld->pGraphics->commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &pRT->cbPreTransition_Outputs[iOutputImage]);
         if (vkresult != VK_SUCCESS) {
             goto on_error;
         }
 
-        drvkBeginCommandBuffer(pRT->cbPreTransition_Outputs[iOutputImage], 0, NULL);
+        ocvkBeginCommandBuffer(pRT->cbPreTransition_Outputs[iOutputImage], 0, NULL);
         {
-            VkImageMemoryBarrier barrier = drvkDefaultImageMemoryBarrier();
+            VkImageMemoryBarrier barrier;
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            barrier.pNext = NULL;
             barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
             barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
             if (pRT->pSwapchain != NULL) {
@@ -1777,7 +2315,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT_OutputFramebuffers(ocGraphicsW
             barrier.srcQueueFamilyIndex = pWorld->pGraphics->queueFamilyIndex;
             barrier.dstQueueFamilyIndex = pWorld->pGraphics->queueFamilyIndex;
             barrier.image = pOutputImages[iOutputImage];
-            barrier.subresourceRange = drvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
+            barrier.subresourceRange = ocvkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1);
             vkCmdPipelineBarrier(pRT->cbPreTransition_Outputs[iOutputImage], VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
         }
         vkEndCommandBuffer(pRT->cbPreTransition_Outputs[iOutputImage]);
@@ -1834,7 +2372,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
 
 
     // Uniform buffer.
-    VkBufferCreateInfo uboInfo; // TODO: drvkBufferCreateInfo() / drvkDefaultBufferCreateInfo() / drvkSimpleBufferCreateInfo()
+    VkBufferCreateInfo uboInfo;
     uboInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     uboInfo.pNext = NULL;
     uboInfo.flags = 0;
@@ -1851,7 +2389,7 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
         return result;
     }
 
-    vkresult = drvkAllocateAndBindBufferMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pRT->uniformBuffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, NULL, &pRT->uniformBufferMemory);
+    vkresult = ocvkAllocateAndBindBufferMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pRT->uniformBuffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, NULL, &pRT->uniformBufferMemory);
     if (vkresult != VK_SUCCESS) {
         vkDestroyBuffer(pWorld->pGraphics->device, pRT->uniformBuffer, NULL);
         ocGraphicsWorldUninitRT_OutputFramebuffers(pWorld, pRT);
@@ -1947,7 +2485,7 @@ OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWo
     pObject->_transform = glm::mat4();
 
     // Uniform buffer.
-    VkBufferCreateInfo uboInfo; // TODO: drvkBufferCreateInfo() / drvkDefaultBufferCreateInfo() / drvkSimpleBufferCreateInfo()
+    VkBufferCreateInfo uboInfo; // TODO: ocvkBufferCreateInfo() / ocvkDefaultBufferCreateInfo() / ocvkSimpleBufferCreateInfo()
     uboInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     uboInfo.pNext = NULL;
     uboInfo.flags = 0;
@@ -1961,7 +2499,7 @@ OC_PRIVATE ocResult ocGraphicsObjectInit(ocGraphicsObject* pObject, ocGraphicsWo
         return result;
     }
 
-    vkresult = drvkAllocateAndBindBufferMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pObject->uniformBuffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, NULL, &pObject->uniformBufferMemory);
+    vkresult = ocvkAllocateAndBindBufferMemory(pWorld->pGraphics->physicalDevice, pWorld->pGraphics->device, pObject->uniformBuffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, NULL, &pObject->uniformBufferMemory);
     if (vkresult != VK_SUCCESS) {
         vkDestroyBuffer(pWorld->pGraphics->device, pObject->uniformBuffer, NULL);
         return result;

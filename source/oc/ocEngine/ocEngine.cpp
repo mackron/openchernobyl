@@ -104,8 +104,8 @@
     #include "../../external/dr_graphics/dr_gl.h"
 #endif
 #ifdef OC_USE_VULKAN
-    #define DR_VULKAN_IMPLEMENTATION
-    #include "../../external/dr_graphics/dr_vulkan.h"
+    #define VKBIND_IMPLEMENTATION
+    #include "../../external/vkbind/vkbind.h"
 #endif
 
 #define MINIAUDIO_IMPLEMENTATION
