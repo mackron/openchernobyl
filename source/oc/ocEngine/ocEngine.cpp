@@ -82,12 +82,10 @@
     #pragma warning(pop)
 #endif
 
-#define STB_PERLIN_IMPLEMENTATION
-#include "../../external/stb/stb_perlin.h"
-
 #define DR_FLAC_IMPLEMENTATION
-#define DR_WAV_IMPLEMENTATION
 #include "../../external/dr_libs/dr_flac.h"
+
+#define DR_WAV_IMPLEMENTATION
 #include "../../external/dr_libs/dr_wav.h"
 
 #define DR_FS_IMPLEMENTATION
@@ -105,7 +103,6 @@
     #define DR_GL_IMPLEMENTATION
     #include "../../external/dr_graphics/dr_gl.h"
 #endif
-
 #ifdef OC_USE_VULKAN
     #define DR_VULKAN_IMPLEMENTATION
     #include "../../external/dr_graphics/dr_vulkan.h"

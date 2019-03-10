@@ -54,7 +54,6 @@
 #endif
 
 // External libraries.
-
 #include "../../external/stb/stb_image.h"
 
 #define STBI_WRITE_NO_STDIO
