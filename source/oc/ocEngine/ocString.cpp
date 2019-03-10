@@ -1,5 +1,14 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
+ocString ocMallocString(size_t sizeInBytesIncludingNullTerminator)
+{
+    if (sizeInBytesIncludingNullTerminator == 0) {
+        return NULL;
+    }
+
+    return (ocString)ocCalloc(sizeInBytesIncludingNullTerminator, 1);   // Use calloc() to ensure it's null terminated.
+}
+
 ocString ocMakeString(const char* str)
 {
     if (str == NULL) return NULL;

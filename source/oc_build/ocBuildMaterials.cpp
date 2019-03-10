@@ -271,7 +271,7 @@ ocResult ocBuildCompileMaterials(int argc, char** argv, ocBuildGraphicsContext* 
     }
 
     char materialsFolderPath[256];
-    drpath_append_and_clean(materialsFolderPath, sizeof(materialsFolderPath), ocGetCurrentDirectory(), OC_BUILD_MATERIALS_INDIR);
+    ocPathAppendAndClean(materialsFolderPath, sizeof(materialsFolderPath), ocGetCurrentDirectory(), OC_BUILD_MATERIALS_INDIR);
     drfs_add_base_directory(&fs, materialsFolderPath);
 
     // Enumerate over each material.

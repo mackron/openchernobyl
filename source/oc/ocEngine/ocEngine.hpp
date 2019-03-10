@@ -33,6 +33,7 @@
 #ifdef OC_WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
+#include <shlobj.h>
 #include <intrin.h>
 #endif
 
@@ -52,12 +53,6 @@
 #include "../../external/stb/stb_image.h"
 #include "../../external/stb/stb_image_write.h"
 #include "../../external/stb/stb_vorbis.c"
-
-//#include "../../external/stb/stretchy_buffer.h"   // <-- Doesn't work with C++ at the moment.
-
-#ifndef DR_IMPLEMENTATION
-    #include "../../external/dr_libs/old/dr.h"  // TODO: Remove this dependency
-#endif
 
 #include "../../external/dr_libs/dr_flac.h"
 #include "../../external/dr_libs/dr_wav.h"
@@ -206,6 +201,7 @@ struct ocWorldObject;
 #include "ocRect.hpp"
 #include "ocContainers.hpp"
 #include "ocString.hpp"
+#include "ocPath.hpp"
 #include "ocImageUtils.hpp"
 #include "ocCommandLine.hpp"
 #include "ocPlatformLayer.hpp"

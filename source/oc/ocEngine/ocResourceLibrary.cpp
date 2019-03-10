@@ -180,9 +180,9 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
     ocFileInfo fileInfoOCD;
     ocZeroObject(&fileInfoOCD);
     ocBool32 hasOCD = OC_FALSE;
-    if (!drpath_extension_equal(filePath, "ocd")) {
+    if (!ocPathExtensionEqual(filePath, "ocd")) {
         char filePathOCD[OC_MAX_PATH];
-        if (drpath_copy_and_append_extension(filePathOCD, sizeof(filePathOCD), filePath, "ocd")) {
+        if (ocPathAppendExtension(filePathOCD, sizeof(filePathOCD), filePath, "ocd")) {
             hasOCD = ocGetFileInfo(pLibrary->pLoader->pFS, filePathOCD, &fileInfoOCD) == OC_SUCCESS;
         }
     }

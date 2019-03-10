@@ -15,7 +15,7 @@ ocResult ocLoggerInit(ocEngineContext* pEngine, ocLogger* pLogger)
 
     char logFilePath[OC_MAX_PATH];
     ocGetLogFolderPath(&pEngine->fs, logFilePath, sizeof(logFilePath));
-    drpath_append(logFilePath, sizeof(logFilePath), OC_LOG_FILE_NAME);
+    ocPathAppend(logFilePath, sizeof(logFilePath), logFilePath, OC_LOG_FILE_NAME);   // In-place append.
 
     ocResult result = ocFileOpen(&pEngine->fs, logFilePath, OC_WRITE | OC_CREATE_DIRS, &pLogger->file);
     if (result != OC_SUCCESS) {

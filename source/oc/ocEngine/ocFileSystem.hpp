@@ -104,6 +104,12 @@ ocResult ocFileWriteLine(ocFile* pFile, const char* str);
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// Retrieves the absolute path of the executable.
+ocResult ocGetExecutablePath(char* pathOut, size_t pathOutSize);
+
+// Retrieves the absolute path of the directory containing the executable.
+ocResult ocGetExecutableDirectoryPath(char* pathOut, size_t pathOutSize);
+
 // Retrieves the path of the directory that contains the log file.
 void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize);
 
@@ -150,3 +156,6 @@ ocResult ocOpenAndWriteFile(const char* filePath, const void* pFileData, size_t 
 
 // Creates a new file with the given string.
 ocResult ocOpenAndWriteTextFile(const char* filePath, const char* pFileData);
+
+// Copies a file.
+ocResult ocCopyFile(const char* srcPath, const char* dstPath, ocBool32 failIfExists);

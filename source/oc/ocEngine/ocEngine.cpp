@@ -14,6 +14,7 @@
 #include "ocMisc.cpp"
 #include "ocRect.cpp"
 #include "ocString.cpp"
+#include "ocPath.cpp"
 #include "ocImageUtils.cpp"
 #include "ocCommandLine.cpp"
 #include "ocPlatformLayer.cpp"
@@ -83,11 +84,6 @@
 
 #define STB_PERLIN_IMPLEMENTATION
 #include "../../external/stb/stb_perlin.h"
-
-#ifndef DR_IMPLEMENTATION
-    #define DR_IMPLEMENTATION
-    #include "../../external/dr_libs/old/dr.h"  // TODO: Remove this dependency.
-#endif
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_WAV_IMPLEMENTATION

@@ -14,8 +14,9 @@ ocResult ocBuildPrependToFile(const char* filePath, const void* pData, size_t da
         return result;
     }
 
-    FILE* pFileOut = dr_fopen(filePath, "wb");
-    if (pFileOut == NULL) {
+    FILE* pFileOut;
+    result = ocFOpen(filePath, "wb", &pFileOut);
+    if (result != OC_SUCCESS) {
         ocFree(pOriginalData);
         return OC_ERROR;
     }
@@ -48,8 +49,9 @@ ocResult ocBuildAppendToFile(const char* filePath, const void* pData, size_t dat
         return result;
     }
 
-    FILE* pFileOut = dr_fopen(filePath, "wb");
-    if (pFileOut == NULL) {
+    FILE* pFileOut;
+    result = ocFOpen(filePath, "wb", &pFileOut);
+    if (result != OC_SUCCESS) {
         ocFree(pOriginalData);
         return OC_ERROR;
     }

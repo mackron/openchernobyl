@@ -58,9 +58,9 @@ ocResult ocFileSystemInit(ocEngineContext* pEngine, ocFileSystem* pFS)
 
     // The base directories should always be relative to the executable.
     char exePath[OC_MAX_PATH];
-    if (dr_get_executable_directory_path(exePath, sizeof(exePath))) {
+    if (ocGetExecutableDirectoryPath(exePath, sizeof(exePath))) {
         char dataPath[OC_MAX_PATH];
-        drpath_copy_and_append(dataPath, sizeof(dataPath), exePath, "data");
+        ocPathAppend(dataPath, sizeof(dataPath), exePath, "data");
         drfs_add_base_directory(&pFS->internalFS, dataPath);
 
         // The executable's directory should be the lowest priority base directory.
@@ -238,6 +238,78 @@ ocResult ocFileWriteLine(ocFile* pFile, const char* str)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+ocResult ocGetExecutablePath(char* pathOut, size_t pathOutSize)
+{
+    if (pathOut == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+#if defined(OC_WIN32)
+    if (pathOut == NULL || pathOutSize == 0) {
+        return OC_INVALID_ARGS;
+    }
+
+    DWORD length = GetModuleFileNameA(NULL, pathOut, (DWORD)pathOutSize);
+    if (length == 0) {
+        pathOut[0] = '\0';
+        return OC_ERROR;    /* TODO: Return proper error code. */
+    }
+
+    // Force null termination.
+    if (length == pathOutSize) {
+        pathOut[length - 1] = '\0';
+    }
+
+    // Back slashes need to be normalized to forward.
+    while (pathOut[0] != '\0') {
+        if (pathOut[0] == '\\') {
+            pathOut[0] = '/';
+        }
+        pathOut += 1;
+    }
+
+    return OC_SUCCESS;
+#else
+    if (pathOut == NULL || pathOutSize == 0) {
+        return OC_INVALID_ARGS;
+    }
+
+    ssize_t length = readlink("/proc/self/exe", pathOut, pathOutSize);
+    if (length == -1) {
+        pathOut[0] = '\0';
+        return OC_ERROR;    /* TODO: Return proper error code. */
+    }
+
+    if ((size_t)length == pathOutSize) {
+        pathOut[length - 1] = '\0';
+    } else {
+        pathOut[length] = '\0';
+    }
+
+    return OC_SUCCESS;
+#endif
+}
+
+ocResult ocGetExecutableDirectoryPath(char* pathOut, size_t pathOutSize)
+{
+    ocResult result = ocGetExecutablePath(pathOut, pathOutSize);
+    if (result != OC_SUCCESS) {
+        return result;
+    }
+
+    // A null terminator needs to be placed at the last slash.
+    char* lastSlash = pathOut;
+    while (pathOut[0] != '\0') {
+        if (pathOut[0] == '/' || pathOut[0] == '\\') {
+            lastSlash = pathOut;
+        }
+        pathOut += 1;
+    }
+
+    lastSlash[0] = '\0';
+    return OC_SUCCESS;
+}
+
 void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
 {
     if (pathOut == NULL || pathOutSize == 0) {
@@ -245,24 +317,76 @@ void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
     }
 
     char logFolderPath[DRFS_MAX_PATH];
-    if (!ocIsPortable(pFS->pEngine) && dr_get_log_folder_path(logFolderPath, sizeof(logFolderPath))) {
+    ocBool32 useLocalPath = ocIsPortable(pFS->pEngine); // <-- Use the local log path for portable builds.
+
+#if defined(OC_WIN32)
+    // The documentation for SHGetFolderPathA() says that the output path should be the size of MAX_PATH. We'll enforce that just to be safe.
+    if (pathOutSize >= MAX_PATH) {
+        SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, pathOut);
+    } else {
+        char pathOutTemp[MAX_PATH];
+        SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, pathOutTemp);
+
+        if (strcpy_s(pathOut, pathOutSize, pathOutTemp) != 0) {
+            useLocalPath = OC_TRUE;
+        }
+    }
+
+    // Back slashes need to be normalized to forward.
+    while (pathOut[0] != '\0') {
+        if (pathOut[0] == '\\') {
+            pathOut[0] = '/';
+        }
+        pathOut += 1;
+    }
+#else
+    const char* configdir = getenv("XDG_CONFIG_HOME");
+    if (configdir != NULL) {
+        if (strcpy_s(pathOut, pathOutSize, configdir) != 0) {
+            useLocalPath = OC_TRUE;
+        }
+    } else {
+        const char* homedir = getenv("HOME");
+        if (homedir == NULL) {
+            homedir = getpwuid(getuid())->pw_dir;
+        }
+
+        if (homedir != NULL) {
+            if (strcpy_s(pathOut, pathOutSize, homedir) == 0) {
+                size_t homedirLength = strlen(homedir);
+                pathOut     += homedirLength;
+                pathOutSize -= homedirLength;
+
+                if (pathOutSize > 0) {
+                    pathOut[0] = '/';
+                    pathOut     += 1;
+                    pathOutSize -= 1;
+
+                    if (strcpy_s(pathOut, pathOutSize, ".config") != 0) {
+                        useLocalPath = OC_TRUE;
+                    }
+                }
+            }
+        }
+    }
+#endif
+
+    if (!useLocalPath) {
         // If the log folder path is relative, assume it's relative to the executable.
-        if (drpath_is_relative(logFolderPath)) {
-            dr_get_executable_path(pathOut, pathOutSize);
-            drpath_base_path(pathOut);
-            drpath_append(pathOut, pathOutSize, logFolderPath);
+        if (ocPathIsRelative(logFolderPath)) {
+            ocGetExecutableDirectoryPath(pathOut, sizeof(pathOut));
+            ocPathAppend(pathOut, pathOutSize, pathOut, logFolderPath); // In-place append.
         } else {
             strcpy_s(pathOut, pathOutSize, logFolderPath);
         }
 
         // The folder path needs to be namespaced based on the game name.
-        drpath_append(pathOut, pathOutSize, OC_CONFIG_NAME);
+        ocPathAppend(pathOut, pathOutSize, pathOut, OC_CONFIG_NAME);    // In-place append.
     } else {
         // We're either running the portable version of we've failed to retrieve the per-user log folder path so we'll just fall back to
         // the executable's directory.
-        dr_get_executable_path(pathOut, pathOutSize);
-        drpath_base_path(pathOut);
-        drpath_append(pathOut, pathOutSize, "var/log");
+        ocGetExecutableDirectoryPath(pathOut, sizeof(pathOut));
+        ocPathAppend(pathOut, pathOutSize, pathOut, "var/log");         // In-place append.
     }
 }
 
@@ -664,4 +788,49 @@ ocResult ocOpenAndWriteTextFile(const char* filePath, const char* pFileData)
     }
 
     return ocOpenAndWriteFile(filePath, pFileData, strlen(pFileData));
+}
+
+ocResult ocCopyFile(const char* srcPath, const char* dstPath, ocBool32 failIfExists)
+{
+    if (srcPath == NULL || dstPath == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+#if _WIN32
+    return CopyFileA(srcPath, dstPath, failIfExists) != 0;
+#else
+    int fdSrc = open(srcPath, O_RDONLY, 0666);
+    if (fdSrc == -1) {
+        return OC_ERROR;    /* TODO: Return proper error code. Does this set errno? */
+    }
+
+    int fdDst = open(dstPath, O_WRONLY | O_TRUNC | O_CREAT | ((failIfExists) ? O_EXCL : 0), 0666);
+    if (fdDst == -1) {
+        close(fdSrc);
+        return OC_ERROR;    /* TODO: Return proper error code. */
+    }
+
+    dr_bool32 result = DR_TRUE;
+    struct stat info;
+    if (fstat(fdSrc, &info) == 0) {
+        char buffer[BUFSIZ];
+        int bytesRead;
+        while ((bytesRead = read(fdSrc, buffer, sizeof(buffer))) > 0) {
+            if (write(fdDst, buffer, bytesRead) != bytesRead) {
+                result = OC_ERROR;  /* TODO: Return proper error code. */
+                break;
+            }
+        }
+    } else {
+        result = OC_ERROR;  /* TODO: Return proper error code. */
+    }
+
+    close(fdDst);
+    close(fdSrc);
+
+    // Permissions.
+    chmod(dstPath, info.st_mode & 07777);
+
+    return result;
+#endif
 }

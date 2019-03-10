@@ -122,7 +122,7 @@ ocResult ocResourceLoaderDetermineResourceType(ocResourceLoader* pLoader, const 
         return OC_INVALID_ARGS;
     }
 
-    const char* ext = drpath_extension(filePath);
+    const char* ext = ocPathExtension(filePath);
     if (_stricmp(ext, "ocd") == 0) {
         return ocResourceLoaderDetermineOCDResourceType(pLoader, filePath, pType);
     }
@@ -330,7 +330,7 @@ ocResult ocResourceLoaderLoadImage(ocResourceLoader* pLoader, const char* filePa
     // We use a trial and error system for loading different file formats. If one fails, we just fall through to the
     // next sub-loader and try again. The exception is .ocd files which is the native file format for the engine. When
     // a file with this extension is specified, it will _not_ fall through to the next sub-loaders.
-    if (drpath_extension_equal(filePath, "ocd")) {
+    if (ocPathExtensionEqual(filePath, "ocd")) {
         result = ocLoadImage_OCD(&reader, pData);
     } else {
         result = OC_FAILED_TO_LOAD_RESOURCE;
@@ -578,13 +578,13 @@ ocResult ocResourceLoaderLoadScene(ocResourceLoader* pLoader, const char* filePa
     // We use a trial and error system for loading different file formats. If one fails, we just fall through to the
     // next sub-loader and try again. The exception is .ocd files which is the native file format for the engine. When
     // a file with this extension is specified, it will _not_ fall through to the next sub-loaders.
-    if (drpath_extension_equal(filePath, "ocd")) {
+    if (ocPathExtensionEqual(filePath, "ocd")) {
         result = ocLoadScene_OCD(&reader, pData);
     } else {
         result = OC_FAILED_TO_LOAD_RESOURCE;
 
         // OBJ.
-        if (result != OC_SUCCESS && drpath_extension_equal(filePath, "obj")) {
+        if (result != OC_SUCCESS && ocPathExtensionEqual(filePath, "obj")) {
             result = ocLoadScene_OBJ(&reader, pData);
         }
 

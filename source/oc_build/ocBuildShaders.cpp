@@ -50,22 +50,22 @@ ocResult ocBuildShadersContextUninit(ocBuildShadersContext* pContext)
 
 const char* ocBuildGetShaderStageStringFromFilePath(const char* filePath)
 {
-    if (drpath_extension_equal(filePath, "vert")) {
+    if (ocPathExtensionEqual(filePath, "vert")) {
         return "VERTEX";
     }
-    if (drpath_extension_equal(filePath, "tesc")) {
+    if (ocPathExtensionEqual(filePath, "tesc")) {
         return "TESSELLATION_CONTROL";
     }
-    if (drpath_extension_equal(filePath, "tese")) {
+    if (ocPathExtensionEqual(filePath, "tese")) {
         return "TESSELLATION_EVALUATION";
     }
-    if (drpath_extension_equal(filePath, "geom")) {
+    if (ocPathExtensionEqual(filePath, "geom")) {
         return "GEOMETRY";
     }
-    if (drpath_extension_equal(filePath, "frag")) {
+    if (ocPathExtensionEqual(filePath, "frag")) {
         return "FRAGMENT";
     }
-    if (drpath_extension_equal(filePath, "comp")) {
+    if (ocPathExtensionEqual(filePath, "comp")) {
         return "COMPUTE";
     }
 
@@ -329,7 +329,7 @@ ocResult ocBuildGetShaderVariableNameFromFileName(char* dst, size_t dstSize, con
     }
 
     char variableNameBase[256];
-    drpath_copy_and_remove_extension(variableNameBase, sizeof(variableNameBase), drpath_file_name(shaderFileName));
+    ocPathRemoveExtension(variableNameBase, sizeof(variableNameBase), ocPathFileName(shaderFileName));
     snprintf(dst, dstSize, "g_%s_%s", variableNameBase, ocBuildGetShaderStageStringFromFilePath(shaderFileName));
 
     return OC_SUCCESS;

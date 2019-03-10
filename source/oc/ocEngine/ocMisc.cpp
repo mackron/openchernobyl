@@ -1,9 +1,57 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
 #ifdef OC_WIN32
+typedef enum OC_PROCESS_DPI_AWARENESS {
+    DTK_PROCESS_DPI_UNAWARE = 0,
+    DTK_PROCESS_SYSTEM_DPI_AWARE = 1,
+    DTK_PROCESS_PER_MONITOR_DPI_AWARE = 2
+} OC_PROCESS_DPI_AWARENESS;
+
+typedef enum OC_MONITOR_DPI_TYPE {
+    DTK_MDT_EFFECTIVE_DPI = 0,
+    DTK_MDT_ANGULAR_DPI = 1,
+    DTK_MDT_RAW_DPI = 2,
+    DTK_MDT_DEFAULT = DTK_MDT_EFFECTIVE_DPI
+} OC_MONITOR_DPI_TYPE;
+
+typedef BOOL    (__stdcall * OC_PFN_SetProcessDPIAware)     (void);
+typedef HRESULT (__stdcall * OC_PFN_SetProcessDpiAwareness) (OC_PROCESS_DPI_AWARENESS);
+typedef HRESULT (__stdcall * OC_PFN_GetDpiForMonitor)       (HMONITOR hmonitor, OC_MONITOR_DPI_TYPE dpiType, UINT *dpiX, UINT *dpiY);
+
+
 void ocMakeDPIAware_Win32()
 {
-    dr_win32_make_dpi_aware();
+    ocBool32 fallBackToDiscouragedAPI = OC_FALSE;
+
+    // We can't call SetProcessDpiAwareness() directly because otherwise on versions of Windows < 8.1 we'll get an error at load time about
+    // a missing DLL.
+    HMODULE hSHCoreDLL = LoadLibraryW(L"shcore.dll");
+    if (hSHCoreDLL != NULL) {
+        OC_PFN_SetProcessDpiAwareness _SetProcessDpiAwareness = (OC_PFN_SetProcessDpiAwareness)GetProcAddress(hSHCoreDLL, "SetProcessDpiAwareness");
+        if (_SetProcessDpiAwareness != NULL) {
+            if (_SetProcessDpiAwareness(DTK_PROCESS_PER_MONITOR_DPI_AWARE) != S_OK) {
+                fallBackToDiscouragedAPI = OC_TRUE;
+            }
+        } else {
+            fallBackToDiscouragedAPI = OC_TRUE;
+        }
+
+        FreeLibrary(hSHCoreDLL);
+    } else {
+        fallBackToDiscouragedAPI = OC_TRUE;
+    }
+
+    if (fallBackToDiscouragedAPI) {
+        HMODULE hUser32DLL = LoadLibraryW(L"user32.dll");
+        if (hUser32DLL != NULL) {
+            OC_PFN_SetProcessDPIAware _SetProcessDPIAware = (OC_PFN_SetProcessDPIAware)GetProcAddress(hUser32DLL, "SetProcessDPIAware");
+            if (_SetProcessDPIAware != NULL) {
+                _SetProcessDPIAware();
+            }
+
+            FreeLibrary(hUser32DLL);
+        }
+    }
 }
 #endif
 

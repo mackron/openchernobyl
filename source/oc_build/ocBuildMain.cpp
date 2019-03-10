@@ -144,10 +144,10 @@ int ocBuildGraphicsPost(int argc, char** argv)
     ocResult result = OC_SUCCESS;
 
     // Copy the final generated files over to the main source tree.
-    if (!dr_copy_file(OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/ocGraphics_OpenGL_Autogen.cpp", "source/oc/ocEngine/Graphics/OpenGL/ocGraphics_OpenGL_Autogen.cpp", OC_FALSE)) {
+    if (!ocCopyFile(OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/ocGraphics_OpenGL_Autogen.cpp", "source/oc/ocEngine/Graphics/OpenGL/ocGraphics_OpenGL_Autogen.cpp", OC_FALSE)) {
         return -5;
     }
-    if (!dr_copy_file(OC_BUILD_INTERMEDIATE_DIRECTORY "/vulkan/ocGraphics_Vulkan_Autogen.cpp", "source/oc/ocEngine/Graphics/Vulkan/ocGraphics_Vulkan_Autogen.cpp", OC_FALSE)) {
+    if (!ocCopyFile(OC_BUILD_INTERMEDIATE_DIRECTORY "/vulkan/ocGraphics_Vulkan_Autogen.cpp", "source/oc/ocEngine/Graphics/Vulkan/ocGraphics_Vulkan_Autogen.cpp", OC_FALSE)) {
         return -6;
     }
 

@@ -357,6 +357,11 @@ OC_INLINE void ocTrim(char* str)
 
 typedef char* ocString;
 
+// Allocates the memory for a string, including the null terminator.
+//
+// Use this API if you want to allocate memory for the string, but you want to fill it with raw data yourself.
+ocString ocMallocString(size_t sizeInBytesIncludingNullTerminator);
+
 // Creates a newly allocated string. Free the string with ocFreeString().
 ocString ocMakeString(const char* str);
 

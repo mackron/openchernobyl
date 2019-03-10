@@ -10,7 +10,7 @@ ocBool32 ocIsIgnoredPipelineFile(const char* filePath)
 {
     ocAssert(filePath != NULL);
 
-    const char* fileName = drpath_file_name(filePath);
+    const char* fileName = ocPathFileName(filePath);
     ocAssert(fileName != NULL);
 
     for (size_t i = 0; i < ocCountOf(g_ocIgnoredPipelineFiles); ++i) {
@@ -177,7 +177,7 @@ ocResult ocBuildCompilePipelines(int argc, char** argv, ocBuildGraphicsContext* 
     }
 
     char folderPath[256];
-    drpath_append_and_clean(folderPath, sizeof(folderPath), ocGetCurrentDirectory(), OC_BUILD_PIPELINES_INDIR);
+    ocPathAppendAndClean(folderPath, sizeof(folderPath), ocGetCurrentDirectory(), OC_BUILD_PIPELINES_INDIR);
     drfs_add_base_directory(&fs, folderPath);
 
     // Because pipelines can inherit from other pipelines we need to do these in two passes. The first pass gathers the basic
