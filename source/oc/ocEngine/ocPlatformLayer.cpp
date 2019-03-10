@@ -321,7 +321,7 @@ void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int s
     ocAssert(windowFrameX >= 0);
     ocAssert(windowFrameY >= 0);
 
-    int scaledSizeX = sizeX  + windowFrameX;
+    int scaledSizeX = sizeX + windowFrameX;
     int scaledSizeY = sizeY + windowFrameY;
     SetWindowPos(pWindow->hWnd, NULL, 0, 0, scaledSizeX, scaledSizeY, SWP_NOZORDER | SWP_NOMOVE);
 }
