@@ -3,15 +3,7 @@
 // To Compile:
 //
 // Include Paths:
-//   - source/external/bullet3/src
 //   - <path to Vulkan SDK>/Include
-//
-//
-// To Link:
-//   - Bullet:
-//     - BulletDynamics  / BulletDynamics_Debug
-//     - BulletCollision / BulletCollision_Debug
-//     - LinearMath      / LinearMath_Debug
 
 #ifndef OC_ENGINE_HPP
 #define OC_ENGINE_HPP
@@ -107,17 +99,6 @@
 #endif
 
 #include "../../external/miniaudio/miniaudio.h"
-
-#if defined(_MSC_VER)
-    #pragma warning(push)
-    #pragma warning(disable:4127)
-    #pragma warning(disable:4201)
-    #pragma warning(disable:4305)
-#endif
-#include "../../external/bullet3/src/btBulletDynamicsCommon.h"
-#if defined(_MSC_VER)
-    #pragma warning(pop)
-#endif
 
 #if defined(_MSC_VER)
     #pragma warning(push)

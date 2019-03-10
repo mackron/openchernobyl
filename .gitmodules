@@ -7,10 +7,6 @@
 [submodule "source/external/stb"]
 	path = source/external/stb
 	url = https://github.com/nothings/stb
-[submodule "source/external/bullet3"]
-	path = source/external/bullet3
-	url = https://github.com/bulletphysics/bullet3
-	ignore = dirty
 [submodule "source/external/glm"]
 	path = source/external/glm
 	url = https://github.com/g-truc/glm.git

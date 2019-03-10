@@ -2,11 +2,7 @@
 
 struct ocDynamicsWorld
 {
-    btDbvtBroadphase* pBroadphase;
-    btDefaultCollisionConfiguration* pCollisionConfiguration;
-    btCollisionDispatcher* pCollisionDispatcher;
-    btSequentialImpulseConstraintSolver* pSolver;
-    btDiscreteDynamicsWorld* pInternalWorld;
+    int _unused;
 };
 
 //
