@@ -102,7 +102,7 @@
     #include "../../external/dr_graphics/dr_vulkan.h"
 #endif
 
-#include "../../external/mini_al/mini_al.h"
+#include "../../external/miniaudio/miniaudio.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)

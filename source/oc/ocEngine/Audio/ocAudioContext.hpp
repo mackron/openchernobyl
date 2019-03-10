@@ -3,8 +3,8 @@
 struct ocAudioContext
 {
     ocEngineContext* pEngine;
-    mal_context internalContext;
-    mal_device playbackDevice;
+    ma_context internalContext;
+    ma_device playbackDevice;
 };
 
 //

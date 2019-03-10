@@ -1,34 +1,34 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
-OC_INLINE ocResult ocToResultFromMAL(mal_result resultMAL)
+OC_INLINE ocResult ocToResultFromMAL(ma_result resultMAL)
 {
     switch (resultMAL)
     {
-        case MAL_SUCCESS:       return OC_SUCCESS;
-        case MAL_INVALID_ARGS:  return OC_INVALID_ARGS;
-        case MAL_OUT_OF_MEMORY: return OC_OUT_OF_MEMORY;
-        case MAL_NO_BACKEND:    return OC_FAILED_TO_INIT_AUDIO;
+        case MA_SUCCESS:       return OC_SUCCESS;
+        case MA_INVALID_ARGS:  return OC_INVALID_ARGS;
+        case MA_OUT_OF_MEMORY: return OC_OUT_OF_MEMORY;
+        case MA_NO_BACKEND:    return OC_FAILED_TO_INIT_AUDIO;
         default:                return OC_ERROR;
     }
 }
 
-mal_uint32 ocOnSendSamplesMAL(mal_device* pDevice, mal_uint32 frameCount, void* pSamples)
+void ocOnSendSamplesMAL(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
     // TODO: Implement me.
     (void)pDevice;
+    (void)pOutput;
+    (void)pInput;
     (void)frameCount;
-    (void)pSamples;
-    return 0;
 }
 
-void ocOnLogMAL(mal_context* pContext, mal_device* pDevice, const char* pMessage)
+void ocOnLogMAL(ma_context* pContext, ma_device* pDevice, ma_uint32 logLevel, const char* pMessage)
 {
     (void)pContext;
 
     ocAudioContext* pAudio = (ocAudioContext*)pDevice->pUserData;
     ocAssert(pAudio != NULL);
 
-    ocLogf(pAudio->pEngine, "AUDIO: %s", pMessage);
+    ocLogf(pAudio->pEngine, "AUDIO: [%s] %s", /*ma_log_level_to_string(logLevel)*/ "ERROR", pMessage); (void)logLevel;  // TODO: Replace "ERROR" with ma_log_level_to_string().
 }
 
 ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
@@ -40,23 +40,24 @@ ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
 
     pAudio->pEngine = pEngine;
 
-    mal_context_config contextConfig = mal_context_config_init(ocOnLogMAL);
+    ma_context_config contextConfig = ma_context_config_init();
+    contextConfig.logCallback = ocOnLogMAL;
 
-    mal_result resultMAL = mal_context_init(NULL, 0, &contextConfig, &pAudio->internalContext);
-    if (resultMAL != MAL_SUCCESS) {
+    ma_result resultMAL = ma_context_init(NULL, 0, &contextConfig, &pAudio->internalContext);
+    if (resultMAL != MA_SUCCESS) {
         return ocToResultFromMAL(resultMAL);
     }
 
-    mal_device_config deviceConfig = mal_device_config_init_playback(
-        mal_format_f32,
-        0,  // <-- Prefer device's native channel count.
-        48000,
-        ocOnSendSamplesMAL
-    );
+    ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.format   = ma_format_f32;
+    deviceConfig.playback.channels = 0;  // <-- Prefer device's native channel count.
+    deviceConfig.sampleRate        = 48000;
+    deviceConfig.dataCallback      = ocOnSendSamplesMAL;
+    deviceConfig.pUserData         = pAudio;
 
-    resultMAL = mal_device_init(&pAudio->internalContext, mal_device_type_playback, NULL, &deviceConfig, pAudio, &pAudio->playbackDevice);
-    if (resultMAL != MAL_SUCCESS) {
-        mal_context_uninit(&pAudio->internalContext);
+    resultMAL = ma_device_init(&pAudio->internalContext, &deviceConfig, &pAudio->playbackDevice);
+    if (resultMAL != MA_SUCCESS) {
+        ma_context_uninit(&pAudio->internalContext);
         return ocToResultFromMAL(resultMAL);
     }
 
@@ -65,7 +66,10 @@ ocResult ocAudioInit(ocEngineContext* pEngine, ocAudioContext* pAudio)
 
 void ocAudioUninit(ocAudioContext* pAudio)
 {
-    if (pAudio == NULL) return;
-    mal_device_uninit(&pAudio->playbackDevice);
-    mal_context_uninit(&pAudio->internalContext);
+    if (pAudio == NULL) {
+        return;
+    }
+
+    ma_device_uninit(&pAudio->playbackDevice);
+    ma_context_uninit(&pAudio->internalContext);
 }

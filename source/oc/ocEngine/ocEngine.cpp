@@ -113,8 +113,8 @@
     #include "../../external/dr_graphics/dr_vulkan.h"
 #endif
 
-#define MAL_IMPLEMENTATION
-#include "../../external/mini_al/mini_al.h"
+#define MINIAUDIO_IMPLEMENTATION
+#include "../../external/miniaudio/miniaudio.h"
 
 
 // Always define stb_vorbis last because it causes compilation errors otherwise.

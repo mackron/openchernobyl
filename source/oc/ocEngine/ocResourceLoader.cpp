@@ -3,20 +3,20 @@
 OC_PRIVATE ocBool32 ocCheckOCDHeader(const void* pData, ocUInt64 dataSize, ocUInt32 expectedType)
 {
     if (pData == NULL || dataSize < 8) {
-        return MAL_FALSE;
+        return OC_FALSE;
     }
 
     ocUInt32 fourcc = *(ocUInt32*)pData;
     if (fourcc != OC_OCD_FOURCC) {
-        return MAL_FALSE;
+        return OC_FALSE;
     }
 
     ocUInt32 type = *((ocUInt32*)pData + 1);
     if (type != expectedType) {
-        return MAL_FALSE;
+        return OC_FALSE;
     }
     
-    return MAL_TRUE;
+    return OC_TRUE;
 }
 
 // Free the returned pointer with ocFree().
