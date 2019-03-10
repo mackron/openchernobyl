@@ -33,7 +33,14 @@
 #ifdef OC_WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4091)
+#endif
 #include <shlobj.h>
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#endif
 #include <intrin.h>
 #endif
 
