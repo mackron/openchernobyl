@@ -99,7 +99,7 @@ const char* ocNextToken(const char* tokens, char* tokenOut, size_t tokenOutSize)
 
     // If the output buffer is large enough to hold the token, copy the token into it. When we copy the token we need to
     // ensure we don't include the escape character.
-    //assert(strEnd >= strBeg);
+    //ocAssert(strEnd >= strBeg);
 
     while (tokenOutSize > 1 && strBeg < strEnd) {
         if (strBeg[0] == '\\' && strBeg[1] == '\"' && strBeg < strEnd) {

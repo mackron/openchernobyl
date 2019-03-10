@@ -251,7 +251,7 @@ static LRESULT DefaultWindowProcWin32(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 ocBool32 ocWindowInit_Win32(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
 
     DWORD dwExStyle = 0;
     DWORD dwStyle = WS_OVERLAPPEDWINDOW;
@@ -282,14 +282,14 @@ ocBool32 ocWindowInit_Win32(unsigned int resolutionX, unsigned int resolutionY, 
 
 void ocWindowUninit_Win32(ocWindow* pWindow)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
 
     DestroyWindow(pWindow->hWnd);
 }
 
 void ocWindowShow_Win32(ocWindow* pWindow)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
 
     ShowWindow(pWindow->hWnd, SW_SHOW);
 }
@@ -297,7 +297,7 @@ void ocWindowShow_Win32(ocWindow* pWindow)
 
 void ocWindowGetSize_Win32(const ocWindow* pWindow, unsigned int* pSizeX, unsigned int* pSizeY)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
 
     RECT rect;
     GetClientRect(pWindow->hWnd, &rect);
@@ -308,7 +308,7 @@ void ocWindowGetSize_Win32(const ocWindow* pWindow, unsigned int* pSizeX, unsign
 
 void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int sizeY)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
 
     RECT windowRect;
     RECT clientRect;
@@ -318,8 +318,8 @@ void ocWindowSetSize_Win32(ocWindow* pWindow, unsigned int sizeX, unsigned int s
     int windowFrameX = (windowRect.right - windowRect.left) - (clientRect.right - clientRect.left);
     int windowFrameY = (windowRect.bottom - windowRect.top) - (clientRect.bottom - clientRect.top);
 
-    assert(windowFrameX >= 0);
-    assert(windowFrameY >= 0);
+    ocAssert(windowFrameX >= 0);
+    ocAssert(windowFrameY >= 0);
 
     int scaledSizeX = sizeX  + windowFrameX;
     int scaledSizeY = sizeY + windowFrameY;
@@ -546,7 +546,7 @@ OC_PRIVATE void* ocGetX11WindowProperty(Display* display, Window window, Atom pr
 
 ocBool32 ocWindowInit_X11(unsigned int resolutionX, unsigned int resolutionY, ocWindow* pWindow)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
 
     XSetWindowAttributes attr;
     attr.colormap = g_Colormap;
@@ -567,13 +567,13 @@ ocBool32 ocWindowInit_X11(unsigned int resolutionX, unsigned int resolutionY, oc
 
 void ocWindowUninit_X11(ocWindow* pWindow)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
     XDestroyWindow(g_X11Display, pWindow->windowX11);
 }
 
 void ocWindowShow_X11(ocWindow* pWindow)
 {
-    assert(pWindow != NULL);
+    ocAssert(pWindow != NULL);
     XMapRaised(g_X11Display, pWindow->windowX11);
 }
 
@@ -855,7 +855,7 @@ static LARGE_INTEGER g_OCTimerFrequency = {0};
 
 void ocTimerInit_Win32(ocTimer* pTimer)
 {
-    assert(pTimer != NULL);
+    ocAssert(pTimer != NULL);
 
     if (g_OCTimerFrequency.QuadPart == 0) {
         QueryPerformanceFrequency(&g_OCTimerFrequency);
@@ -868,7 +868,7 @@ void ocTimerInit_Win32(ocTimer* pTimer)
 
 double ocTimerTick_Win32(ocTimer* pTimer)
 {
-    assert(pTimer != NULL);
+    ocAssert(pTimer != NULL);
 
     LARGE_INTEGER counter;
     if (!QueryPerformanceCounter(&counter)) {
@@ -887,7 +887,7 @@ double ocTimerTick_Win32(ocTimer* pTimer)
 #ifdef OC_X11
 void ocTimerInit_Linux(ocTimer* pTimer)
 {
-    assert(pTimer != NULL);
+    ocAssert(pTimer != NULL);
 
     struct timespec newTime;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &newTime);
@@ -897,7 +897,7 @@ void ocTimerInit_Linux(ocTimer* pTimer)
 
 double ocTimerTick_Linux(ocTimer* pTimer)
 {
-    assert(pTimer != NULL);
+    ocAssert(pTimer != NULL);
 
     struct timespec newTime;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &newTime);
