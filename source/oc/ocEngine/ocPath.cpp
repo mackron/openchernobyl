@@ -455,7 +455,7 @@ static size_t ocPathAppend_Internal(char* pathOut, size_t pathOutSize, const cha
     // It only ever makes sense to "append" an absolute path to a blank path. If the other path is absolute, but the base
     // path is not blank we need to return an error because it just doesn't make sense to do this.
     if (ocPathIsAbsolute(other) && base[0] != '\0') {
-        return OC_FALSE;
+        return 0;
     }
 
     if (other[0] == '\0') {

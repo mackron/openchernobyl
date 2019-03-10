@@ -187,7 +187,9 @@ ocResult ocResourceLibraryLoad(ocResourceLibrary* pLibrary, const char* filePath
         }
     }
 
-    if (!hasSrc && !hasOCD) return OC_DOES_NOT_EXIST;
+    if (!hasSrc && !hasOCD) {
+        return OC_DOES_NOT_EXIST;
+    }
     if (!hasSrc) {
         fileInfoSrc = fileInfoOCD;
     }

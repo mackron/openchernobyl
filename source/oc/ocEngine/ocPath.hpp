@@ -195,7 +195,7 @@ size_t ocPathFileNameWithoutExtension(char* pathOut, size_t pathOutSize, const c
 // base        [in]  The base directory.
 // other       [in]  The relative path to append to "base".
 //
-// Returns true if the paths were appended successfully; false otherwise.
+// Returns the length of the resulting string including the null terminator. Returns 0 on error.
 //
 // This assumes both paths are well formed and "other" is a relative path.
 //
@@ -209,7 +209,7 @@ size_t ocPathAppend(char* pathOut, size_t pathOutSize, const char* base, const c
 // base        [in]  The base directory.
 // i           [in]  The iterator to append.
 //
-// Returns true if the paths were appended successfully; false otherwise.
+// Returns the length of the resulting string including the null terminator. Returns 0 on error.
 //
 // This assumes both paths are well formed and "i" is a valid iterator.
 //
@@ -223,7 +223,7 @@ size_t ocPathAppendIterator(char* pathOut, size_t pathOutSize, const char* base,
 // base        [in]  The base directory.
 // extension   [in]  The relative path to append to "base".
 //
-// Returns true if the paths were appended successfully; false otherwise.
+// Returns the length of the resulting string including the null terminator. Returns 0 on error.
 //
 // "pathOut" and "base" are allowed to be the same pointer, in which case the other path is appended in-place.
 size_t ocPathAppendExtension(char* pathOut, size_t pathOutSize, const char* base, const char* extension);

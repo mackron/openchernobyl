@@ -58,7 +58,7 @@ ocResult ocFileSystemInit(ocEngineContext* pEngine, ocFileSystem* pFS)
 
     // The base directories should always be relative to the executable.
     char exePath[OC_MAX_PATH];
-    if (ocGetExecutableDirectoryPath(exePath, sizeof(exePath))) {
+    if (ocGetExecutableDirectoryPath(exePath, sizeof(exePath)) == OC_SUCCESS) {
         char dataPath[OC_MAX_PATH];
         ocPathAppend(dataPath, sizeof(dataPath), exePath, "data");
         drfs_add_base_directory(&pFS->internalFS, dataPath);
@@ -316,33 +316,16 @@ void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
         return;
     }
 
-    char logFolderPath[DRFS_MAX_PATH];
+    char logFolderPath[OC_MAX_PATH];
     ocBool32 useLocalPath = ocIsPortable(pFS->pEngine); // <-- Use the local log path for portable builds.
 
 #if defined(OC_WIN32)
-    // The documentation for SHGetFolderPathA() says that the output path should be the size of MAX_PATH. We'll enforce that just to be safe.
-    if (pathOutSize >= MAX_PATH) {
-        SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, pathOut);
-    } else {
-        char pathOutTemp[MAX_PATH];
-        SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, pathOutTemp);
-
-        if (strcpy_s(pathOut, pathOutSize, pathOutTemp) != 0) {
-            useLocalPath = OC_TRUE;
-        }
-    }
-
-    // Back slashes need to be normalized to forward.
-    while (pathOut[0] != '\0') {
-        if (pathOut[0] == '\\') {
-            pathOut[0] = '/';
-        }
-        pathOut += 1;
-    }
+    SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, logFolderPath);
+    ocPathToForwardSlashes(logFolderPath);
 #else
     const char* configdir = getenv("XDG_CONFIG_HOME");
     if (configdir != NULL) {
-        if (strcpy_s(pathOut, pathOutSize, configdir) != 0) {
+        if (strcpy_s(logFolderPath, sizeof(logFolderPath), configdir) != 0) {
             useLocalPath = OC_TRUE;
         }
     } else {
@@ -352,20 +335,10 @@ void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
         }
 
         if (homedir != NULL) {
-            if (strcpy_s(pathOut, pathOutSize, homedir) == 0) {
-                size_t homedirLength = strlen(homedir);
-                pathOut     += homedirLength;
-                pathOutSize -= homedirLength;
-
-                if (pathOutSize > 0) {
-                    pathOut[0] = '/';
-                    pathOut     += 1;
-                    pathOutSize -= 1;
-
-                    if (strcpy_s(pathOut, pathOutSize, ".config") != 0) {
-                        useLocalPath = OC_TRUE;
-                    }
-                }
+            if (strcpy_s(logFolderPath, sizeof(logFolderPath), homedir) == 0) {
+                ocPathAppend(logFolderPath, sizeof(logFolderPath), logFolderPath, ".config");
+            } else {
+                useLocalPath = OC_TRUE;
             }
         }
     }
@@ -377,7 +350,7 @@ void ocGetLogFolderPath(ocFileSystem* pFS, char* pathOut, size_t pathOutSize)
             ocGetExecutableDirectoryPath(pathOut, sizeof(pathOut));
             ocPathAppend(pathOut, pathOutSize, pathOut, logFolderPath); // In-place append.
         } else {
-            strcpy_s(pathOut, pathOutSize, logFolderPath);
+            oc_strcpy_s(pathOut, pathOutSize, logFolderPath);
         }
 
         // The folder path needs to be namespaced based on the game name.
