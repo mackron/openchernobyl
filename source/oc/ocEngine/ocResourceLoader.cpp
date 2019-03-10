@@ -411,7 +411,7 @@ OC_PRIVATE ocResult ocLoadScene_OCD(ocStreamReader* pReader, ocSceneData* pData)
 }
 
 
-OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesToRead)
+OC_PRIVATE size_t oc__miniobj_read(void* userData, void* bufferOut, size_t bytesToRead)
 {
     size_t bytesRead;
     ocResult result = ocStreamReaderRead((ocStreamReader*)userData, bufferOut, bytesToRead, &bytesRead);
@@ -422,7 +422,7 @@ OC_PRIVATE size_t oc__drobj_read(void* userData, void* bufferOut, size_t bytesTo
     return bytesRead;
 }
 
-OC_PRIVATE ocBool32 oc__drobj_seek_to_start(void* userData)
+OC_PRIVATE ocBool32 oc__miniobj_seek_to_start(void* userData)
 {
     return ocStreamReaderSeek((ocStreamReader*)userData, 0, ocSeekOrigin_Start) == OC_SUCCESS;
 }
@@ -432,7 +432,7 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
     ocAssert(pOBJReader != NULL);
     ocAssert(pOCDWriter != NULL);
 
-    drobj* obj = drobj_load(oc__drobj_read, oc__drobj_seek_to_start, pOBJReader);
+    miniobj* obj = miniobj_load(oc__miniobj_read, oc__miniobj_seek_to_start, pOBJReader);
     if (obj == NULL) {
         return OC_FAILED_TO_LOAD_RESOURCE;
     }
@@ -441,7 +441,7 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
     ocOCDSceneBuilder builder;
     ocResult result = ocOCDSceneBuilderInit(&builder);
     if (result != OC_SUCCESS) {
-        drobj_delete(obj);
+        miniobj_delete(obj);
         return result;
     }
 
@@ -457,25 +457,25 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
         }
         {
             for (ocUInt32 iMaterial = 0; iMaterial < obj->materialCount; ++iMaterial) {
-                drobj_material* pMaterial = &obj->pMaterials[iMaterial];
+                miniobj_material* pMaterial = &obj->pMaterials[iMaterial];
                 
                 ocUInt32 vertexCount;
                 float* pVertexData;
                 ocUInt32 indexCount;
                 ocUInt32* pIndexData;
-                drobj_interleave_p3t2n3_material(obj, iMaterial, &vertexCount, &pVertexData, &indexCount, &pIndexData);
+                miniobj_interleave_p3t2n3_material(obj, iMaterial, &vertexCount, &pVertexData, &indexCount, &pIndexData);
 
                 // TODO: With the material, might want to first find the full library/name path.
 
                 result = ocOCDSceneBuilderMeshComponentAddGroup(&builder, pMaterial->name, ocGraphicsPrimitiveType_Triangle, ocGraphicsVertexFormat_P3T2N3, vertexCount, pVertexData, indexCount, pIndexData);
                 if (result != OC_SUCCESS) {
-                    drobj_free(pVertexData);
-                    drobj_free(pIndexData);
+                    miniobj_free(pVertexData);
+                    miniobj_free(pIndexData);
                     goto done;
                 }
 
-                drobj_free(pVertexData);
-                drobj_free(pIndexData);
+                miniobj_free(pVertexData);
+                miniobj_free(pIndexData);
             }
         }
         result = ocOCDSceneBuilderEndMeshComponent(&builder);
@@ -497,7 +497,7 @@ OC_PRIVATE ocResult ocConvertToOCD_OBJ(ocStreamReader* pOBJReader, ocStreamWrite
 
 done:
     ocOCDSceneBuilderUninit(&builder);
-    drobj_delete(obj);
+    miniobj_delete(obj);
     return result;
 }
 

@@ -62,7 +62,8 @@
 #include "../../external/dr_libs/dr_flac.h"
 #include "../../external/dr_libs/dr_wav.h"
 #include "../../external/dr_libs/old/dr_fs.h"   // TODO: Replace with dr-soft/dr_fs/dr_fs.h
-#include "../../external/dr_libs/dr_obj.h"
+
+#include "../../external/miniobj/miniobj.h"
 
 #ifdef OC_ENABLE_PCX
 #include "../../external/dr_libs/dr_pcx.h"

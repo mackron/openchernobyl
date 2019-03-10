@@ -20,3 +20,6 @@
 [submodule "source/external/miniaudio"]
 	path = source/external/miniaudio
 	url = https://github.com/dr-soft/miniaudio.git
+[submodule "source/external/miniobj"]
+	path = source/external/miniobj
+	url = https://github.com/dr-soft/miniobj.git

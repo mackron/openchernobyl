@@ -8,7 +8,7 @@ OC_INLINE ocResult ocToResultFromMAL(ma_result resultMAL)
         case MA_INVALID_ARGS:  return OC_INVALID_ARGS;
         case MA_OUT_OF_MEMORY: return OC_OUT_OF_MEMORY;
         case MA_NO_BACKEND:    return OC_FAILED_TO_INIT_AUDIO;
-        default:                return OC_ERROR;
+        default:               return OC_ERROR;
     }
 }
 
