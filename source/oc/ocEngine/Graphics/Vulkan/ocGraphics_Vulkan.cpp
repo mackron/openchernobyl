@@ -19,9 +19,10 @@
 OC_PRIVATE VkFormat ocToVulkanImageFormat(ocImageFormat format)
 {
     switch (format) {
-        case ocImageFormat_R8G8B8A8: return VK_FORMAT_R8G8B8A8_UNORM;
-        case ocImageFormat_SRGBA8:   return VK_FORMAT_R8G8B8A8_SRGB;
-        default:                     return VK_FORMAT_UNDEFINED;
+        case ocImageFormat_R8G8B8A8:      return VK_FORMAT_R8G8B8A8_UNORM;
+        case ocImageFormat_SRGBA8:        return VK_FORMAT_R8G8B8A8_SRGB;
+        case ocImageFormat_R16G16B16A16F: return VK_FORMAT_R16G16B16A16_SFLOAT;
+        default:                          return VK_FORMAT_UNDEFINED;
     }
 }
 
@@ -1154,7 +1155,7 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         // Finally we need to copy the data from the staging buffer over to the image. We need a command buffer for this.
         VkBufferImageCopy regions[32];
         for (uint32_t iMipmap = 0; iMipmap < pImage->mipLevels; ++iMipmap) {
-            regions[iMipmap].bufferOffset = pDesc->pMipmaps[iMipmap].offset;
+            regions[iMipmap].bufferOffset = pDesc->pMipmaps[iMipmap].dataOffset;
             regions[iMipmap].bufferRowLength = 0;
             regions[iMipmap].bufferImageHeight = 0;
             regions[iMipmap].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

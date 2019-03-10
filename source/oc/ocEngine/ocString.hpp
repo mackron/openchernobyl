@@ -357,10 +357,10 @@ OC_INLINE void ocTrim(char* str)
 
 typedef char* ocString;
 
-// Creates a newly allocated string. Free the string with oc_free_string().
+// Creates a newly allocated string. Free the string with ocFreeString().
 ocString ocMakeString(const char* str);
 
-// Creates a formatted string. Free the string with oc_free_string().
+// Creates a formatted string. Free the string with ocFreeString().
 ocString ocMakeStringv(const char* format, va_list args);
 ocString ocMakeStringf(const char* format, ...);
 
@@ -369,16 +369,16 @@ ocString ocSetString(ocString str, const char* newStr);
 
 // Appends a string to another ocString.
 //
-// This free's "lstr". Use this API like so: "lstr = oc_append_string(lstr, rstr)". It works the same way as realloc().
+// This free's "lstr". Use this API like so: "lstr = ocAppendString(lstr, rstr)". It works the same way as realloc().
 //
-// Use oc_make_stringf("%s%s", str1, str2) to append to C-style strings together. An optimized solution for this may be implemented in the future.
+// Use ocMakeStringf("%s%s", str1, str2) to append to C-style strings together. An optimized solution for this may be implemented in the future.
 ocString ocAppendString(ocString lstr, const char* rstr);
 
 // Appends a formatted string to another ocString.
 ocString ocAppendStringv(ocString lstr, const char* format, va_list args);
 ocString ocAppendStringf(ocString lstr, const char* format, ...);
 
-// Same as dtk_append_string(), except restricts it to a maximum number of characters and does not require the input
+// Same as ocAppendString(), except restricts it to a maximum number of characters and does not require the input
 // string to be null terminated.
 ocString ocAppendStringLength(ocString lstr, const char* rstr, size_t rstrLen);
 
@@ -390,5 +390,5 @@ size_t ocStringLength(ocString str);
 size_t ocStringCapacity(ocString str);
 
 
-// Frees a string created by oc_make_string*()
+// Frees a string created by ocMakeString*()
 void ocFreeString(ocString str);

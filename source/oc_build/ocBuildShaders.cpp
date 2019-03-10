@@ -37,10 +37,10 @@ ocResult ocBuildShadersContextUninit(ocBuildShadersContext* pContext)
 #define OC_BUILD_GLSLANG_PATH  "build/oc_build/bin/glslangValidator"
 #endif
 
-#define OC_BUILD_SHADERS_INDIR "source/oc/ocEngine/Graphics/_Pipelines/Shaders"
+#define OC_BUILD_SHADERS_INDIR_OLD "source/oc/ocEngine/Graphics/_Pipelines/Shaders"
 
 #define OC_BUILD_MCPP_CMD(infile, outdir, options, cmd) \
-    snprintf(cmd, sizeof(cmd), "%s %s/%s -o %s/%s/%s -P -k %s", OC_BUILD_MCPP_PATH, OC_BUILD_SHADERS_INDIR, infile, OC_BUILD_INTERMEDIATE_DIRECTORY, outdir, infile, options)
+    snprintf(cmd, sizeof(cmd), "%s %s/%s -o %s/%s/%s -P -k %s", OC_BUILD_MCPP_PATH, OC_BUILD_SHADERS_INDIR_OLD, infile, OC_BUILD_INTERMEDIATE_DIRECTORY, outdir, infile, options)
 
 #define OC_BUILD_GLSLANG_CMD_VULKAN(infile, outdir, options, cmd) \
     snprintf(cmd, sizeof(cmd), "%s %s \"%s/vulkan/%s\" -o \"%s/vulkan/%s.spv\"", OC_BUILD_GLSLANG_PATH, options, OC_BUILD_INTERMEDIATE_DIRECTORY, infile, OC_BUILD_INTERMEDIATE_DIRECTORY, infile)
@@ -78,7 +78,7 @@ ocResult ocBuildCompileShader_OpenGL(const char* filePath)
     int systemResult;
 
     char inputFilePath[OC_MAX_PATH];
-    snprintf(inputFilePath, sizeof(inputFilePath), "%s/%s", OC_BUILD_SHADERS_INDIR, filePath);
+    snprintf(inputFilePath, sizeof(inputFilePath), "%s/%s", OC_BUILD_SHADERS_INDIR_OLD, filePath);
 
     char intermediateFilePath[OC_MAX_PATH];
     snprintf(intermediateFilePath, sizeof(intermediateFilePath), "%s%s", OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/", filePath);
@@ -123,7 +123,7 @@ ocResult ocBuildCompileShader_Vulkan(const char* filePath)
     int systemResult;
 
     char inputFilePath[OC_MAX_PATH];
-    snprintf(inputFilePath, sizeof(inputFilePath), "%s/%s", OC_BUILD_SHADERS_INDIR, filePath);
+    snprintf(inputFilePath, sizeof(inputFilePath), "%s/%s", OC_BUILD_SHADERS_INDIR_OLD, filePath);
 
     char intermediateFilePath[OC_MAX_PATH];
     snprintf(intermediateFilePath, sizeof(intermediateFilePath), "%s%s", OC_BUILD_INTERMEDIATE_DIRECTORY "/vulkan/", filePath);

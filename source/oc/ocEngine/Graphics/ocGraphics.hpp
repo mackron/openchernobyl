@@ -40,6 +40,16 @@ enum ocGraphicsPrimitiveType
     ocGraphicsPrimitiveType_Triangle
 };
 
+enum ocGraphicsShaderStage
+{
+    ocGraphicsShaderStage_Vertex,
+    ocGraphicsShaderStage_TessellationControl,
+    ocGraphicsShaderStage_TessellationEvaluation,
+    ocGraphicsShaderStage_Geometry,
+    ocGraphicsShaderStage_Fragment,
+    ocGraphicsShaderStage_Compute
+};
+
 OC_INLINE size_t ocGetVertexSizeFromFormat(ocGraphicsVertexFormat vertexFormat)
 {
     switch (vertexFormat)

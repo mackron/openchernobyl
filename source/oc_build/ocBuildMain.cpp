@@ -1,16 +1,97 @@
 // Copyright (C) 2018 David Reid. See included LICENSE file.
 
 #include "../oc/ocEngine/ocEngine.cpp"
+#include "../external/json/json.c"
 
 #define OC_BUILD_INTERMEDIATE_DIRECTORY "build/oc_build/bin/out"
+
+struct ocBuildGraphicsContext;
+
+struct ocBuildRenderPassAttachment
+{
+    const char* name;
+    const char* format;
+    const char* loadOp;
+    const char* storeOp;
+    const char* stencilLoadOp;
+    const char* stencilStoreOp;
+    const char* initialLayout;
+    const char* finalLayout;
+};
+
+struct ocBuildRenderPassAttachmentReference
+{
+    const char* attachment;
+    const char* layout;
+};
+
+struct ocBuildRenderPassSubpass
+{
+    const char* name;
+    std::vector<ocBuildRenderPassAttachmentReference> inputAttachments;
+    std::vector<ocBuildRenderPassAttachmentReference> colorAttachments;
+    std::vector<ocBuildRenderPassAttachmentReference> resolveAttachments;
+    std::vector<ocBuildRenderPassAttachmentReference> depthStencilAttachments;
+};
+
+uint32_t                srcSubpass;
+uint32_t                dstSubpass;
+VkPipelineStageFlags    srcStageMask;
+VkPipelineStageFlags    dstStageMask;
+VkAccessFlags           srcAccessMask;
+VkAccessFlags           dstAccessMask;
+VkDependencyFlags       dependencyFlags;
+
+struct ocBuildRenderPassSubpassDependency
+{
+    const char* srcSubpass;
+    const char* dstSubpass;
+    const char* srcStageMask;
+    const char* dstStageMask;
+    const char* srcAccessMask;
+    const char* dstAccessMask;
+    const char* dependencyFlags;
+};
+
+struct ocBuildRenderPass
+{
+    struct json_value_s* pJSONRoot;
+    const char* name;
+    std::vector<ocBuildRenderPassAttachment> attachments;
+    std::vector<ocBuildRenderPassSubpass> subpasses;
+    std::vector<ocBuildRenderPassSubpassDependency> dependencies;
+};
 
 #include "ocBuildUtils.hpp"
 #include "ocBuildShaders.hpp"
 #include "ocBuildPipelines.hpp"
+#include "ocBuildMaterials.hpp"
+
+struct ocBuildGraphicsContext
+{
+    std::vector<struct json_value_s*> pipelineJSONRoots;    // <-- Used for clean up.
+    std::vector<ocBuildPipelineDefinition> pipelineDefinitions;
+};
+
 
 #include "ocBuildUtils.cpp"
 #include "ocBuildShaders.cpp"
 #include "ocBuildPipelines.cpp"
+#include "ocBuildMaterials.cpp"
+
+
+
+void ocBuildGraphicsContextUninit(ocBuildGraphicsContext* pGraphicsBuildContext)
+{
+    if (pGraphicsBuildContext == NULL) {
+        return;
+    }
+
+    for (size_t i = 0; i < pGraphicsBuildContext->pipelineJSONRoots.size(); ++i) {
+        free(pGraphicsBuildContext->pipelineJSONRoots[i]);
+    }
+}
+
 
 int ocBuildGraphics(int argc, char** argv)
 {
@@ -33,6 +114,8 @@ int ocBuildGraphics(int argc, char** argv)
     }
 
 
+    ocBuildGraphicsContext graphicsBuildContext;
+
     // Compile shaders first.
     result = ocBuildCompileShaders(argc, argv);
     if (result != OC_SUCCESS) {
@@ -40,11 +123,19 @@ int ocBuildGraphics(int argc, char** argv)
     }
 
     // Pipelines come after shaders since they depend on them.
-    result = ocBuildCompilePipelines(argc, argv);
+    result = ocBuildCompilePipelines(argc, argv, &graphicsBuildContext);
     if (result != OC_SUCCESS) {
         return -4;
     }
 
+    // Materials depend on pipelines.
+    result = ocBuildCompileMaterials(argc, argv, &graphicsBuildContext);
+    if (result != 0) {
+        return result;
+    }
+
+
+    ocBuildGraphicsContextUninit(&graphicsBuildContext);
     return 0;
 }
 

@@ -180,3 +180,109 @@ char* ocBuildBufferToCString(const unsigned char* buffer, size_t size, const cha
 
     return output;
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// JSON Helpers
+//
+///////////////////////////////////////////////////////////////////////////////
+
+struct json_value_s* ocJSONLoadFile(const char* pAbsolutePath, struct json_parse_result_s* pParseResult)
+{
+    ocAssert(pAbsolutePath != NULL);
+    ocAssert(pParseResult != NULL);
+
+    char* pFileData;
+    size_t fileSize;
+    ocResult result = ocOpenAndReadTextFile(pAbsolutePath, &pFileData, &fileSize);
+    if (result != OC_SUCCESS) {
+        return NULL;
+    }
+
+    struct json_value_s* pJSONValue = json_parse_ex((const void*)pFileData, fileSize, json_parse_flags_allow_json5, NULL, NULL, pParseResult);
+
+    ocFree(pFileData);
+    return pJSONValue;
+}
+
+const char* ocJSONErrorToString(enum json_parse_error_e error)
+{
+    switch (error)
+    {
+        case json_parse_error_none: return "json_parse_error_none";
+        case json_parse_error_expected_comma_or_closing_bracket: return "json_parse_error_expected_comma_or_closing_bracket";
+        case json_parse_error_expected_colon: return "json_parse_error_expected_colon";
+        case json_parse_error_expected_opening_quote: return "json_parse_error_expected_opening_quote";
+        case json_parse_error_invalid_string_escape_sequence: return "json_parse_error_invalid_string_escape_sequence";
+        case json_parse_error_invalid_number_format: return "json_parse_error_invalid_number_format";
+        case json_parse_error_invalid_value: return "json_parse_error_invalid_value";
+        case json_parse_error_premature_end_of_buffer: return "json_parse_error_premature_end_of_buffer";
+        case json_parse_error_invalid_string: return "json_parse_error_invalid_string";
+        case json_parse_error_allocator_failed: return "json_parse_error_allocator_failed";
+        case json_parse_error_unexpected_trailing_characters: return "json_parse_error_unexpected_trailing_characters";
+        case json_parse_error_unknown: return "json_parse_error_unknown";
+        default: break;
+    }
+
+    return "Unknown error";
+}
+
+void ocPrintJSONParseError(const char* pAbsolutePath, struct json_parse_result_s* pParseResult)
+{
+    ocAssert(pParseResult != NULL);
+    printf("%s(%d): error %d: %s\n", pAbsolutePath, (int)pParseResult->error_line_no, (int)pParseResult->error, ocJSONErrorToString((enum json_parse_error_e)pParseResult->error));
+}
+
+const char* ocJSONGetStringFromObject(struct json_object_s* pObject, const char* pElementName)
+{
+    if (pObject == NULL) {
+        return NULL;
+    }
+
+    for (json_object_element_s* pElement = pObject->start; pElement != NULL; pElement = pElement->next) {
+        if (strcmp(pElement->name->string, pElementName) == 0) {
+            if (pElement->value->type == json_type_string) {
+                return ((struct json_string_s*)pElement->value->payload)->string;
+            } else {
+                return NULL;    // Found an element of the same name, but it's not a string.
+            }
+        }
+    }
+
+    return NULL;
+}
+
+const char* ocJSONGetStringFromValue(struct json_value_s* pValue)
+{
+    if (pValue == NULL || pValue->type != json_type_string) {
+        return NULL;
+    }
+
+    return ((struct json_string_s*)pValue->payload)->string;
+}
+
+ocResult ocJSONGetBooleanFromValue(struct json_value_s* pValue, ocBool32* pResult)
+{
+    if (pValue == NULL || pResult == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pValue->type == json_type_true) {
+        *pResult = OC_TRUE;
+    } else if (pValue->type == json_type_false) {
+        *pResult = OC_FALSE;
+    } else if (pValue->type == json_type_string) {
+        const char* str = ((struct json_string_s*)pValue->payload)->string;
+        if (oc_stricmp(str, "false") == 0) {
+            *pResult = OC_FALSE;
+        } else {
+            *pResult = OC_TRUE;
+        }
+    } else {
+        return OC_INVALID_ARGS; // JSON type not recognized.
+    }
+
+    return OC_SUCCESS;
+}

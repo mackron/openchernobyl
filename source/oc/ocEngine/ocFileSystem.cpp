@@ -616,17 +616,22 @@ ocResult ocOpenAndReadFile(const char* filePath, void** ppFileData, size_t* pFil
 ocResult ocOpenAndReadTextFile(const char* filePath, char** ppFileData, size_t* pFileSize)
 {
     char* pFileData;
-    ocResult result = ocOpenAndReadFileWithExtraData(filePath, (void**)&pFileData, pFileSize, 1);
+    size_t fileSize;
+    ocResult result = ocOpenAndReadFileWithExtraData(filePath, (void**)&pFileData, &fileSize, 1);
     if (result != OC_SUCCESS) {
         return result;
     }
 
-    pFileData[*pFileSize] = '\0';
+    pFileData[fileSize] = '\0';
 
     if (ppFileData) {
         *ppFileData = pFileData;
     } else {
         ocFree(pFileData);
+    }
+
+    if (pFileSize) {
+        *pFileSize = fileSize;
     }
 
     return OC_SUCCESS;

@@ -1,0 +1,11 @@
+{
+    "VertShader" : "ocMaterial_Diffuse.vert",
+    "FragShader" : "ocMaterial_Diffuse.frag",
+    "Properties" : [
+        {"Name":"FRAG_Material.DiffuseColor", "Type":"vec4",      "DefaultValue":"(1, 1, 1, 1)"},
+        {"Name":"FRAG_Material_DiffuseMap",   "Type":"sampler2D", "DefaultValue":"default.png"}
+    ],
+    "Pipelines" : [
+        "World"
+    ]
+}

@@ -3,8 +3,9 @@
 enum ocImageFormat
 {
     ocImageFormat_Undefined = 0,
-    ocImageFormat_R8G8B8A8  = 1,
-    ocImageFormat_SRGBA8    = 2
+    ocImageFormat_R8G8B8A8,
+    ocImageFormat_SRGBA8,
+    ocImageFormat_R16G16B16A16F
 };
 
 ocUInt32 ocImageFormatComponentCount(ocImageFormat format);
