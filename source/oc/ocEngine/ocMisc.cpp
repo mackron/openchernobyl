@@ -2,16 +2,16 @@
 
 #ifdef OC_WIN32
 typedef enum OC_PROCESS_DPI_AWARENESS {
-    DTK_PROCESS_DPI_UNAWARE = 0,
-    DTK_PROCESS_SYSTEM_DPI_AWARE = 1,
-    DTK_PROCESS_PER_MONITOR_DPI_AWARE = 2
+    OC_PROCESS_DPI_UNAWARE = 0,
+    OC_PROCESS_SYSTEM_DPI_AWARE = 1,
+    OC_PROCESS_PER_MONITOR_DPI_AWARE = 2
 } OC_PROCESS_DPI_AWARENESS;
 
 typedef enum OC_MONITOR_DPI_TYPE {
-    DTK_MDT_EFFECTIVE_DPI = 0,
-    DTK_MDT_ANGULAR_DPI = 1,
-    DTK_MDT_RAW_DPI = 2,
-    DTK_MDT_DEFAULT = DTK_MDT_EFFECTIVE_DPI
+    OC_MDT_EFFECTIVE_DPI = 0,
+    OC_MDT_ANGULAR_DPI = 1,
+    OC_MDT_RAW_DPI = 2,
+    OC_MDT_DEFAULT = OC_MDT_EFFECTIVE_DPI
 } OC_MONITOR_DPI_TYPE;
 
 typedef BOOL    (__stdcall * OC_PFN_SetProcessDPIAware)     (void);
@@ -29,7 +29,7 @@ void ocMakeDPIAware_Win32()
     if (hSHCoreDLL != NULL) {
         OC_PFN_SetProcessDpiAwareness _SetProcessDpiAwareness = (OC_PFN_SetProcessDpiAwareness)GetProcAddress(hSHCoreDLL, "SetProcessDpiAwareness");
         if (_SetProcessDpiAwareness != NULL) {
-            if (_SetProcessDpiAwareness(DTK_PROCESS_PER_MONITOR_DPI_AWARE) != S_OK) {
+            if (_SetProcessDpiAwareness(OC_PROCESS_PER_MONITOR_DPI_AWARE) != S_OK) {
                 fallBackToDiscouragedAPI = OC_TRUE;
             }
         } else {
