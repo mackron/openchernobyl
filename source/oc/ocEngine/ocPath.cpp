@@ -481,10 +481,10 @@ static size_t ocPathAppend_Internal(char* pathOut, size_t pathOutSize, const cha
     if (pathOut != NULL) {
         if (pathOutLength+1 <= pathOutSize) {
             if (pathOut != base) {
-                oc_strcpy_s(pathOut + 0, pathOutSize - 0, base);
+                oc_strncpy_s(pathOut, pathOutSize, base, path1Length);
             }
-            oc_strcpy_s(pathOut + path1Length,     pathOutSize - path1Length,     "/");
-            oc_strcpy_s(pathOut + path1Length + 1, pathOutSize - path1Length - 1, other);
+            oc_strncpy_s(pathOut + path1Length,               pathOutSize - path1Length,               "/",   slashLength);
+            oc_strncpy_s(pathOut + path1Length + slashLength, pathOutSize - path1Length - slashLength, other, path2Length);
         }
     }
 
