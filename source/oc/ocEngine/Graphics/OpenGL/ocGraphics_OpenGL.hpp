@@ -8,7 +8,7 @@
 
 struct ocGraphicsContext : public ocGraphicsContextBase
 {
-    drgl gl;
+    GLBapi gl;
     ocWindow* pCurrentWindow;
     uint32_t msaaSamples;
 };

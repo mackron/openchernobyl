@@ -100,8 +100,8 @@
 #endif
 
 #ifdef OC_USE_OPENGL
-    #define DR_GL_IMPLEMENTATION
-    #include "../../external/dr_graphics/dr_gl.h"
+    #define GLBIND_IMPLEMENTATION
+    #include "../../external/glbind/glbind.h"
 #endif
 #ifdef OC_USE_VULKAN
     #define VKBIND_IMPLEMENTATION

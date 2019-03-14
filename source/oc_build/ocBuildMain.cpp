@@ -34,14 +34,6 @@ struct ocBuildRenderPassSubpass
     std::vector<ocBuildRenderPassAttachmentReference> depthStencilAttachments;
 };
 
-uint32_t                srcSubpass;
-uint32_t                dstSubpass;
-VkPipelineStageFlags    srcStageMask;
-VkPipelineStageFlags    dstStageMask;
-VkAccessFlags           srcAccessMask;
-VkAccessFlags           dstAccessMask;
-VkDependencyFlags       dependencyFlags;
-
 struct ocBuildRenderPassSubpassDependency
 {
     const char* srcSubpass;

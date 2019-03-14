@@ -64,30 +64,9 @@
 #include "../../external/dr_libs/dr_pcx.h"
 #endif
 
-
 #ifdef OC_USE_OPENGL
-    #define DR_GL_VERSION 210
-    #define DR_GL_ENABLE_EXT_framebuffer_blit
-    #define DR_GL_ENABLE_EXT_framebuffer_multisample
-    #define DR_GL_ENABLE_EXT_framebuffer_object
-    #define DR_GL_ENABLE_ARB_texture_multisample
-    #define DR_GL_ENABLE_EXT_swap_control
-    #ifdef OC_DEBUG
-        #define DR_GL_ENABLE_ARB_debug_output
-    #endif
-    #define DR_GL_NO_DEFAULT_INCLUDES
-    #ifdef _WIN32
-    #include <GL/gl.h>
-    #include "../../external/GL/glext.h"
-    #include "../../external/GL/wglext.h"
-    #else
-    #include <GL/glx.h>
-    #include "../../external/GL/glxext.h"
-    #include "../../external/GL/glext.h"
-    #endif
-    #include "../../external/dr_graphics/dr_gl.h"
+    #include "../../external/glbind/glbind.h"
 #endif
-
 #ifdef OC_USE_VULKAN
     #ifdef OC_WIN32
         #define VK_USE_PLATFORM_WIN32_KHR

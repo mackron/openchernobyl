@@ -1,9 +1,6 @@
 [submodule "source/external/dr_libs"]
 	path = source/external/dr_libs
 	url = https://github.com/mackron/dr_libs
-[submodule "source/external/dr_graphics"]
-	path = source/external/dr_graphics
-	url = https://github.com/dr-soft/dr_graphics
 [submodule "source/external/stb"]
 	path = source/external/stb
 	url = https://github.com/nothings/stb
@@ -25,3 +22,6 @@
 [submodule "source/external/vkbind"]
 	path = source/external/vkbind
 	url = https://github.com/dr-soft/vkbind.git
+[submodule "source/external/glbind"]
+	path = source/external/glbind
+	url = https://github.com/dr-soft/glbind.git

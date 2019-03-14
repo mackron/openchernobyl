@@ -63,11 +63,11 @@ OC_PRIVATE void ocGraphicsSetCurrentWindow(ocGraphicsContext* pGraphics, ocWindo
     }
 
 #ifdef OC_WIN32
-    pGraphics->gl.MakeCurrent(pWindow->hDC, pGraphics->gl.hRC);
+    pGraphics->gl.wglMakeCurrent(pWindow->hDC, glbGetRC());
 #endif
 
 #ifdef OC_X11
-    pGraphics->gl.MakeCurrent(pGraphics->gl.pDisplay, pWindow->windowX11, pGraphics->gl.rc);
+    pGraphics->gl.glXMakeCurrent(pGraphics->gl.pDisplay, pWindow->windowX11, pGraphics->gl.rc);
 #endif
 
     pGraphics->pCurrentWindow = pWindow;
@@ -108,6 +108,220 @@ OC_PRIVATE void APIENTRY ocOpenGLErrorCB(GLenum source, GLenum type, GLuint id, 
     }
 }
 
+
+GLboolean ocglIsExtensionInString(const char* ext, const char* str)
+{
+    if (ext == NULL || str == NULL) return GL_FALSE;
+
+    const char* ext2beg = str;
+    const char* ext2end = ext2beg;
+
+    for (;;) {
+        while (ext2end[0] != ' ' && ext2end[0] != '\0') {
+            ext2end += 1;
+        }
+
+        if (strncmp(ext, ext2beg, ext2end - ext2beg) == 0) {
+            return GL_TRUE;
+        }
+
+        // Break if we've reached the end. Otherwise, just move to start fo the next extension.
+        if (ext2end[0] == '\0') {
+            break;
+        } else {
+            ext2beg = ext2end + 1;
+            ext2end = ext2beg;
+        }
+    }
+
+    return GL_FALSE;
+}
+
+#if defined(GLBIND_WGL)
+GLboolean ocglIsWGLExtensionSupported(GLBapi* pGL, const char* ext)
+{
+    if (pGL->wglGetExtensionsStringARB) {
+        return ocglIsExtensionInString(ext, pGL->wglGetExtensionsStringARB(pGL->wglGetCurrentDC()));
+    }
+
+    if (pGL->wglGetExtensionsStringEXT) {
+        return ocglIsExtensionInString(ext, pGL->wglGetExtensionsStringEXT());
+    }
+
+    return GL_FALSE;
+}
+#endif
+
+#if defined(GLBIND_GLX)
+GLboolean ocglIsX11ExtensionSupported(GLBapi* pGL, const char* ext)
+{
+    if (pGL->glXQueryExtensionsString) {
+        return ocglIsExtensionInString(ext, pGL->glXQueryExtensionsString(glbGetDisplay(), XDefaultScreen(glbGetDisplay())));
+    }
+
+    return GL_FALSE;
+}
+#endif
+
+GLboolean ocglIsExtensionSupported(GLBapi* pGL, const char* ext)
+{
+    if (pGL->glGetStringi) {
+        GLint supportedExtensionCount = 0;
+        pGL->glGetIntegerv(GL_NUM_EXTENSIONS, &supportedExtensionCount);
+
+        for (GLint i = 0; i < supportedExtensionCount; ++i) {
+            const char* supportedExtension = (const char*)pGL->glGetStringi(GL_EXTENSIONS, i);
+            if (supportedExtension != NULL) {
+                if (strcmp(supportedExtension, ext) == 0) {
+                    return GL_TRUE;
+                }
+            }
+        }
+
+        // It's not a core extension. Check platform-specific extensions.
+        GLboolean isSupported = GL_FALSE;
+#if defined(GLBIND_WGL)
+        isSupported = ocglIsWGLExtensionSupported(pGL, ext);
+#endif
+#if defined(GLBIND_GLX)
+        isSupported = ocglIsX11ExtensionSupported(pGL, ext);
+#endif
+        return isSupported;
+    }
+
+    // Fall back to old style.
+    GLboolean isSupported = ocglIsExtensionInString(ext, (const char*)pGL->glGetString(GL_EXTENSIONS));
+    if (!isSupported) {
+#if defined(GLBIND_WGL)
+        isSupported = ocglIsWGLExtensionSupported(pGL, ext);
+#endif
+#if defined(GLBIND_GLX)
+        isSupported = ocglIsX11ExtensionSupported(pGL, ext);
+#endif
+    }
+
+    return isSupported;
+}
+
+
+GLuint ocglCreateShader(GLBapi* pGL, GLenum type, const GLchar* src, GLchar** pErrorOut)
+{
+    if (pErrorOut != NULL) *pErrorOut = NULL;    // <-- Safety.
+    if (pGL == NULL || src == NULL) return 0;
+
+
+    GLuint shader = pGL->glCreateShader(type);
+    if (shader == 0) {
+        if (pErrorOut) *pErrorOut = ocMakeString("Failed to create shader object.");
+        return 0;
+    }
+
+    pGL->glShaderSource(shader, 1, &src, NULL);
+    pGL->glCompileShader(shader);
+
+    GLint compileResult;
+    pGL->glGetShaderiv(shader, GL_COMPILE_STATUS, &compileResult);
+    if (compileResult == GL_FALSE) {
+        if (pErrorOut != NULL) {
+            GLint errorLen;
+            pGL->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &errorLen);
+            if (errorLen > 1) {
+                *pErrorOut = (char*)ocMallocString(errorLen);
+                if (*pErrorOut != NULL) {
+                    pGL->glGetShaderInfoLog(shader, errorLen, NULL, *pErrorOut);
+                }
+            }
+        }
+
+        pGL->glDeleteShader(shader);
+        return 0;
+    }
+
+    return shader;
+}
+
+GLuint ocglCreateProgram(GLBapi* pGL, GLuint shaderCount, const GLuint* pShaders, GLchar** pErrorOut)
+{
+    if (pErrorOut != NULL) *pErrorOut = NULL;   // <-- Safety.
+    if (pGL == NULL || shaderCount == 0 || pShaders == NULL) return 0;
+
+
+    GLuint program = pGL->glCreateProgram();
+    if (program == 0) {
+        if (pErrorOut) *pErrorOut = ocMakeString("Failed to create program object.");
+        return 0;
+    }
+
+    for (GLuint iShader = 0; iShader < shaderCount; ++iShader) {
+        pGL->glAttachShader(program, pShaders[iShader]);
+    }
+
+    pGL->glLinkProgram(program);
+
+    GLint linkStatus;
+    pGL->glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+    if (linkStatus == GL_FALSE) {
+        if (pErrorOut != NULL) {
+            GLint errorLen;
+            pGL->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &errorLen);
+            if (errorLen > 1) {
+                *pErrorOut = (char*)ocMallocString(errorLen);
+                if (*pErrorOut != NULL) {
+                    pGL->glGetProgramInfoLog(program, errorLen, NULL, *pErrorOut);
+                }
+            }
+        }
+
+        pGL->glDeleteProgram(program);
+        return 0;
+    }
+
+    return program;
+}
+
+GLuint ocglCreateSimpleProgramFromStrings(GLBapi* pGL, const char* srcVS, const char* srcFS, GLchar** pErrorOut)
+{
+    if (pErrorOut != NULL) *pErrorOut = NULL;   // <-- Safety.
+    if (pGL == NULL) return 0;
+
+    GLuint shaders[2] = {0, 0};
+    GLuint shaderCount = 0;
+
+    // Vertex.
+    if (srcVS != NULL) {
+        shaders[shaderCount] = ocglCreateShader(pGL, GL_VERTEX_SHADER, srcVS, pErrorOut);
+        if (shaders[shaderCount] == 0) {
+            return 0;
+        }
+
+        shaderCount += 1;
+    }
+
+    // Fragment.
+    if (srcFS != NULL) {
+        shaders[shaderCount] = ocglCreateShader(pGL, GL_FRAGMENT_SHADER, srcFS, pErrorOut);
+        if (shaders[shaderCount] == 0) {
+            return 0;
+        }
+
+        shaderCount += 1;
+    }
+
+    if (shaderCount == 0) {
+        if (pErrorOut) *pErrorOut = ocMakeString("No shader strings specified.");
+        return 0;
+    }
+
+    GLuint program = ocglCreateProgram(pGL, shaderCount, shaders, pErrorOut);
+
+    for (GLuint iShader = 0; iShader < shaderCount; ++iShader) {
+        pGL->glDeleteShader(shaders[iShader]);
+    }
+
+    return program;
+}
+
+
 ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, ocGraphicsContext* pGraphics)
 {
     ocResult result = ocGraphicsInitBase(pEngine, pGraphics);
@@ -115,37 +329,37 @@ ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, o
         return result;
     }
 
-    if (!drglInit(&pGraphics->gl)) {
+    if (glbInit(&pGraphics->gl, NULL) != GL_NO_ERROR) {
         return OC_FAILED_TO_INIT_GRAPHICS;
     }
 
-    drgl &gl = pGraphics->gl;
+    GLBapi &gl = pGraphics->gl;
 
     // Feature support.
-    if (drglIsExtensionSupported(&gl, "GL_ARB_texture_multisample")) {
+    if (ocglIsExtensionSupported(&gl, "GL_ARB_texture_multisample")) {
         pGraphics->supportFlags |= OC_GRAPHICS_SUPPORT_FLAG_MSAA;
         pGraphics->minMSAA = 1;
 
         GLint maxMSAA = 1;
-        gl.GetIntegerv(GL_MAX_SAMPLES, &maxMSAA);
+        gl.glGetIntegerv(GL_MAX_SAMPLES, &maxMSAA);
         pGraphics->maxMSAA = maxMSAA;
 
         pGraphics->msaaSamples = ocClamp(desiredMSAASamples, pGraphics->minMSAA, pGraphics->maxMSAA);
 
         // TODO: Only enable this when it's needed.
         if (pGraphics->msaaSamples > 1) {
-            pGraphics->gl.Enable(GL_MULTISAMPLE);
+            pGraphics->gl.glEnable(GL_MULTISAMPLE);
         }
     }
 
-    if (drglIsExtensionSupported(&gl, "WGL_EXT_swap_control_tear") || drglIsExtensionSupported(&gl, "GLX_EXT_swap_control_tear")) {
+    if (ocglIsExtensionSupported(&gl, "WGL_EXT_swap_control_tear") || ocglIsExtensionSupported(&gl, "GLX_EXT_swap_control_tear")) {
         pGraphics->supportFlags |= OC_GRAPHICS_SUPPORT_FLAG_ADAPTIVE_VSYNC;
     }
 
 #ifdef OC_DEBUG
-    if (drglIsExtensionSupported(&gl, "GL_ARB_debug_output")) {
-        gl.Enable(GL_DEBUG_OUTPUT);
-        gl.DebugMessageCallbackARB(ocOpenGLErrorCB, pGraphics);
+    if (ocglIsExtensionSupported(&gl, "GL_ARB_debug_output")) {
+        gl.glEnable(GL_DEBUG_OUTPUT);
+        gl.glDebugMessageCallbackARB(ocOpenGLErrorCB, pGraphics);
     }
 #endif
 
@@ -162,7 +376,7 @@ void ocGraphicsUninit(ocGraphicsContext* pGraphics)
         return;
     }
 
-    drglUninit(&pGraphics->gl);
+    glbUninit();
     ocGraphicsUninitBase(pGraphics);
 }
 
@@ -188,7 +402,7 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 
 
 #ifdef OC_WIN32
-    if (!SetPixelFormat(pWindow->hDC, pGraphics->gl.pixelFormat, &pGraphics->gl.pfd)) {
+    if (!SetPixelFormat(pWindow->hDC, glbGetPixelFormat(), glbGetPFD())) {
         ocFree(pSwapchain);
         return OC_FAILED_TO_INIT_GRAPHICS;
     }
@@ -196,7 +410,12 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
 
 
     // V-Sync.
-    if (pGraphics->gl.SwapIntervalEXT != NULL) {
+#ifdef OC_WIN32
+    if (pGraphics->gl.wglSwapIntervalEXT != NULL) {
+#endif
+#ifdef OC_X11
+    if (pGraphics->gl.glXSwapIntervalEXT != NULL) {
+#endif
         int interval = 0;
         if (vsyncMode == ocVSyncMode_Enabled) {
             interval = 1;
@@ -208,10 +427,10 @@ ocResult ocGraphicsCreateSwapchain(ocGraphicsContext* pGraphics, ocWindow* pWind
         ocGraphicsSetCurrentWindow(pGraphics, pWindow);
         {
 #ifdef OC_WIN32
-            pGraphics->gl.SwapIntervalEXT(interval);
+            pGraphics->gl.wglSwapIntervalEXT(interval);
 #endif
 #ifdef OC_X11
-            pGraphics->gl.SwapIntervalEXT(pGraphics->gl.pDisplay, pWindow->windowX11, interval);
+            pGraphics->gl.glXSwapIntervalEXT(pGraphics->gl.pDisplay, pWindow->windowX11, interval);
 #endif
         }
         ocGraphicsSetCurrentWindow(pGraphics, pPrevCurrentWindow);
@@ -263,7 +482,7 @@ void ocGraphicsPresent(ocGraphicsContext* pGraphics, ocGraphicsSwapchain* pSwapc
 #endif
 
 #ifdef OC_X11
-    pGraphics->gl.SwapBuffers(pGraphics->gl.pDisplay, pSwapchain->pWindow->windowX11);
+    pGraphics->gl.glXSwapBuffers(glbGetDisplay(), pSwapchain->pWindow->windowX11);
 #endif
 }
 
@@ -283,21 +502,21 @@ ocResult ocGraphicsCreateImage(ocGraphicsContext* pGraphics, ocGraphicsImageDesc
         return OC_OUT_OF_MEMORY;
     }
 
-    drgl &gl = pGraphics->gl;
+    GLBapi &gl = pGraphics->gl;
 
     GLint internalFormat = ocToOpenGLImageInternalFormat(pDesc->format);
     GLint format = ocToOpenGLImageFormat(pDesc->format);
     GLenum type = ocToOpenGLImageFormatType(pDesc->format);
 
-    gl.GenTextures(1, &pImage->objectGL);
-    gl.BindTexture(GL_TEXTURE_2D, pImage->objectGL);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (pDesc->mipLevels == 1) ? GL_NEAREST : GL_NEAREST_MIPMAP_NEAREST);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl.glGenTextures(1, &pImage->objectGL);
+    gl.glBindTexture(GL_TEXTURE_2D, pImage->objectGL);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (pDesc->mipLevels == 1) ? GL_NEAREST : GL_NEAREST_MIPMAP_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     for (uint32_t iMipmap = 0; iMipmap < pDesc->mipLevels; ++iMipmap) {
-        gl.TexImage2D(GL_TEXTURE_2D, iMipmap, internalFormat, (GLsizei)pDesc->pMipmaps[iMipmap].width, (GLsizei)pDesc->pMipmaps[iMipmap].height, 0, format, type, ocOffsetPtr(pDesc->pImageData, pDesc->pMipmaps[iMipmap].dataOffset));
+        gl.glTexImage2D(GL_TEXTURE_2D, iMipmap, internalFormat, (GLsizei)pDesc->pMipmaps[iMipmap].width, (GLsizei)pDesc->pMipmaps[iMipmap].height, 0, format, type, ocOffsetPtr(pDesc->pImageData, pDesc->pMipmaps[iMipmap].dataOffset));
     }
 
     *ppImage = pImage;
@@ -310,7 +529,7 @@ void ocGraphicsDeleteImage(ocGraphicsContext* pGraphics, ocGraphicsImage* pImage
         return;
     }
 
-    pGraphics->gl.DeleteTextures(1, &pImage->objectGL);
+    pGraphics->gl.glDeleteTextures(1, &pImage->objectGL);
     ocFree(pImage);
 }
 
@@ -335,15 +554,15 @@ ocResult ocGraphicsCreateMesh(ocGraphicsContext* pGraphics, ocGraphicsMeshDesc* 
     size_t vertexBufferSize = pMesh->vertexCount * ocGetVertexSizeFromFormat(pMesh->vertexFormat);
     size_t indexBufferSize = pMesh->indexCount * ocGetIndexSizeFromFormat(pMesh->indexFormat);
 
-    drgl &gl = pGraphics->gl;
+    GLBapi &gl = pGraphics->gl;
 
-    gl.GenBuffers(1, &pMesh->vbo);
-    gl.BindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
-    gl.BufferData(GL_ARRAY_BUFFER, vertexBufferSize, pDesc->pVertices, GL_STATIC_DRAW);
+    gl.glGenBuffers(1, &pMesh->vbo);
+    gl.glBindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
+    gl.glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, pDesc->pVertices, GL_STATIC_DRAW);
 
-    gl.GenBuffers(1, &pMesh->ibo);
-    gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
-    gl.BufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, pDesc->pIndices, GL_STATIC_DRAW);
+    gl.glGenBuffers(1, &pMesh->ibo);
+    gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
+    gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, pDesc->pIndices, GL_STATIC_DRAW);
 
     *ppMesh = pMesh;
     return OC_SUCCESS;
@@ -355,10 +574,10 @@ void ocGraphicsDeleteMesh(ocGraphicsContext* pGraphics, ocGraphicsMesh* pMesh)
         return;
     }
 
-    drgl &gl = pGraphics->gl;
+    GLBapi &gl = pGraphics->gl;
 
-    gl.DeleteBuffers(1, &pMesh->ibo);
-    gl.DeleteBuffers(1, &pMesh->vbo);
+    gl.glDeleteBuffers(1, &pMesh->ibo);
+    gl.glDeleteBuffers(1, &pMesh->vbo);
 
     ocFree(pMesh);
 }
@@ -381,17 +600,17 @@ ocResult ocGraphicsWorldInit(ocGraphicsContext* pGraphics, ocGraphicsWorld* pWor
     pWorld->pObjects = new std::vector<ocGraphicsObject*>();
 
 
-    drgl &gl = pWorld->pGraphics->gl;
+    GLBapi &gl = pWorld->pGraphics->gl;
 
     // Shaders. Should probably make this part of the context...
     char* errorStr;
-    pWorld->testProgramGL = drglCreateSimpleProgramFromStrings(&gl, g_ocShader_Default_VERTEX, g_ocShader_Default_FRAGMENT, &errorStr);
+    pWorld->testProgramGL = ocglCreateSimpleProgramFromStrings(&gl, g_ocShader_Default_VERTEX, g_ocShader_Default_FRAGMENT, &errorStr);
     if (pWorld->testProgramGL == 0) {
         ocErrorf(pGraphics->pEngine, "%s\n", errorStr);
-        drglFree(errorStr);
+        ocFreeString(errorStr);
         return OC_SHADER_ERROR;
     }
-    drglFree(errorStr);
+    ocFreeString(errorStr);
 
 
     return OC_SUCCESS;
@@ -425,24 +644,24 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
         return;
     }
 
-    drgl &gl = pWorld->pGraphics->gl;
+    GLBapi &gl = pWorld->pGraphics->gl;
 
-    gl.BindFramebufferEXT(GL_FRAMEBUFFER, pRT->framebuffer.objectGL);
-    gl.Viewport(0, 0, pRT->sizeX, pRT->sizeY);
+    gl.glBindFramebufferEXT(GL_FRAMEBUFFER, pRT->framebuffer.objectGL);
+    gl.glViewport(0, 0, pRT->sizeX, pRT->sizeY);
 
-    gl.UseProgram(pWorld->testProgramGL);
+    gl.glUseProgram(pWorld->testProgramGL);
 
     // Camera.
-    gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Camera.Projection"), 1, GL_FALSE, glm::value_ptr(pRT->projection));
-    gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Camera.View"),       1, GL_FALSE, glm::value_ptr(pRT->view));
+    gl.glUniformMatrix4fv(gl.glGetUniformLocation(pWorld->testProgramGL, "Camera.Projection"), 1, GL_FALSE, glm::value_ptr(pRT->projection));
+    gl.glUniformMatrix4fv(gl.glGetUniformLocation(pWorld->testProgramGL, "Camera.View"),       1, GL_FALSE, glm::value_ptr(pRT->view));
 
-    gl.ClearColor(0, 0, 1, 1);
-    gl.ClearDepth(1);
-    gl.ClearStencil(0);
-    gl.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    gl.glClearColor(0, 0, 1, 1);
+    gl.glClearDepth(1);
+    gl.glClearStencil(0);
+    gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     if (pWorld->pCurrentImage) {
-        gl.BindTexture(GL_TEXTURE_2D, pWorld->pCurrentImage->objectGL);
+        gl.glBindTexture(GL_TEXTURE_2D, pWorld->pCurrentImage->objectGL);
     }
 
     for (size_t iObject = 0; iObject < pWorld->pObjects->size(); ++iObject) {
@@ -450,8 +669,8 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
         if (pObject->type == ocGraphicsObjectType_Mesh) {
             ocGraphicsMesh* pMesh = pObject->data.mesh.pResource;   // <-- For ease of use.
 
-            gl.UniformMatrix4fv(gl.GetUniformLocation(pWorld->testProgramGL, "Object.Model"), 1, GL_FALSE, glm::value_ptr(pObject->_transform));
-            gl.Uniform1i(gl.GetUniformLocation(pWorld->testProgramGL, "Texture0"), 0);
+            gl.glUniformMatrix4fv(gl.glGetUniformLocation(pWorld->testProgramGL, "Object.Model"), 1, GL_FALSE, glm::value_ptr(pObject->_transform));
+            gl.glUniform1i(gl.glGetUniformLocation(pWorld->testProgramGL, "Texture0"), 0);
 
             //gl.EnableClientState(GL_VERTEX_ARRAY);
             //gl.EnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -459,24 +678,24 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
 
             
 
-            GLint loc0 = gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Position");
-            GLint loc1 = gl.GetAttribLocation(pWorld->testProgramGL, "VERT_TexCoord");
+            GLint loc0 = gl.glGetAttribLocation(pWorld->testProgramGL, "VERT_Position");
+            GLint loc1 = gl.glGetAttribLocation(pWorld->testProgramGL, "VERT_TexCoord");
             //GLint loc2 = gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Normal");
 
-            gl.EnableVertexAttribArray(loc0);
-            gl.EnableVertexAttribArray(loc1);
+            gl.glEnableVertexAttribArray(loc0);
+            gl.glEnableVertexAttribArray(loc1);
 
-            gl.BindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
-            gl.VertexAttribPointer(gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Position"), 3, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
-            gl.VertexAttribPointer(gl.GetAttribLocation(pWorld->testProgramGL, "VERT_TexCoord"), 2, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
-            //gl.VertexAttribPointer(gl.GetAttribLocation(pWorld->testProgramGL, "VERT_Normal"),   3, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
+            gl.glBindBuffer(GL_ARRAY_BUFFER, pMesh->vbo);
+            gl.glVertexAttribPointer(gl.glGetAttribLocation(pWorld->testProgramGL, "VERT_Position"), 3, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
+            gl.glVertexAttribPointer(gl.glGetAttribLocation(pWorld->testProgramGL, "VERT_TexCoord"), 2, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
+            //gl.glVertexAttribPointer(gl.glGetAttribLocation(pWorld->testProgramGL, "VERT_Normal"),   3, GL_FLOAT, GL_FALSE, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
 
-            //gl.VertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
-            //gl.TexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
-            //gl.NormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
+            //gl.glVertexPointer(3, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), 0);
+            //gl.glTexCoordPointer(2, GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3)));
+            //gl.glNormalPointer(GL_FLOAT, (GLsizei)ocGetVertexSizeFromFormat(pMesh->vertexFormat), (const GLvoid*)(sizeof(float)*(3+2)));
 
-            gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
-            gl.DrawElements(ocToOpenGLPrimitiveType(pMesh->primitiveType), pMesh->indexCount, ocToOpenGLIndexFormat(pMesh->indexFormat), 0);
+            gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMesh->ibo);
+            gl.glDrawElements(ocToOpenGLPrimitiveType(pMesh->primitiveType), pMesh->indexCount, ocToOpenGLIndexFormat(pMesh->indexFormat), 0);
         }
     }
 
@@ -484,9 +703,9 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     // The final composition is slightly different depending on whether or not we are outputting to a window or an image.
     if (pRT->pSwapchain != NULL) {
         ocGraphicsSetCurrentWindow(pWorld->pGraphics, pRT->pSwapchain->pWindow);
-        gl.BindFramebufferEXT(GL_READ_FRAMEBUFFER, pRT->framebuffer.objectGL);
-        gl.BindFramebufferEXT(GL_DRAW_FRAMEBUFFER, 0);
-        gl.BlitFramebufferEXT(0, 0, pRT->sizeX, pRT->sizeY, 0, 0, pRT->sizeX, pRT->sizeY, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        gl.glBindFramebufferEXT(GL_READ_FRAMEBUFFER, pRT->framebuffer.objectGL);
+        gl.glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER, 0);
+        gl.glBlitFramebufferEXT(0, 0, pRT->sizeX, pRT->sizeY, 0, 0, pRT->sizeX, pRT->sizeY, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     } else {
 
     }
@@ -590,38 +809,38 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     pRT->view = glm::mat4();
 
     // Render targets need a framebuffer object.
-    drgl &gl = pWorld->pGraphics->gl;
+    GLBapi &gl = pWorld->pGraphics->gl;
 
     // Color texture.
-    gl.GenRenderbuffersEXT(1, &pRT->framebuffer.colorRenderbufferGL);
-    gl.BindRenderbufferEXT(GL_RENDERBUFFER, pRT->framebuffer.colorRenderbufferGL);
+    gl.glGenRenderbuffersEXT(1, &pRT->framebuffer.colorRenderbufferGL);
+    gl.glBindRenderbufferEXT(GL_RENDERBUFFER, pRT->framebuffer.colorRenderbufferGL);
     if (pWorld->pGraphics->msaaSamples == 1) {
-        gl.RenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, (GLsizei)sizeX, (GLsizei)sizeY);
+        gl.glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, (GLsizei)sizeX, (GLsizei)sizeY);
     } else {
-        gl.RenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, pWorld->pGraphics->msaaSamples, GL_RGBA, pRT->sizeX, pRT->sizeY);
+        gl.glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, pWorld->pGraphics->msaaSamples, GL_RGBA, pRT->sizeX, pRT->sizeY);
     }
 
     // Depth/stencil renderbuffer.
-    gl.GenRenderbuffersEXT(1, &pRT->framebuffer.depthStencilRenderbufferGL);
-    gl.BindRenderbufferEXT(GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
+    gl.glGenRenderbuffersEXT(1, &pRT->framebuffer.depthStencilRenderbufferGL);
+    gl.glBindRenderbufferEXT(GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
     if (pWorld->pGraphics->msaaSamples == 1) {
-        gl.RenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)sizeX, (GLsizei)sizeY);
+        gl.glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)sizeX, (GLsizei)sizeY);
     } else {
-        gl.RenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, pWorld->pGraphics->msaaSamples, GL_DEPTH24_STENCIL8, pRT->sizeX, pRT->sizeY);
+        gl.glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, pWorld->pGraphics->msaaSamples, GL_DEPTH24_STENCIL8, pRT->sizeX, pRT->sizeY);
     }
 
 
     // Framebuffer object.
-    gl.GenFramebuffersEXT(1, &pRT->framebuffer.objectGL);
-    gl.BindFramebufferEXT(GL_FRAMEBUFFER, pRT->framebuffer.objectGL);
-    gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pRT->framebuffer.colorRenderbufferGL);
-    gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
+    gl.glGenFramebuffersEXT(1, &pRT->framebuffer.objectGL);
+    gl.glBindFramebufferEXT(GL_FRAMEBUFFER, pRT->framebuffer.objectGL);
+    gl.glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pRT->framebuffer.colorRenderbufferGL);
+    gl.glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
 
     // Can also do this for depth/stencil which I _think_ is how I had to do it on an Intel implementation at some point in the past:
     //gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
     //gl.FramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pRT->framebuffer.depthStencilRenderbufferGL);
 
-    GLenum status = gl.CheckFramebufferStatusEXT(GL_FRAMEBUFFER);
+    GLenum status = gl.glCheckFramebufferStatusEXT(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         ocErrorf(pWorld->pGraphics->pEngine, "Invalid framebuffer status: %s", ocOpenGLFramebufferStatusToString(status));
         return OC_INVALID_FRAMEBUFFER;
@@ -637,11 +856,11 @@ OC_PRIVATE void ocGraphicsWorldUninitRT(ocGraphicsWorld* pWorld, ocGraphicsRT* p
     ocAssert(pWorld != NULL);
     ocAssert(pRT != NULL);
 
-    drgl &gl = pWorld->pGraphics->gl;
+    GLBapi &gl = pWorld->pGraphics->gl;
 
-    gl.DeleteFramebuffersEXT(1, &pRT->framebuffer.objectGL);
-    gl.DeleteRenderbuffersEXT(1, &pRT->framebuffer.depthStencilRenderbufferGL);
-    gl.DeleteRenderbuffersEXT(1, &pRT->framebuffer.colorRenderbufferGL);
+    gl.glDeleteFramebuffersEXT(1, &pRT->framebuffer.objectGL);
+    gl.glDeleteRenderbuffersEXT(1, &pRT->framebuffer.depthStencilRenderbufferGL);
+    gl.glDeleteRenderbuffersEXT(1, &pRT->framebuffer.colorRenderbufferGL);
 }
 
 ocResult ocGraphicsWorldCreateRTFromSwapchain(ocGraphicsWorld* pWorld, ocGraphicsSwapchain* pSwapchain, ocGraphicsRT** ppRT)
