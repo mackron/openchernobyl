@@ -109,100 +109,6 @@ OC_PRIVATE void APIENTRY ocOpenGLErrorCB(GLenum source, GLenum type, GLuint id, 
 }
 
 
-GLboolean ocglIsExtensionInString(const char* ext, const char* str)
-{
-    if (ext == NULL || str == NULL) return GL_FALSE;
-
-    const char* ext2beg = str;
-    const char* ext2end = ext2beg;
-
-    for (;;) {
-        while (ext2end[0] != ' ' && ext2end[0] != '\0') {
-            ext2end += 1;
-        }
-
-        if (strncmp(ext, ext2beg, ext2end - ext2beg) == 0) {
-            return GL_TRUE;
-        }
-
-        // Break if we've reached the end. Otherwise, just move to start fo the next extension.
-        if (ext2end[0] == '\0') {
-            break;
-        } else {
-            ext2beg = ext2end + 1;
-            ext2end = ext2beg;
-        }
-    }
-
-    return GL_FALSE;
-}
-
-#if defined(GLBIND_WGL)
-GLboolean ocglIsWGLExtensionSupported(GLBapi* pGL, const char* ext)
-{
-    if (pGL->wglGetExtensionsStringARB) {
-        return ocglIsExtensionInString(ext, pGL->wglGetExtensionsStringARB(pGL->wglGetCurrentDC()));
-    }
-
-    if (pGL->wglGetExtensionsStringEXT) {
-        return ocglIsExtensionInString(ext, pGL->wglGetExtensionsStringEXT());
-    }
-
-    return GL_FALSE;
-}
-#endif
-
-#if defined(GLBIND_GLX)
-GLboolean ocglIsX11ExtensionSupported(GLBapi* pGL, const char* ext)
-{
-    if (pGL->glXQueryExtensionsString) {
-        return ocglIsExtensionInString(ext, pGL->glXQueryExtensionsString(glbGetDisplay(), XDefaultScreen(glbGetDisplay())));
-    }
-
-    return GL_FALSE;
-}
-#endif
-
-GLboolean ocglIsExtensionSupported(GLBapi* pGL, const char* ext)
-{
-    if (pGL->glGetStringi) {
-        GLint supportedExtensionCount = 0;
-        pGL->glGetIntegerv(GL_NUM_EXTENSIONS, &supportedExtensionCount);
-
-        for (GLint i = 0; i < supportedExtensionCount; ++i) {
-            const char* supportedExtension = (const char*)pGL->glGetStringi(GL_EXTENSIONS, i);
-            if (supportedExtension != NULL) {
-                if (strcmp(supportedExtension, ext) == 0) {
-                    return GL_TRUE;
-                }
-            }
-        }
-
-        // It's not a core extension. Check platform-specific extensions.
-        GLboolean isSupported = GL_FALSE;
-#if defined(GLBIND_WGL)
-        isSupported = ocglIsWGLExtensionSupported(pGL, ext);
-#endif
-#if defined(GLBIND_GLX)
-        isSupported = ocglIsX11ExtensionSupported(pGL, ext);
-#endif
-        return isSupported;
-    }
-
-    // Fall back to old style.
-    GLboolean isSupported = ocglIsExtensionInString(ext, (const char*)pGL->glGetString(GL_EXTENSIONS));
-    if (!isSupported) {
-#if defined(GLBIND_WGL)
-        isSupported = ocglIsWGLExtensionSupported(pGL, ext);
-#endif
-#if defined(GLBIND_GLX)
-        isSupported = ocglIsX11ExtensionSupported(pGL, ext);
-#endif
-    }
-
-    return isSupported;
-}
-
 
 GLuint ocglCreateShader(GLBapi* pGL, GLenum type, const GLchar* src, GLchar** pErrorOut)
 {
@@ -336,7 +242,7 @@ ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, o
     GLBapi &gl = pGraphics->gl;
 
     // Feature support.
-    if (ocglIsExtensionSupported(&gl, "GL_ARB_texture_multisample")) {
+    if (glbIsExtensionSupported(&gl, "GL_ARB_texture_multisample")) {
         pGraphics->supportFlags |= OC_GRAPHICS_SUPPORT_FLAG_MSAA;
         pGraphics->minMSAA = 1;
 
@@ -352,12 +258,12 @@ ocResult ocGraphicsInit(ocEngineContext* pEngine, uint32_t desiredMSAASamples, o
         }
     }
 
-    if (ocglIsExtensionSupported(&gl, "WGL_EXT_swap_control_tear") || ocglIsExtensionSupported(&gl, "GLX_EXT_swap_control_tear")) {
+    if (glbIsExtensionSupported(&gl, "WGL_EXT_swap_control_tear") || glbIsExtensionSupported(&gl, "GLX_EXT_swap_control_tear")) {
         pGraphics->supportFlags |= OC_GRAPHICS_SUPPORT_FLAG_ADAPTIVE_VSYNC;
     }
 
 #ifdef OC_DEBUG
-    if (ocglIsExtensionSupported(&gl, "GL_ARB_debug_output")) {
+    if (glbIsExtensionSupported(&gl, "GL_ARB_debug_output")) {
         gl.glEnable(GL_DEBUG_OUTPUT);
         gl.glDebugMessageCallbackARB(ocOpenGLErrorCB, pGraphics);
     }
