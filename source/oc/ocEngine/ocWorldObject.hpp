@@ -8,11 +8,11 @@ struct ocWorldObject;
 // object is a simple matter of performing a subtraction (no traversal required).
 struct ocWorldObject
 {
-    ocWorld* pWorld;            // <-- Should never be null. Do _not_ use this to determine if the object is in the world - use ocWorldObjectIsInWorld().
-    ocString name;              // <-- Does not need to be unique, and can be null.
-    glm::vec4 absolutePosition; // <-- Don't set this directly to move the object. Use ocWorldObjectSetAbsolutePosition().
-    glm::quat absoluteRotation; // <-- As above, except ocWorldObjectSetAbsoluteRotation()
-    glm::vec4 absoluteScale;    // <-- As above, except ocWorldObjectSetAbsoluteScale()
+    ocWorld* pWorld;            // Should never be null. Do _not_ use this to determine if the object is in the world - use ocWorldObjectIsInWorld().
+    ocString name;              // Does not need to be unique, and can be null.
+    glm::vec4 absolutePosition; // Don't set this directly to move the object. Use ocWorldObjectSetAbsolutePosition().
+    glm::quat absoluteRotation; // As above, except ocWorldObjectSetAbsoluteRotation()
+    glm::vec4 absoluteScale;    // As above, except ocWorldObjectSetAbsoluteScale()
     ocComponent* ppComponents[OC_MAX_COMPONENTS];
     ocUInt16 componentCount;
     ocUInt16 isInWorld            : 1;
