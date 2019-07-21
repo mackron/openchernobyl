@@ -1,15 +1,6 @@
 
-#ifdef VULKAN
 #define OC_UNIFORM(_binding) layout (binding = _binding) uniform
-#else
-#define OC_UNIFORM(_binding) uniform
-#endif
-
-#ifdef VULKAN
 #define OC_UBO(_set, _binding, _blockname) layout (set = _set, binding = _binding) uniform _blockname
-#else
-#define OC_UBO(_set, _binding, _blockname) uniform struct _blockname
-#endif
 
 #if defined(__VERSION__) && __VERSION__ <= 120
     #if defined(SHADER_STAGE_FRAGMENT)

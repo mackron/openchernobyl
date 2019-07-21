@@ -2,7 +2,6 @@
 
 struct ocBuildShadersContext
 {
-    ocString pOutputFileData_OpenGL;
     ocString pOutputFileData_Vulkan;
 };
 
@@ -22,7 +21,6 @@ ocResult ocBuildShadersContextUninit(ocBuildShadersContext* pContext)
         return OC_INVALID_ARGS;
     }
 
-    ocFreeString(pContext->pOutputFileData_OpenGL);
     ocFreeString(pContext->pOutputFileData_Vulkan);
 
     return OC_SUCCESS;
@@ -44,9 +42,6 @@ ocResult ocBuildShadersContextUninit(ocBuildShadersContext* pContext)
 
 #define OC_BUILD_GLSLANG_CMD_VULKAN(infile, outdir, options, cmd) \
     snprintf(cmd, sizeof(cmd), "%s %s \"%s/vulkan/%s\" -o \"%s/vulkan/%s.spv\"", OC_BUILD_GLSLANG_PATH, options, OC_BUILD_INTERMEDIATE_DIRECTORY, infile, OC_BUILD_INTERMEDIATE_DIRECTORY, infile)
-
-#define OC_BUILD_GLSLANG_CMD_OPENGL(infile, outdir, options, cmd) \
-    snprintf(cmd, sizeof(cmd), "%s %s \"%s/opengl/%s\"", OC_BUILD_GLSLANG_PATH, options, OC_BUILD_INTERMEDIATE_DIRECTORY, infile)
 
 const char* ocBuildGetShaderStageStringFromFilePath(const char* filePath)
 {
@@ -70,51 +65,6 @@ const char* ocBuildGetShaderStageStringFromFilePath(const char* filePath)
     }
 
     return "GENERIC";
-}
-
-ocResult ocBuildCompileShader_OpenGL(const char* filePath)
-{
-    char cmd[4096];
-    int systemResult;
-
-    char inputFilePath[OC_MAX_PATH];
-    snprintf(inputFilePath, sizeof(inputFilePath), "%s/%s", OC_BUILD_SHADERS_INDIR_OLD, filePath);
-
-    char intermediateFilePath[OC_MAX_PATH];
-    snprintf(intermediateFilePath, sizeof(intermediateFilePath), "%s%s", OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/", filePath);
-
-
-    ocCreateDirectoryRecursive(OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl");
-
-    // Preprocess.
-    char options[1024];
-    snprintf(options, sizeof(options),
-        "-DOPENGL -D__VERSION__=%s -DSHADER_STAGE_%s",
-        "120",
-        ocBuildGetShaderStageStringFromFilePath(filePath));
-
-    OC_BUILD_MCPP_CMD(filePath, "opengl", options, cmd);
-    systemResult = ocSystem(cmd);
-    if (systemResult != 0) {
-        return OC_FAILED_TO_COMPILE_SHADER;
-    }
-
-    // Compile.
-    snprintf(options, sizeof(options), "");
-
-    char prefix[1024];
-    snprintf(prefix, sizeof(prefix),
-        "#version 120\n"
-        "\n");
-
-    ocBuildPrependStringToFile(intermediateFilePath, prefix);
-    OC_BUILD_GLSLANG_CMD_OPENGL(filePath, "opengl", "", cmd);
-    systemResult = ocSystem(cmd);
-    if (systemResult != 0) {
-        return OC_FAILED_TO_COMPILE_SHADER;
-    }
-
-    return OC_SUCCESS;
 }
 
 ocResult ocBuildCompileShader_Vulkan(const char* filePath)
@@ -168,12 +118,6 @@ ocResult ocBuildCompileShader(const char* filePath)
 
     printf("Compiling Shader: %s\n", filePath);
 
-    result = ocBuildCompileShader_OpenGL(filePath);
-    if (result != OC_SUCCESS) {
-        printf("Failed to compile OpenGL shader %s.\n\n", filePath);
-        return result;
-    }
-
     result = ocBuildCompileShader_Vulkan(filePath);
     if (result != OC_SUCCESS) {
         printf("Failed to compile Vulkan shader %s.\n\n", filePath);
@@ -183,35 +127,6 @@ ocResult ocBuildCompileShader(const char* filePath)
     return result;
 }
 
-
-ocResult ocBuildGenerateShaderCCode_OpenGL(ocBuildShadersContext* pContext, const char* filePath)
-{
-    char inputFilePath[OC_MAX_PATH];
-    snprintf(inputFilePath, sizeof(inputFilePath), "%s/opengl/%s", OC_BUILD_INTERMEDIATE_DIRECTORY, filePath);
-
-    void* pInputFileData;
-    size_t inputFileSize;
-    ocResult result = ocOpenAndReadFile(inputFilePath, &pInputFileData, &inputFileSize);
-    if (result != OC_SUCCESS) {
-        return result;
-    }
-
-    char variableName[256];
-    ocBuildGetShaderVariableNameFromFileName(variableName, sizeof(variableName), filePath);
-
-    // For now we output the file data as a C-style string.
-    char* pOutputData = ocBuildBufferToCString((const unsigned char*)pInputFileData, inputFileSize, variableName);
-    if (pOutputData == NULL) {
-        return OC_ERROR;
-    }
-
-    pContext->pOutputFileData_OpenGL = ocAppendString(pContext->pOutputFileData_OpenGL, pOutputData);
-    pContext->pOutputFileData_OpenGL = ocAppendString(pContext->pOutputFileData_OpenGL, "\n\n");
-
-    ocFree(pOutputData);
-    ocFree(pInputFileData);
-    return OC_SUCCESS;
-}
 
 ocResult ocBuildGenerateShaderCCode_Vulkan(ocBuildShadersContext* pContext, const char* filePath)
 {
@@ -245,12 +160,6 @@ ocResult ocBuildGenerateShaderCCode_Vulkan(ocBuildShadersContext* pContext, cons
 ocResult ocBuildGenerateShaderCCode(ocBuildShadersContext* pContext, const char* filePath)
 {
     ocResult result = OC_SUCCESS;
-
-    result = ocBuildGenerateShaderCCode_OpenGL(pContext, filePath);
-    if (result != OC_SUCCESS) {
-        printf("Failed to generate C code for OpenGL shader %s\n", filePath);
-        return result;
-    }
 
     result = ocBuildGenerateShaderCCode_Vulkan(pContext, filePath);
     if (result != OC_SUCCESS) {
@@ -306,11 +215,6 @@ ocResult ocBuildCompileShaders(int argc, char** argv)
 
 
     // At this point we should have the contents of the auto-generated files in memory, so now we need to dump it to an actual file.
-    result = ocBuildAppendStringToFile(OC_BUILD_INTERMEDIATE_DIRECTORY "/opengl/ocGraphics_OpenGL_Autogen.cpp", context.pOutputFileData_OpenGL);
-    if (result != OC_SUCCESS) {
-        return result;
-    }
-
     result = ocBuildAppendStringToFile(OC_BUILD_INTERMEDIATE_DIRECTORY "/vulkan/ocGraphics_Vulkan_Autogen.cpp", context.pOutputFileData_Vulkan);
     if (result != OC_SUCCESS) {
         return result;
