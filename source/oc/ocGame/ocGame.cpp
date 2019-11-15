@@ -350,9 +350,9 @@ int ocInitAndRun(int argc, char** argv)
 
             // Transform.
             ocWorldObjectSetAbsoluteTransform(&object,
-                glm::vec3(pSceneObject->relativePositionX, pSceneObject->relativePositionY, pSceneObject->relativePositionZ),
-                glm::quat(pSceneObject->relativeRotationW, pSceneObject->relativeRotationX, pSceneObject->relativeRotationY, pSceneObject->relativeRotationZ),
-                glm::vec3(pSceneObject->relativeScaleX,    pSceneObject->relativeScaleY,    pSceneObject->relativeScaleZ));
+                glm::vec3(pSceneObject->absolutePositionX, pSceneObject->absolutePositionY, pSceneObject->absolutePositionZ),
+                glm::quat(pSceneObject->absoluteRotationW, pSceneObject->absoluteRotationX, pSceneObject->absoluteRotationY, pSceneObject->absoluteRotationZ),
+                glm::vec3(pSceneObject->absoluteScaleX,    pSceneObject->absoluteScaleY,    pSceneObject->absoluteScaleZ));
 
             // Components.
             ocSceneObjectComponent* pSceneObjectComponents = (ocSceneObjectComponent*)(g_Game.pSceneResource->scene.pPayload + pSceneObject->componentsOffset);

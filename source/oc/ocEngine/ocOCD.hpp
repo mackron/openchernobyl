@@ -107,9 +107,9 @@ struct ocOCDSceneBuilderObject
     ocUInt32 lastChildIndex;
     ocUInt32 prevSiblingIndex;
     ocUInt32 nextSiblingIndex;
-    glm::vec3 relativePosition;
-    glm::quat relativeRotation;
-    glm::vec3 relativeScale;
+    glm::vec3 absolutePosition;
+    glm::quat absoluteRotation;
+    glm::vec3 absoluteScale;
     ocUInt32 componentCount;
     ocUInt64 componentsOffset;
 };
@@ -173,7 +173,7 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
 // Starts a new object.
 //
 // When called between another BeginObject/EndObject pair, the new object will be a child of that outer object.
-ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* name, const glm::vec3 &relativePosition, const glm::quat &relativeRotation, const glm::vec3 &relativeScale);
+ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* name, const glm::vec3 &absolutePosition, const glm::quat &absoluteRotation, const glm::vec3 &absoluteScale);
 
 // Ends an object.
 ocResult ocOCDSceneBuilderEndObject(ocOCDSceneBuilder* pBuilder);

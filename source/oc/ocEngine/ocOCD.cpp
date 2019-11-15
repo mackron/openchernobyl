@@ -20,7 +20,9 @@ OC_PRIVATE ocResult ocStreamWriterWriteOCDDataBlock(ocStreamWriter* pWriter, con
 
 ocResult ocOCDDataBlockInit(ocOCDDataBlock* pBlock)
 {
-    if (pBlock == NULL) return OC_INVALID_ARGS;
+    if (pBlock == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocZeroObject(pBlock);
     ocStreamWriterInit(&pBlock->pData, &pBlock->dataSize, pBlock);
@@ -30,7 +32,9 @@ ocResult ocOCDDataBlockInit(ocOCDDataBlock* pBlock)
 
 ocResult ocOCDDataBlockUninit(ocOCDDataBlock* pBlock)
 {
-    if (pBlock == NULL) return OC_INVALID_ARGS;
+    if (pBlock == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocFree(pBlock->pData);
     ocStreamWriterUninit(pBlock);
@@ -40,10 +44,17 @@ ocResult ocOCDDataBlockUninit(ocOCDDataBlock* pBlock)
 
 ocResult ocOCDDataBlockWrite(ocOCDDataBlock* pBlock, const void* pData, ocSizeT dataSize, ocUInt64* pOffsetOut)
 {
-    if (pOffsetOut) *pOffsetOut = 0;
-    if (pBlock == NULL || pData == NULL) return OC_INVALID_ARGS;
+    if (pOffsetOut) {
+        *pOffsetOut = 0;
+    }
 
-    if (pOffsetOut) *pOffsetOut = pBlock->dataSize;
+    if (pBlock == NULL || pData == NULL) {
+        return OC_INVALID_ARGS;
+    }
+
+    if (pOffsetOut) {
+        *pOffsetOut = pBlock->dataSize;
+    }
 
     ocResult result = ocStreamWriterWrite(pBlock, pData, dataSize, NULL);
     if (result != OC_SUCCESS) {
@@ -259,7 +270,9 @@ ocResult ocOCDSceneBuilderInit(ocOCDSceneBuilder* pBuilder)
 
 ocResult ocOCDSceneBuilderUninit(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL) return OC_INVALID_ARGS;
+    if (pBuilder == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocStackUninit(&pBuilder->meshGroups);
 
@@ -464,7 +477,9 @@ ocResult ocOCDSceneBuilderRender(ocOCDSceneBuilder* pBuilder, ocStreamWriter* pW
 
 ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char* path, ocUInt32* pIndex)
 {
-    if (pBuilder == NULL || path == NULL) return OC_INVALID_ARGS;
+    if (pBuilder == NULL || path == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     // Check if the subresource already exists. If so, reuse it.
     for (ocUInt32 iSubresource = 0; iSubresource < (ocUInt32)pBuilder->subresources.count; ++iSubresource) {
@@ -500,13 +515,18 @@ ocResult ocOCDSceneBuilderAddSubresource(ocOCDSceneBuilder* pBuilder, const char
     }
 
 
-    if (pIndex) *pIndex = (ocUInt32)(pBuilder->subresources.count-1);
+    if (pIndex) {
+        *pIndex = (ocUInt32)(pBuilder->subresources.count-1);
+    }
+
     return OC_SUCCESS;
 }
 
-ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* name, const glm::vec3 &relativePosition, const glm::quat &relativeRotation, const glm::vec3 &relativeScale)
+ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* name, const glm::vec3 &absolutePosition, const glm::quat &absoluteRotation, const glm::vec3 &absoluteScale)
 {
-    if (pBuilder == NULL) return OC_INVALID_ARGS;
+    if (pBuilder == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocResult result = OC_SUCCESS;
 
@@ -554,9 +574,9 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
 
 
     // Transformation.
-    object.relativePosition = relativePosition;
-    object.relativeRotation = relativeRotation;
-    object.relativeScale = relativeScale;
+    object.absolutePosition = absolutePosition;
+    object.absoluteRotation = absoluteRotation;
+    object.absoluteScale    = absoluteScale;
 
 
 
@@ -577,7 +597,9 @@ ocResult ocOCDSceneBuilderBeginObject(ocOCDSceneBuilder* pBuilder, const char* n
 
 ocResult ocOCDSceneBuilderEndObject(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL) return OC_INVALID_ARGS;
+    if (pBuilder == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     if (pBuilder->objectStack.count == 0) {
         return OC_INVALID_OPERATION;
@@ -658,7 +680,9 @@ OC_PRIVATE ocResult ocOCDSceneBuilder_AddComponent(ocOCDSceneBuilder* pBuilder, 
 
 ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const char* path)
 {
-    if (pBuilder == NULL) return OC_INVALID_ARGS;
+    if (pBuilder == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     if (pBuilder->objectStack.count == 0) {
         return OC_INVALID_OPERATION;
@@ -712,7 +736,9 @@ ocResult ocOCDSceneBuilderAddSceneComponent(ocOCDSceneBuilder* pBuilder, const c
 
 ocResult ocOCDSceneBuilderBeginMeshComponent(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_TRUE) return OC_INVALID_ARGS;
+    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_TRUE) {
+        return OC_INVALID_ARGS;
+    }
 
     if (pBuilder->objectStack.count == 0) {
         return OC_INVALID_OPERATION;
@@ -737,7 +763,9 @@ ocResult ocOCDSceneBuilderBeginMeshComponent(ocOCDSceneBuilder* pBuilder)
 
 ocResult ocOCDSceneBuilderEndMeshComponent(ocOCDSceneBuilder* pBuilder)
 {
-    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_FALSE) return OC_INVALID_ARGS;
+    if (pBuilder == NULL || pBuilder->isAddingMeshComponent == OC_FALSE) {
+        return OC_INVALID_ARGS;
+    }
 
     if (pBuilder->objectStack.count == 0) {
         return OC_INVALID_OPERATION;
@@ -882,7 +910,9 @@ done:
 
 ocResult ocOCDSceneBuilderMeshComponentAddGroup(ocOCDSceneBuilder* pBuilder, const char* materialPath, ocGraphicsPrimitiveType primitiveType, ocGraphicsVertexFormat vertexFormat, ocUInt32 vertexCount, float* pVertexData, ocGraphicsIndexFormat indexFormat, ocUInt32 indexCount, void* pIndexData)
 {
-    if (pBuilder == NULL || pVertexData == NULL || pIndexData == NULL) return OC_INVALID_ARGS;
+    if (pBuilder == NULL || pVertexData == NULL || pIndexData == NULL) {
+        return OC_INVALID_ARGS;
+    }
 
     ocOCDSceneBuilderMeshGroup meshGroup;
     ocResult result = ocOCDSceneBuilderAddSubresource(pBuilder, materialPath, &meshGroup.materialSubresourceIndex);

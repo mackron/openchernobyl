@@ -88,16 +88,16 @@ struct ocSceneObject
     ocUInt32 nextSiblingIndex;
 
     // Transformation information.
-    float relativePositionX;
-    float relativePositionY;
-    float relativePositionZ;
-    float relativeRotationX;
-    float relativeRotationY;
-    float relativeRotationZ;
-    float relativeRotationW;
-    float relativeScaleX;
-    float relativeScaleY;
-    float relativeScaleZ;
+    float absolutePositionX;
+    float absolutePositionY;
+    float absolutePositionZ;
+    float absoluteRotationX;
+    float absoluteRotationY;
+    float absoluteRotationZ;
+    float absoluteRotationW;
+    float absoluteScaleX;
+    float absoluteScaleY;
+    float absoluteScaleZ;
 
     // Components.
     ocUInt32 componentCount;
