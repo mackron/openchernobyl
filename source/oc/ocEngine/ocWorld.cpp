@@ -423,7 +423,7 @@ void ocWorldSetObjectAbsoluteTransform(ocWorld* pWorld, ocWorldObject* pObject, 
         return;
     }
 
-    // We update the transforms of the children first, because they need to no the previous transform of the parent
+    // We update the transforms of the children first, because they need to know the previous transform of the parent
     // object so they can be transformed correctly.
     for (ocWorldObject* pChild = pObject->pFirstChild; pChild != NULL; pChild = pChild->pNextSibling) {
         if (pChild->noRelativePosition == 0 || pChild->noRelativeRotation == 0 || pChild->noRelativeScale == 0) {   // <-- Check if anything needs to be updated.
