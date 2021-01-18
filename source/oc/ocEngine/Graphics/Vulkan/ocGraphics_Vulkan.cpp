@@ -1902,8 +1902,11 @@ void ocGraphicsWorldDrawRT(ocGraphicsWorld* pWorld, ocGraphicsRT* pRT)
     if (pWorld == NULL || pRT == NULL) return;
 
     // Update the uniform buffers for the render target.
-    memcpy(ocOffsetPtr(pRT->pUniformBufferData, 0),                 &pRT->projection, sizeof(pRT->projection));
-    memcpy(ocOffsetPtr(pRT->pUniformBufferData, sizeof(glm::mat4)), &pRT->view,       sizeof(pRT->view));
+    glm::mat4 projection = pRT->projection * ocMakeMat4_VulkanClipCorrection();
+    glm::mat4 view       = pRT->view;
+
+    memcpy(ocOffsetPtr(pRT->pUniformBufferData, 0),                 &projection, sizeof(pRT->projection));
+    memcpy(ocOffsetPtr(pRT->pUniformBufferData, sizeof(glm::mat4)), &view,       sizeof(pRT->view));
 
     // The descriptor set for the RTs uniforms need to be updated.
     VkWriteDescriptorSet descriptorWrite;
@@ -2352,7 +2355,8 @@ OC_PRIVATE ocResult ocGraphicsWorldAllocAndInitRT(ocGraphicsWorld* pWorld, ocGra
     pRT->pImage = pImage;
     pRT->sizeX = sizeX;
     pRT->sizeY = sizeY;
-    pRT->projection = glm::mat4() * ocMakeMat4_VulkanClipCorrection();
+    pRT->projection = glm::mat4()/* * ocMakeMat4_VulkanClipCorrection()*/;
+    pRT->projection = glm::mat4()/* * ocMakeMat4_VulkanClipCorrection()*/;
     pRT->view = glm::mat4();
 
     // Main framebuffer.

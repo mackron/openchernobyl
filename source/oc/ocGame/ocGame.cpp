@@ -3,6 +3,8 @@
 #include "ocGame.hpp"
 
 ocGame g_Game;
+float g_RotationX = 0;
+float g_RotationY = 0;
 
 OC_PRIVATE ocResult ocGame_RecreateWindowRT(ocVSyncMode vsyncMode)
 {
@@ -37,11 +39,27 @@ OC_PRIVATE void ocGame_DoInput(ocEngineContext* pEngine)
     ocGetMouseRelativePosition(pEngine, &mousePosX, &mousePosY);
 
     ocLogf(pEngine, "Mouse Pos: %d %d", (ocInt32)mousePosX, (ocInt32)mousePosY);
+
+    g_RotationX -= mousePosY*0.01f;
+    g_RotationY -= mousePosX*0.01f;
+
+    glm::quat rotation =
+        glm::angleAxis(g_RotationX, glm::vec3(1, 0, 0)) * 
+        glm::angleAxis(g_RotationY, glm::vec3(0, 1, 0));
+
+    ocCameraSetRotation(&g_Game.camera, rotation);
+
+    /*ocCameraRotateX(&g_Game.camera, mousePosY*0.01f);
+    ocCameraRotateY(&g_Game.camera, mousePosX*0.01f);*/
 }
 
 OC_PRIVATE void ocGame_DoUpdate(ocEngineContext* pEngine, double dt)
 {
     (void)pEngine;
+
+    /* TESTING: Update the RT camera. */
+    g_Game.pWindowRT->view = ocCameraGetViewMatrix(&g_Game.camera);
+    g_Game.pWindowRT->projection = ocCameraGetProjectionMatrix(&g_Game.camera);
 
     ocWorldStep(&g_Game.world, dt);
 }
@@ -85,7 +103,7 @@ OC_PRIVATE void ocGame_OnWindowEvent(ocEngineContext* pEngine, ocWindowEvent e)
     (void)pEngine;
 
     // Don't care about any events before initialization is complete.
-    if ((g_Game.flags & OC_GAME_FLAG_IS_INITIALIZED) == 0) {
+    if (!g_Game.isInitialized) {
         return;
     }
 
@@ -206,6 +224,10 @@ int ocInitAndRun(int argc, char** argv)
     if (result != OC_SUCCESS) {
         goto done;
     }
+
+    /* Camera. */
+    ocCameraInitPerspective(90, 640.0f/480.0f, 0.01f, 1000.0f, &g_Game.camera);
+    ocCameraSetPosition(&g_Game.camera, glm::vec3(0, 0, 4));
 
     // TESTING (Image)
     {
@@ -422,7 +444,7 @@ int ocInitAndRun(int argc, char** argv)
     ocTimerInit(&g_Game.timer);
 
     // Mark the game as initialized. This is mainly used for ensuring we don't try handling window events prematurely.
-    g_Game.flags |= OC_GAME_FLAG_IS_INITIALIZED;
+    g_Game.isInitialized = OC_TRUE;
 
     // The main loop will call ocStep(), and will return when the application has terminated. The return value is the result code.
     result = ocMainLoop(&g_Game.engine);

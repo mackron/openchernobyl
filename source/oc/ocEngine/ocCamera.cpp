@@ -2,7 +2,9 @@
 
 void ocCameraInitOrtho(float left, float right, float top, float bottom, ocCamera* pCamera)
 {
-    if (pCamera == NULL) return;
+    if (pCamera == NULL) {
+        return;
+    }
 
     ocCameraSetOrtho(pCamera, left, right, top, bottom);
     pCamera->position = glm::vec4(0, 0, 0, 0);
@@ -11,7 +13,9 @@ void ocCameraInitOrtho(float left, float right, float top, float bottom, ocCamer
 
 void ocCameraInitPerspective(float fov, float aspect, float znear, float zfar, ocCamera* pCamera)
 {
-    if (pCamera == NULL) return;
+    if (pCamera == NULL) {
+        return;
+    }
 
     ocCameraSetPerspective(pCamera, fov, aspect, znear, zfar);
     pCamera->position = glm::vec4(0, 0, 0, 0);
@@ -21,7 +25,9 @@ void ocCameraInitPerspective(float fov, float aspect, float znear, float zfar, o
 
 void ocCameraSetOrtho(ocCamera* pCamera, float left, float right, float top, float bottom)
 {
-    if (pCamera == NULL) return;
+    if (pCamera == NULL) {
+        return;
+    }
 
     pCamera->projectionType = ocCameraProjectionType_Ortho;
     pCamera->projection = glm::ortho(left, right, bottom, top);
@@ -33,7 +39,9 @@ void ocCameraSetOrtho(ocCamera* pCamera, float left, float right, float top, flo
 
 void ocCameraSetPerspective(ocCamera* pCamera, float fov, float aspect, float znear, float zfar)
 {
-    if (pCamera == NULL) return;
+    if (pCamera == NULL) {
+        return;
+    }
 
     pCamera->projectionType = ocCameraProjectionType_Perspective;
     pCamera->projection = glm::perspective(fov, aspect, znear, zfar);
@@ -43,28 +51,31 @@ void ocCameraSetPerspective(ocCamera* pCamera, float fov, float aspect, float zn
     pCamera->perspective.zfar = zfar;
 }
 
-glm::mat4 ocCameraGetProjectionMatrix(ocCamera* pCamera)
+glm::mat4 ocCameraGetProjectionMatrix(const ocCamera* pCamera)
 {
-    if (pCamera == NULL) return glm::mat4();
+    if (pCamera == NULL) {
+        return glm::mat4();
+    }
+
     return pCamera->projection;
 }
 
-glm::mat4 ocCameraGetViewMatrix(ocCamera* pCamera)
+glm::mat4 ocCameraGetViewMatrix(const ocCamera* pCamera)
 {
-    if (pCamera == NULL) return glm::mat4();
+    if (pCamera == NULL) {
+        return glm::mat4();
+    }
 
-    glm::mat4 result = glm::mat4_cast(glm::inverse(pCamera->rotation));
-    result[3][0] = -pCamera->position.x;
-    result[3][1] = -pCamera->position.y;
-    result[3][2] = -pCamera->position.z;
-
-    return result;
+    return glm::mat4_cast(glm::inverse(pCamera->rotation)) * glm::translate(-glm::vec3(pCamera->position));
 }
 
 
 void ocCameraSetPosition(ocCamera* pCamera, float x, float y, float z)
 {
-    if (pCamera == NULL) return;
+    if (pCamera == NULL) {
+        return;
+    }
+
     pCamera->position.x = x;
     pCamera->position.y = y;
     pCamera->position.z = z;
@@ -78,6 +89,36 @@ void ocCameraSetPosition(ocCamera* pCamera, const glm::vec3 &position)
 
 void ocCameraSetRotation(ocCamera* pCamera, const glm::quat &rotation)
 {
-    if (pCamera == NULL) return;
+    if (pCamera == NULL) {
+        return;
+    }
+
     pCamera->rotation = rotation;
+}
+
+void ocCameraRotate(ocCamera* pCamera, const glm::quat &rotation)
+{
+    if (pCamera == NULL) {
+        return;
+    }
+
+    pCamera->rotation = pCamera->rotation * rotation;
+}
+
+void ocCameraRotateX(ocCamera* pCamera, float angleInRadians)
+{
+    if (pCamera == NULL) {
+        return;
+    }
+
+    ocCameraSetRotation(pCamera, glm::angleAxis(angleInRadians, glm::vec3(1, 0, 0)) * pCamera->rotation);
+}
+
+void ocCameraRotateY(ocCamera* pCamera, float angleInRadians)
+{
+    if (pCamera == NULL) {
+        return;
+    }
+
+    ocCameraSetRotation(pCamera, glm::angleAxis(angleInRadians, glm::vec3(0, 1, 0)) * pCamera->rotation);
 }

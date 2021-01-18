@@ -5,8 +5,6 @@
 
 #include "../ocEngine/ocEngine.hpp"
 
-#define OC_GAME_FLAG_IS_INITIALIZED     (1 << 0)
-
 struct ocGame
 {
     ocEngineContext engine;
@@ -15,9 +13,10 @@ struct ocGame
     ocWorld world;
     ocGraphicsSwapchain* pSwapchain;
     ocGraphicsRT* pWindowRT;
-    unsigned int flags;
+    ocBool32 isInitialized : 1;
 
     // TESTING
+    ocCamera camera;
     ocResource* pImageResource;
     ocResource* pSceneResource;
     ocGraphicsImage* pImage;
